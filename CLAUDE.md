@@ -36,3 +36,24 @@ The backend is a FastAPI application under `backend/`:
 
 **YouTube** uses `youtube-transcript-api` to fetch timestamped transcripts.
 **Blog** uses `trafilatura` to fetch and clean article text from any URL.
+
+## Frontend
+
+Next.js 16 app under `frontend/` (TypeScript, Tailwind v4, App Router).
+
+```bash
+cd frontend
+npm install
+npm run dev        # http://localhost:3000
+```
+
+Run backend and frontend concurrently in separate terminals. The frontend calls
+`http://localhost:8000` directly; CORS is configured in `backend/main.py` to allow
+`http://localhost:3000`.
+
+### Key files
+- `frontend/app/page.tsx` — root page, renders `<IngestTabs />`
+- `frontend/components/IngestTabs.tsx` — YouTube / Blog tab switcher
+- `frontend/components/YouTubeForm.tsx` — YouTube URL input + transcript display
+- `frontend/components/BlogForm.tsx` — Blog URL input + article display
+- `frontend/lib/api.ts` — typed fetch wrappers for both ingest endpoints
