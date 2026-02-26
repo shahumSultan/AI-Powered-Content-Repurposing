@@ -17,6 +17,7 @@ def _extract_video_id(url: str) -> str:
     if parsed.hostname in ("www.youtube.com", "youtube.com"):
         qs = parse_qs(parsed.query)
         if "v" in qs:
+            print(f"VIDEO ID: {qs['v'][0]}")  # Debug print
             return qs["v"][0]
     raise HTTPException(status_code=422, detail="Could not extract video ID from URL")
 
@@ -34,6 +35,8 @@ def ingest_youtube(body: IngestRequest) -> YouTubeIngestResponse:
         raise HTTPException(status_code=404, detail="No transcript found for this video")
     except Exception as e:
         raise HTTPException(status_code=502, detail=f"Failed to fetch transcript: {e}")
+    
+    print(f"RAW TRANSCRIPT: {raw}")  # Debug print
 
     transcript = [
         TranscriptSegment(text=seg["text"], start=seg["start"], duration=seg["duration"])
