@@ -39,7 +39,7 @@ export default function Home() {
             <a href="#try-it" className="transition hover:text-zinc-400">
               Try It
             </a>
-            <span>© 2026 ContentFlow Product of Enigma-Cube</span>
+            <span>© 2026 ContentFlow - Product of Enigma-Cube</span>
           </div>
         </div>
       </footer>
