@@ -40,9 +40,9 @@ export default function Home() {
             <a href="#pricing" className="transition hover:text-zinc-400">
               Pricing
             </a>
-            <a href="#try-it" className="transition hover:text-zinc-400">
+            {/* <a href="#try-it" className="transition hover:text-zinc-400">
               Try It
-            </a>
+            </a> */}
             <span>© 2026 ContentFlow - Product of Enigma-Cube</span>
           </div>
         </div>
