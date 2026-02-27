@@ -31,7 +31,7 @@ class ShortsIdea(BaseModel):
 class ContentPack(BaseModel):
     hooks: list[Hook]
     linkedin_posts: list[LinkedInPost]
-    twitter_posts: list[TwitterPost]
+    # twitter_posts: list[TwitterPost]
     ig_captions: list[IGCaption]
     shorts_ideas: list[ShortsIdea]
 

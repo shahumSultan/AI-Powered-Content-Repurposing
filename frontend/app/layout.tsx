@@ -13,8 +13,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Content Repurposer",
-  description: "Extract transcripts and article text from any URL",
+  title: "ContentFlow — Turn Any Content Into a Full Content Pack",
+  description:
+    "Paste a YouTube video or blog URL and get hooks, LinkedIn posts, Instagram captions, and Shorts ideas in seconds. Runs locally, no API key required.",
 };
 
 export default function RootLayout({

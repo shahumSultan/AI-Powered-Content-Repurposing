@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 :root {
-  --background: #09090b;
+  --background: #030307;
   --foreground: #fafafa;
 }
 
@@ -16,4 +16,96 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-geist-sans), Arial, sans-serif;
+}
+
+/* ─── Keyframes ─── */
+
+@keyframes orbFloat {
+  0%, 100% { transform: translateY(0px) scale(1);      }
+  33%       { transform: translateY(-20px) scale(1.05); }
+  66%       { transform: translateY(10px) scale(0.97);  }
+}
+
+@keyframes textGradientPan {
+  0%   { background-position: 0% center;   }
+  100% { background-position: 200% center; }
+}
+
+/* ─── AnimateOnScroll ─── */
+
+.animate-on-scroll {
+  opacity: 0;
+  transform: translateY(2rem);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.animate-on-scroll.in-view {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ─── Hero gradient text ─── */
+
+.hero-gradient-text {
+  background: linear-gradient(135deg, #7c3aed 0%, #d946ef 40%, #ec4899 70%, #7c3aed 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: textGradientPan 4s linear infinite;
+}
+
+/* ─── Ambient orbs ─── */
+
+.hero-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  pointer-events: none;
+  animation: orbFloat 8s ease-in-out infinite;
+}
+
+/* ─── Card hover glow ─── */
+
+.card-glow {
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+
+.card-glow:hover {
+  transform: scale(1.02) translateY(-2px);
+  box-shadow: 0 0 32px 0 rgba(139, 92, 246, 0.2);
+  border-color: rgba(139, 92, 246, 0.3);
+}
+
+/* ─── Popular pricing card ─── */
+
+.pricing-popular {
+  border-color: rgba(167, 139, 250, 0.4);
+  box-shadow: 0 0 40px 0 rgba(139, 92, 246, 0.15);
+}
+
+/* ─── Gradient CTA button ─── */
+
+.btn-gradient {
+  background: linear-gradient(135deg, #7c3aed, #d946ef, #ec4899);
+  transition: opacity 0.2s ease, box-shadow 0.2s ease;
+}
+
+.btn-gradient:hover {
+  opacity: 0.9;
+  box-shadow: 0 0 20px 0 rgba(217, 70, 239, 0.4);
+}
+
+/* ─── Section divider ─── */
+
+.section-divider {
+  border: none;
+  height: 1px;
+  background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.06), transparent);
+}
+
+/* ─── Smooth scroll ─── */
+
+html {
+  scroll-behavior: smooth;
 }

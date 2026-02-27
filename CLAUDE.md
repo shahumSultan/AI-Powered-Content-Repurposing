@@ -47,17 +47,22 @@ The backend is a FastAPI application under `backend/`:
 |---|---|---|
 | `POST /generate` | `{ "urls": ["<url>", ...] }` | `{ content_pack, errors, export_json, export_csv }` |
 
-Pipeline: ingest each URL → chunk (400–900 words) → embed (`all-MiniLM-L6-v2`) → semantic dedup + rank → Qwen2.5-7B-Instruct generates content pack → CSV/JSON export.
+Pipeline: ingest each URL → chunk (400–900 words) → embed (`all-MiniLM-L6-v2`) → semantic dedup + rank → local GGUF model generates content pack → CSV/JSON export.
 
 `content_pack` contains: 10 hooks, 5 LinkedIn posts, 10 Twitter/X posts, 5 IG captions, 10 Shorts ideas (with YouTube timestamps where available).
 
-#### ML model — Qwen2.5-7B-Instruct
+#### ML model — local GGUF via llama-cpp-python
 
-- Loaded lazily on first request via `backend/services/model_loader.py`
-- **Requires a GPU with ≥8 GB VRAM** (runs 4-bit quantised via `bitsandbytes`)
-- ~5 GB model weights downloaded automatically from HuggingFace Hub on first run and cached in `~/.cache/huggingface/`
-- First request is slow (~1 min for model load); subsequent requests are fast
-- If no GPU is available or inference fails, a stub fallback is returned automatically
+- Loaded lazily on first request inside `backend/services/generator.py`
+- **No HuggingFace account or API key required** — model runs fully locally
+- Place your `.gguf` file in `models/` and set `MODEL_PATH` in `.env`:
+  ```bash
+  cp .env.example .env
+  # edit .env → MODEL_PATH=models/your-model.gguf
+  ```
+- GPU is used automatically when available (`n_gpu_layers=-1`); falls back to CPU with no config change
+- First request loads the model (~2–10 s); subsequent requests are fast
+- If the model file is missing or inference fails, a stub fallback is returned automatically
 
 ## Frontend
 
