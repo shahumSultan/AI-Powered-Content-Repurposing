@@ -24,8 +24,12 @@ API docs available at `http://localhost:8000/docs`.
 The backend is a FastAPI application under `backend/`:
 
 - `backend/main.py` — creates the `FastAPI` app and registers routers
-- `backend/routers/ingest.py` — ingestion endpoints (`/ingest/youtube`, `/ingest/blog`)
-- `backend/schemas/ingest.py` — Pydantic request/response models for the ingest layer
+- `backend/routers/youtube.py` — `POST /ingest/youtube`
+- `backend/routers/blog.py` — `POST /ingest/blog`
+- `backend/routers/generate.py` — `POST /generate` (full pipeline)
+- `backend/schemas/ingest.py` — Pydantic models for the ingest layer
+- `backend/schemas/generate.py` — Pydantic models for the generate layer
+- `backend/services/` — pipeline services (chunker, embedder, ranker, generator, exporter)
 
 ### Ingestion Layer (`/ingest`)
 
@@ -36,6 +40,24 @@ The backend is a FastAPI application under `backend/`:
 
 **YouTube** uses `youtube-transcript-api` to fetch timestamped transcripts.
 **Blog** uses `trafilatura` to fetch and clean article text from any URL.
+
+### Generation Layer (`/generate`)
+
+| Endpoint | Input | Output |
+|---|---|---|
+| `POST /generate` | `{ "urls": ["<url>", ...] }` | `{ content_pack, errors, export_json, export_csv }` |
+
+Pipeline: ingest each URL → chunk (400–900 words) → embed (`all-MiniLM-L6-v2`) → semantic dedup + rank → Qwen2.5-7B-Instruct generates content pack → CSV/JSON export.
+
+`content_pack` contains: 10 hooks, 5 LinkedIn posts, 10 Twitter/X posts, 5 IG captions, 10 Shorts ideas (with YouTube timestamps where available).
+
+#### ML model — Qwen2.5-7B-Instruct
+
+- Loaded lazily on first request via `backend/services/model_loader.py`
+- **Requires a GPU with ≥8 GB VRAM** (runs 4-bit quantised via `bitsandbytes`)
+- ~5 GB model weights downloaded automatically from HuggingFace Hub on first run and cached in `~/.cache/huggingface/`
+- First request is slow (~1 min for model load); subsequent requests are fast
+- If no GPU is available or inference fails, a stub fallback is returned automatically
 
 ## Frontend
 
@@ -52,8 +74,10 @@ Run backend and frontend concurrently in separate terminals. The frontend calls
 `http://localhost:3000`.
 
 ### Key files
-- `frontend/app/page.tsx` — root page, renders `<IngestTabs />`
-- `frontend/components/IngestTabs.tsx` — YouTube / Blog tab switcher
+- `frontend/app/page.tsx` — root page: GenerateForm (primary) + IngestTabs (collapsible)
+- `frontend/components/GenerateForm.tsx` — multi-URL textarea → calls `/generate`
+- `frontend/components/ContentPackView.tsx` — tabbed display of all 5 content types + CSV/JSON export
+- `frontend/components/IngestTabs.tsx` — YouTube / Blog tab switcher (dev/debug)
 - `frontend/components/YouTubeForm.tsx` — YouTube URL input + transcript display
 - `frontend/components/BlogForm.tsx` — Blog URL input + article display
-- `frontend/lib/api.ts` — typed fetch wrappers for both ingest endpoints
+- `frontend/lib/api.ts` — typed fetch wrappers for all endpoints

@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from backend.routers import blog, youtube
+from backend.routers import blog, generate, youtube
 
 app = FastAPI(title="AI-Powered Content Repurposing", version="0.1.0")
 
@@ -14,6 +14,7 @@ app.add_middleware(
 
 app.include_router(youtube.router)
 app.include_router(blog.router)
+app.include_router(generate.router)
 
 
 @app.get("/health")

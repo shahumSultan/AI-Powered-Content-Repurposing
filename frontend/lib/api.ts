@@ -1,4 +1,4 @@
-const API_BASE = "http://localhost:8001";
+const API_BASE = "http://localhost:8000";
 
 export interface TranscriptSegment {
   text: string;
@@ -18,7 +18,29 @@ export interface BlogResponse {
   text: string;
 }
 
-async function post<T>(path: string, body: { url: string }): Promise<T> {
+export interface ShortsIdea {
+  title: string;
+  what_to_say: string;
+  timestamp_start: number | null;
+  timestamp_end: number | null;
+}
+
+export interface ContentPack {
+  hooks: { text: string }[];
+  linkedin_posts: { text: string }[];
+  twitter_posts: { text: string }[];
+  ig_captions: { text: string }[];
+  shorts_ideas: ShortsIdea[];
+}
+
+export interface GenerateResponse {
+  content_pack: ContentPack;
+  errors: string[];
+  export_json: Record<string, unknown>;
+  export_csv: string;
+}
+
+async function post<T>(path: string, body: Record<string, unknown>): Promise<T> {
   const res = await fetch(`${API_BASE}${path}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -38,3 +60,6 @@ export const fetchYouTubeTranscript = (url: string) =>
 
 export const fetchBlogArticle = (url: string) =>
   post<BlogResponse>("/ingest/blog", { url });
+
+export const generateContentPack = (urls: string[]) =>
+  post<GenerateResponse>("/generate", { urls });
