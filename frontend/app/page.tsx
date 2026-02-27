@@ -16,7 +16,7 @@ export default function Home() {
         <hr className="section-divider" />
         <HowItWorksSection />
         <hr className="section-divider" />
-        <TryItSection />
+        {/* <TryItSection /> */}
         <hr className="section-divider" />
         <PricingSection />
       </main>
