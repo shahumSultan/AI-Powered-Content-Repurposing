@@ -73,7 +73,7 @@ export default function HeroSection() {
         {/* CTA row */}
         <AnimateOnScroll delay="300ms" className="flex flex-wrap justify-center gap-4">
           <a href="#try-it" className="btn-gradient inline-block rounded-xl px-8 py-4 text-base font-semibold text-white">
-            Start for Free →
+            Coming Soon →
           </a>
           <a
             href="#how-it-works"

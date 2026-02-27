@@ -48,7 +48,7 @@ export default function Navbar() {
 
         {/* CTA */}
         <a href="#try-it" className="btn-gradient rounded-lg px-4 py-2 text-sm font-semibold text-white">
-          Try Free
+          Coming Soon →
         </a>
       </div>
     </nav>
