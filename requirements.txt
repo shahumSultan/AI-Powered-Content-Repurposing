@@ -3,3 +3,6 @@ uvicorn[standard]>=0.32.0
 youtube-transcript-api>=0.6.3
 trafilatura>=1.12.0
 pydantic>=2.9.0
+sentence-transformers>=3.0.0
+numpy>=1.26.0
+llama_cpp_python==0.3.16

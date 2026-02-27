@@ -25,6 +25,7 @@ env/
 *.swp
 *.swo
 .claude/
+CLAUDE.md
 
 # OS
 .DS_Store
@@ -41,3 +42,8 @@ htmlcov/
 # mypy / ruff
 .mypy_cache/
 .ruff_cache/
+
+# Local model weights — never commit these
+models/*.gguf
+models/*.bin
+models/*.safetensors
