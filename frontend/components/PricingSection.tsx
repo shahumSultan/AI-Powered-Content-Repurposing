@@ -67,7 +67,7 @@ export default function PricingSection() {
       </div>
 
       {/* Pricing cards */}
-      <div className="mx-auto grid max-w-3xl grid-cols-3 gap-10 md:grid-cols-2">
+      <div className="mx-auto grid max-w-3xl grid-cols-2 gap-10 md:grid-cols-2">
         {TIERS.map((tier, i) => (
           <AnimateOnScroll key={tier.name} delay={DELAYS[i]} className="flex flex-col">
             <div
