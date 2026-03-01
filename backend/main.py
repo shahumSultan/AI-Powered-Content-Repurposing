@@ -1,9 +1,23 @@
-from fastapi import FastAPI
+from contextlib import asynccontextmanager
+
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
 from backend.routers import blog, generate, youtube
+from backend.services import generator
 
-app = FastAPI(title="AI-Powered Content Repurposing", version="0.1.0")
+
+@asynccontextmanager
+async def lifespan(_app: FastAPI):
+    generator.load_model()   # blocks until model is loaded (or fails gracefully)
+    yield                    # server is now running
+
+
+app = FastAPI(
+    title="AI-Powered Content Repurposing",
+    version="0.1.0",
+    lifespan=lifespan,
+)
 
 app.add_middleware(
     CORSMiddleware,
@@ -19,4 +33,13 @@ app.include_router(generate.router)
 
 @app.get("/health")
 def health() -> dict:
+    """Always returns OK — does not touch the LLM."""
     return {"status": "ok"}
+
+
+@app.get("/ready")
+def ready() -> dict:
+    """Returns OK only if the LLM has been loaded. Use this for readiness probes."""
+    if not generator.is_ready():
+        raise HTTPException(status_code=503, detail="Model not loaded")
+    return {"status": "ready"}

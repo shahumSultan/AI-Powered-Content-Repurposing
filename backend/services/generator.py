@@ -42,11 +42,26 @@ def _get_llm():
             model_path=_MODEL_PATH,
             n_ctx=6144,      # 1.5k-word prompt (~2k tokens) + 2k output + overhead
             n_batch=2048,    # parallel prompt-token processing (faster prefill)
-            n_gpu_layers=-1,  # 0 = CPU only; set to -1 to offload all layers to GPU
+            n_gpu_layers=0,  # 0 = CPU only; set to -1 to offload all layers to GPU
             verbose=False,
         )
         logger.info("Model loaded.")
     return _llm
+
+
+def load_model() -> None:
+    """Eagerly load the model. Called once at server startup via lifespan."""
+    try:
+        _get_llm()
+    except Exception as exc:
+        logger.warning(
+            "Model failed to load at startup (%s). Stub fallback will be used.", exc
+        )
+
+
+def is_ready() -> bool:
+    """Return True only if the LLM has been loaded successfully."""
+    return _llm is not None
 
 
 # ---------------------------------------------------------------------------

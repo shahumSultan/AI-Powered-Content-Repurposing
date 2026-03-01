@@ -38,9 +38,9 @@ export default function Navbar() {
           <a href="#how-it-works" className="text-sm text-zinc-400 transition hover:text-zinc-100">
             How It Works
           </a>
-          {/* <a href="#try-it" className="text-sm text-zinc-400 transition hover:text-zinc-100">
+          <a href="#try-it" className="text-sm text-zinc-400 transition hover:text-zinc-100">
             Try It
-          </a> */}
+          </a>
           <a href="#pricing" className="text-sm text-zinc-400 transition hover:text-zinc-100">
             Pricing
           </a>
@@ -48,7 +48,7 @@ export default function Navbar() {
 
         {/* CTA */}
         <a href="#try-it" className="btn-gradient rounded-lg px-4 py-2 text-sm font-semibold text-white">
-          Try Free
+          Try Free →
         </a>
       </div>
     </nav>
