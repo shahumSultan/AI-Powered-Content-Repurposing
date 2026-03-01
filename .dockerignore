@@ -1,0 +1,11 @@
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+models/
+frontend/
+.git/
+.env
+*.gguf
+node_modules/
+.next/
