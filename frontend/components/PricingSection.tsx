@@ -25,9 +25,9 @@ const TIERS: PricingTier[] = [
       "Local model (you provide)",
       "Community support",
     ],
-    cta: "Get Started Free",
+    cta: "Get Started Free →",
     ctaHref: "#try-it",
-    popular: false,
+    popular: true,
   },
   {
     name: "Creator",
@@ -42,25 +42,8 @@ const TIERS: PricingTier[] = [
       "Batch CSV export",
       "Email support",
     ],
-    cta: "Start 7-Day Trial",
+    cta: "Contact Sales →",
     ctaHref: "#try-it",
-    popular: true,
-  },
-  {
-    name: "Agency",
-    price: "$50",
-    period: "/month",
-    description: "For teams managing multiple clients and brands.",
-    features: [
-      "Everything in Creator",
-      "Unlimited bulk processing",
-      "Team seats (up to 5)",
-      "White-label export",
-      "API access",
-      "Dedicated Slack support",
-    ],
-    cta: "Contact Sales",
-    ctaHref: "mailto:hello@contentflow.ai",
     popular: false,
   },
 ];
@@ -84,7 +67,7 @@ export default function PricingSection() {
       </div>
 
       {/* Pricing cards */}
-      <div className="mx-auto grid max-w-5xl grid-cols-1 gap-6 md:grid-cols-3">
+      <div className="mx-auto grid max-w-3xl grid-cols-3 gap-10 md:grid-cols-2">
         {TIERS.map((tier, i) => (
           <AnimateOnScroll key={tier.name} delay={DELAYS[i]} className="flex flex-col">
             <div

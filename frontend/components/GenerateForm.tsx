@@ -39,7 +39,7 @@ export default function GenerateForm() {
         <textarea
           value={urlsText}
           onChange={(e) => setUrlsText(e.target.value)}
-          placeholder={"Paste one URL per line — YouTube or blog\nhttps://youtube.com/watch?v=...\nhttps://example.com/article"}
+          placeholder={"Paste your URL — YouTube or blog\nhttps://youtube.com/watch?v=...\nhttps://example.com/article"}
           rows={4}
           className="w-full resize-none rounded-lg border border-zinc-700 bg-zinc-800 px-4 py-3 text-sm text-zinc-100 placeholder-zinc-500 outline-none transition focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20"
           required

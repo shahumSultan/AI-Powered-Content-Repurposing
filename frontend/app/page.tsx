@@ -16,7 +16,7 @@ export default function Home() {
         <hr className="section-divider" />
         <HowItWorksSection />
         <hr className="section-divider" />
-        {/* <TryItSection /> */}
+        <TryItSection />
         <hr className="section-divider" />
         <PricingSection />
       </main>
@@ -40,9 +40,9 @@ export default function Home() {
             <a href="#pricing" className="transition hover:text-zinc-400">
               Pricing
             </a>
-            {/* <a href="#try-it" className="transition hover:text-zinc-400">
+            <a href="#try-it" className="transition hover:text-zinc-400">
               Try It
-            </a> */}
+            </a>
             <span>© 2026 ContentFlow - Product of Enigma-Cube</span>
           </div>
         </div>
