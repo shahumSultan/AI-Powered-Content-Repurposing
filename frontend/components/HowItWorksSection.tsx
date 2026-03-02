@@ -3,24 +3,24 @@ import AnimateOnScroll from "./AnimateOnScroll";
 const STEPS = [
   {
     number: "01",
-    title: "Paste Your URLs",
+    title: "Paste Your Links",
     description:
-      "Drop in YouTube video URLs or blog article links. Mix and match — both source types are handled simultaneously in the same run.",
+      "Drop in a YouTube video or blog link. You can mix both in the same run.",
     detail: "youtube.com, youtu.be, and any article URL",
   },
   {
     number: "02",
-    title: "AI Processes Everything",
+    title: "We Pull Out the Best Parts",
     description:
-      "Transcripts are extracted, articles scraped, then chunked into semantic blocks, embedded, deduplicated, and ranked by relevance before reaching the model.",
-    detail: "No data leaves your machine",
+      "We extract the transcript or text, find the strongest ideas and turn them into platform-ready drafts.",
+    detail: "No copy-pasting. No formatting. No manual rewriting.",
   },
   {
     number: "03",
-    title: "Download Your Pack",
+    title: "Download Your Content Pack",
     description:
-      "40+ pieces of platform-ready content — hooks, posts, captions, and Shorts ideas with precise video timestamps — exported as CSV or JSON in one click.",
-    detail: "CSV + JSON export included",
+      "Get hooks, LinkedIn posts, Instagram captions and short-video ideas - ready to publish.",
+    detail: "Export as CSV or JSON in one click.",
   },
 ];
 
@@ -36,9 +36,9 @@ export default function HowItWorksSection() {
             How It Works
           </p>
           <h2 className="text-3xl font-bold text-zinc-100 md:text-4xl">
-            From raw content to publish-ready posts
+            From long-form content to ready-to-post social content
           </h2>
-          <p className="mt-4 text-zinc-400">Three steps. No setup. No API keys.</p>
+          <p className="mt-4 text-zinc-400">Three steps. No setup.</p>
         </AnimateOnScroll>
       </div>
 

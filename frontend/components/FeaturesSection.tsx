@@ -9,48 +9,48 @@ const ACCENT: Record<string, { bg: string; text: string }> = {
 const FEATURES = [
   {
     accent: "violet",
-    title: "Instant Ingestion",
+    title: "Paste a Link. That's It",
     description:
-      "Paste any YouTube URL or blog link. Full transcripts with timestamps or clean article text — extracted automatically, no copy-pasting required.",
+      "Drop in a YouTube video or blog pos. We automatically extract everything needed - no copy-pasting, no formatting, no manual prep.",
     icon: (
       <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path
           strokeLinecap="round"
           strokeLinejoin="round"
-          strokeWidth={1.5}
-          d="M7 4v16M17 4v16M3 8h4m10 0h4M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z"
+          strokeWidth={2.5}
+          d="M10 14a5 5 0 007.07 0l2.83-2.83a5 5 0 10-7.07-7.07L11 5m3 5a5 5 0 00-7.07 0L4.1 12.93a5 5 0 107.07 7.07L13 19"
         />
       </svg>
     ),
   },
   {
     accent: "fuchsia",
-    title: "Smart Chunking",
+    title: "Finds the Best Moments",
     description:
-      "Content is split into 400–900 word chunks, embedded using MiniLM, and deduplicated — so the model only sees your most unique, signal-rich material.",
+      "We idenitfy the most valuable insights, strongest hooks and key talking points - so your social posts are clear, sharp and relevant.",
     icon: (
       <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path
           strokeLinecap="round"
           strokeLinejoin="round"
-          strokeWidth={1.5}
-          d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18"
+          strokeWidth={2.5}
+          d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"
         />
       </svg>
     ),
   },
   {
     accent: "pink",
-    title: "Multi-Format Output",
+    title: "Creates Ready-to-Post Content",
     description:
-      "One run generates hooks, LinkedIn posts, Instagram captions, and YouTube Shorts ideas with precise timestamps — all export-ready as CSV or JSON.",
+      "In one run, you get: scroll-stopping hooks, LinkedIn posts, Instagram captions, Short-form video ideas.",
     icon: (
       <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path
           strokeLinecap="round"
           strokeLinejoin="round"
-          strokeWidth={1.5}
-          d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"
+          strokeWidth={2.5}
+          d="M7 7h10M7 11h10M7 15h6M6 3h9l5 5v13a1 1 0 01-1 1H6a1 1 0 01-1-1V4a1 1 0 011-1z"
         />
       </svg>
     ),
