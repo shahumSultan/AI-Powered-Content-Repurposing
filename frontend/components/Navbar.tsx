@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import NavbarAuthButtons from "./NavbarAuthButtons";
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
@@ -46,10 +47,8 @@ export default function Navbar() {
           </a>
         </div>
 
-        {/* CTA */}
-        <a href="#try-it" className="btn-gradient rounded-lg px-4 py-2 text-sm font-semibold text-white">
-          Try Free →
-        </a>
+        {/* Auth buttons */}
+        <NavbarAuthButtons />
       </div>
     </nav>
   );
