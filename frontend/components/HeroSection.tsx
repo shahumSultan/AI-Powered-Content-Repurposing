@@ -57,23 +57,22 @@ export default function HeroSection() {
         {/* Headline */}
         <AnimateOnScroll delay="100ms">
           <h1 className="text-5xl font-bold tracking-tight text-zinc-100 md:text-7xl">
-            Turn Any Content Into
-            <span className="hero-gradient-text mt-1 block">A Full Content Pack</span>
+            Stop Rewriting.
+            <span className="hero-gradient-text mt-1 block">Start Repurpoising</span>
           </h1>
         </AnimateOnScroll>
 
         {/* Sub-headline */}
         <AnimateOnScroll delay="200ms">
           <p className="mx-auto max-w-2xl text-lg leading-relaxed text-zinc-400 md:text-xl">
-            Paste a YouTube video or blog URL and get hooks, LinkedIn posts,
-            Instagram captions, and Shorts ideas — in seconds.
+            Tranform long-form content into LinkedIn posts, Instagram captions and short-form video ideas - automatically.
           </p>
         </AnimateOnScroll>
 
         {/* CTA row */}
         <AnimateOnScroll delay="300ms" className="flex flex-wrap justify-center gap-4">
           <a href="#try-it" className="btn-gradient inline-block rounded-xl px-8 py-4 text-base font-semibold text-white">
-            Coming Soon →
+            Try Free →
           </a>
           <a
             href="#how-it-works"
