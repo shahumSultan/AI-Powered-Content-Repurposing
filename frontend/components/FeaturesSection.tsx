@@ -63,7 +63,7 @@ export default function FeaturesSection() {
   return (
     <section id="features" className="bg-zinc-950 px-6 py-24">
       {/* Section header */}
-      <div className="mx-auto mb-16 max-w-2xl text-center">
+      <div className="mx-auto mb-16 max-w-4xl text-center">
         <AnimateOnScroll delay="0ms">
           <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-violet-400">
             Features
