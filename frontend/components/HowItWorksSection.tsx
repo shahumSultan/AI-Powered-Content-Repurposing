@@ -36,7 +36,7 @@ export default function HowItWorksSection() {
             How It Works
           </p>
           <h2 className="text-3xl font-bold text-zinc-100 md:text-4xl">
-            From long-form content to ready-to-post social content
+            From Long-Form Content to Ready-to-Post Social Content
           </h2>
           <p className="mt-4 text-zinc-400">Three steps. No setup.</p>
         </AnimateOnScroll>
