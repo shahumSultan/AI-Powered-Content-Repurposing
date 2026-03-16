@@ -1,11 +1,11 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { signUp } from "../actions";
 
-export default function SignUpPage() {
+function SignUpContent() {
   const [state, action, pending] = useActionState(signUp, null);
   const params = useSearchParams();
   const success = params.get("success") === "1";
@@ -111,5 +111,13 @@ export default function SignUpPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function SignUpPage() {
+  return (
+    <Suspense fallback={<div />}>
+      <SignUpContent />
+    </Suspense>
   );
 }
