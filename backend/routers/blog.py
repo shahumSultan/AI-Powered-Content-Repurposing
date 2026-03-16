@@ -2,7 +2,7 @@ import json
 import trafilatura
 from fastapi import APIRouter, HTTPException
 # from schemas.ingest import BlogIngestResponse, IngestRequest
-from backend.schemas.ingest import BlogIngestResponse, IngestRequest
+from schemas.ingest import BlogIngestResponse, IngestRequest
 
 router = APIRouter(prefix="/ingest", tags=["ingest"])
 

@@ -1,17 +1,11 @@
 import os
-import sys
-import uvicorn
 from contextlib import asynccontextmanager
 from dotenv import load_dotenv
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from backend.routers import blog, generate, youtube
-from backend.services import generator
-
-# Ensure repo root is on sys.path so `from backend.X import ...` always works,
-# regardless of which directory uvicorn/python is invoked from.
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from routers import blog, generate, youtube
+from services import generator
 
 load_dotenv()  # loads .env from the repo root
 
@@ -51,7 +45,3 @@ def ready() -> dict:
     if not generator.is_ready():
         raise HTTPException(status_code=503, detail="Model not loaded")
     return {"status": "ready"}
-
-if __name__ == "__main__":
-    port = int(os.getenv("PORT", 8000))
-    uvicorn.run(app, host="0.0.0.0", port=port)
