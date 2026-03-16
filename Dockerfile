@@ -1,19 +1,18 @@
 FROM python:3.11-slim
 
-# Build tools needed to compile llama-cpp-python from source
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential \
-    cmake \
-    && rm -rf /var/lib/apt/lists/*
-
 WORKDIR /app
 
-# Install Python dependencies first — cached layer, only rebuilds if requirements.txt changes
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
 
-# Pre-bake the sentence-transformers embedding model (~90 MB) into the image.
-# Avoids a runtime download on every cold start.
+# Install all deps except llama-cpp-python
+RUN pip install --no-cache-dir $(grep -iv 'llama' requirements.txt | tr '\n' ' ')
+
+# Install llama-cpp-python from pre-built CPU wheel — no C++ compilation needed
+RUN pip install --no-cache-dir \
+    "llama-cpp-python==0.3.16" \
+    --extra-index-url https://abetlen.github.io/llama-cpp-python/whl/cpu
+
+# Pre-bake the sentence-transformers embedding model into the image layer
 RUN python -c "from sentence_transformers import SentenceTransformer; SentenceTransformer('all-MiniLM-L6-v2')"
 
 # Copy application code
