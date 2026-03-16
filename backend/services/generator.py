@@ -1,9 +1,8 @@
 """
-Content pack generator — llama-cpp-python local inference.
+Content pack generator — Groq cloud inference.
 
-The GGUF model is loaded lazily on the first call to generate_content_pack().
-Set MODEL_PATH in your environment (or .env) to point at the model file.
-If inference fails for any reason the stub fallback is returned automatically.
+Set GROQ_API_KEY in your environment (or .env).
+If the API call fails for any reason the stub fallback is returned automatically.
 """
 
 from __future__ import annotations
@@ -12,6 +11,8 @@ import json
 import logging
 import os
 import re
+
+from groq import Groq
 
 from backend.schemas.generate import (
     ContentPack,
@@ -25,43 +26,31 @@ from backend.services.chunker import Chunk
 
 logger = logging.getLogger(__name__)
 
-_MODEL_PATH = os.getenv("MODEL_PATH", "models/qwen2.5-3b-instruct-q4_k_m.gguf")
-_MAX_PROMPT_WORDS = 1_500   # ~2k input tokens — enough signal, much faster prefill
-_TOP_CHUNKS = 3             # ranker already picked the best chunks; 3 is sufficient
+_GROQ_MODEL = "llama-3.3-70b-versatile"
+_MAX_PROMPT_WORDS = 1_500
+_TOP_CHUNKS = 3
 
-_llm = None
+_client: Groq | None = None
 
 
-def _get_llm():
-    global _llm
-    if _llm is None:
-        from llama_cpp import Llama
-
-        logger.info("Loading model from %s …", _MODEL_PATH)
-        _llm = Llama(
-            model_path=_MODEL_PATH,
-            n_ctx=6144,      # 1.5k-word prompt (~2k tokens) + 2k output + overhead
-            n_batch=2048,    # parallel prompt-token processing (faster prefill)
-            n_gpu_layers=0,  # 0 = CPU only; set to -1 to offload all layers to GPU
-            verbose=False,
-        )
-        logger.info("Model loaded.")
-    return _llm
+def _get_client() -> Groq:
+    global _client
+    if _client is None:
+        _client = Groq(api_key=os.environ["GROQ_API_KEY"])
+    return _client
 
 
 def load_model() -> None:
-    """Eagerly load the model. Called once at server startup via lifespan."""
-    try:
-        _get_llm()
-    except Exception as exc:
-        logger.warning(
-            "Model failed to load at startup (%s). Stub fallback will be used.", exc
-        )
+    """Called at server startup. Validates API key is present."""
+    if os.getenv("GROQ_API_KEY"):
+        logger.info("Groq API key found — ready.")
+    else:
+        logger.warning("GROQ_API_KEY not set. Stub fallback will be used.")
 
 
 def is_ready() -> bool:
-    """Return True only if the LLM has been loaded successfully."""
-    return _llm is not None
+    """Return True if the Groq API key is configured."""
+    return bool(os.getenv("GROQ_API_KEY"))
 
 
 # ---------------------------------------------------------------------------
@@ -136,7 +125,6 @@ def _pack_from_dict(data: dict, chunks: list[Chunk]) -> ContentPack:
     return ContentPack(
         hooks=[Hook(text=h["text"]) for h in data.get("hooks", [])[:5]],
         linkedin_posts=[LinkedInPost(text=p["text"]) for p in data.get("linkedin_posts", [])[:2]],
-        # twitter_posts=[TwitterPost(text=t["text"]) for t in data.get("twitter_posts", [])[:3]],
         ig_captions=[IGCaption(text=c["text"]) for c in data.get("ig_captions", [])[:5]],
         shorts_ideas=shorts_ideas,
     )
@@ -159,7 +147,6 @@ def _stub_pack(chunks: list[Chunk]) -> ContentPack:
             LinkedInPost(text=f"[STUB LINKEDIN {i+1}]\n\n{pool[i].text[:280]}\n\n#AI")
             for i in range(2)
         ],
-        # twitter_posts=[TwitterPost(text=f"[STUB TWEET {i+1}] {_excerpt(pool[i], 18)}") for i in range(3)],
         ig_captions=[IGCaption(text=f"[STUB IG {i+1}] {_excerpt(pool[i], 14)} #AI") for i in range(5)],
         shorts_ideas=[
             ShortsIdea(
@@ -179,7 +166,7 @@ def _stub_pack(chunks: list[Chunk]) -> ContentPack:
 
 def generate_content_pack(chunks: list[Chunk]) -> ContentPack:
     try:
-        llm = _get_llm()
+        client = _get_client()
 
         selected = chunks[:_TOP_CHUNKS]
         source = "\n\n".join(c.text for c in selected)
@@ -187,7 +174,8 @@ def generate_content_pack(chunks: list[Chunk]) -> ContentPack:
         if len(words) > _MAX_PROMPT_WORDS:
             source = " ".join(words[:_MAX_PROMPT_WORDS])
 
-        response = llm.create_chat_completion(
+        response = client.chat.completions.create(
+            model=_GROQ_MODEL,
             messages=[
                 {"role": "system", "content": _SYSTEM_PROMPT},
                 {"role": "user", "content": _USER_TEMPLATE.format(source=source)},
@@ -195,7 +183,7 @@ def generate_content_pack(chunks: list[Chunk]) -> ContentPack:
             max_tokens=2048,
             temperature=0.7,
         )
-        raw_output = response["choices"][0]["message"]["content"]
+        raw_output = response.choices[0].message.content
         data = _extract_json(raw_output)
         pack = _pack_from_dict(data, chunks)
 
@@ -209,12 +197,11 @@ def generate_content_pack(chunks: list[Chunk]) -> ContentPack:
 
         pack.hooks          = _pad(pack.hooks,          5, stub.hooks)
         pack.linkedin_posts = _pad(pack.linkedin_posts, 2, stub.linkedin_posts)
-        # pack.twitter_posts  = _pad(pack.twitter_posts,  3, stub.twitter_posts)
         pack.ig_captions    = _pad(pack.ig_captions,    5, stub.ig_captions)
         pack.shorts_ideas   = _pad(pack.shorts_ideas,   3, stub.shorts_ideas)
 
         return pack
 
     except Exception as exc:
-        logger.warning("llama-cpp inference failed (%s), using stub fallback.", exc)
+        logger.warning("Groq inference failed (%s), using stub fallback.", exc)
         return _stub_pack(chunks)
