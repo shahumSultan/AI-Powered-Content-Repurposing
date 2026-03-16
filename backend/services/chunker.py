@@ -1,9 +1,7 @@
 from __future__ import annotations
-
 import re
 from dataclasses import dataclass, field
-
-from backend.schemas.ingest import TranscriptSegment
+from schemas.ingest import TranscriptSegment
 
 _MIN_WORDS = 400
 _MAX_WORDS = 900

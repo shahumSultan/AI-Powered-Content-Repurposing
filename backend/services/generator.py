@@ -6,15 +6,12 @@ If the API call fails for any reason the stub fallback is returned automatically
 """
 
 from __future__ import annotations
-
 import json
 import logging
 import os
 import re
-
 from groq import Groq
-
-from backend.schemas.generate import (
+from schemas.generate import (
     ContentPack,
     Hook,
     IGCaption,
@@ -22,7 +19,7 @@ from backend.schemas.generate import (
     ShortsIdea,
     TwitterPost,
 )
-from backend.services.chunker import Chunk
+from services.chunker import Chunk
 
 logger = logging.getLogger(__name__)
 

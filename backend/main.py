@@ -1,15 +1,15 @@
 import os
+import uvicorn
 from contextlib import asynccontextmanager
-
 from dotenv import load_dotenv
-load_dotenv()  # loads .env from the repo root
-
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from routers import blog, generate, youtube
+from services import generator
+# from backend.routers import blog, generate, youtube
+# from backend.services import generator
 
-from backend.routers import blog, generate, youtube
-from backend.services import generator
-
+load_dotenv()  # loads .env from the repo root
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
@@ -47,3 +47,7 @@ def ready() -> dict:
     if not generator.is_ready():
         raise HTTPException(status_code=503, detail="Model not loaded")
     return {"status": "ready"}
+
+if __name__ == "__main__":
+    port = int(os.getenv("PORT", 8000))
+    uvicorn.run(app, host="0.0.0.0", port=port)
