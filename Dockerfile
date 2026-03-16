@@ -2,23 +2,28 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
+# System deps needed if llama-cpp-python falls back to source build
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    cmake \
+    pkg-config \
+    && rm -rf /var/lib/apt/lists/*
+
 COPY requirements.txt .
 
 # Install all deps except llama-cpp-python
 RUN pip install --no-cache-dir $(grep -iv 'llama' requirements.txt | tr '\n' ' ')
 
-# Install llama-cpp-python from pre-built CPU wheel — no C++ compilation needed
-RUN pip install --no-cache-dir \
+# Prefer prebuilt CPU wheel, but allow source build if no wheel matches
+RUN pip install --no-cache-dir --prefer-binary \
     "llama-cpp-python==0.3.16" \
     --extra-index-url https://abetlen.github.io/llama-cpp-python/whl/cpu
 
-# Pre-bake the sentence-transformers embedding model into the image layer
+# Pre-download embedding model into image
 RUN python -c "from sentence_transformers import SentenceTransformer; SentenceTransformer('all-MiniLM-L6-v2')"
 
-# Copy application code
 COPY backend/ ./backend/
 
-# Models directory — GGUF file is downloaded at runtime by entrypoint.sh
 RUN mkdir -p models
 
 COPY entrypoint.sh ./entrypoint.sh
