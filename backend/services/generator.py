@@ -11,7 +11,7 @@ import logging
 import os
 import re
 from groq import Groq
-from schemas.generate import (
+from backend.schemas.generate import (
     ContentPack,
     Hook,
     IGCaption,
@@ -19,7 +19,7 @@ from schemas.generate import (
     ShortsIdea,
     TwitterPost,
 )
-from services.chunker import Chunk
+from backend.services.chunker import Chunk
 
 logger = logging.getLogger(__name__)
 

@@ -1,8 +1,7 @@
 from urllib.parse import parse_qs, urlparse
 from fastapi import APIRouter, HTTPException
 from youtube_transcript_api import NoTranscriptFound, TranscriptsDisabled, YouTubeTranscriptApi
-from schemas.ingest import IngestRequest, TranscriptSegment, YouTubeIngestResponse
-# from backend.schemas.ingest import IngestRequest, TranscriptSegment, YouTubeIngestResponse
+from backend.schemas.ingest import IngestRequest, TranscriptSegment, YouTubeIngestResponse
 
 ytt_api = YouTubeTranscriptApi()
 

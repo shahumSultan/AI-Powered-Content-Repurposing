@@ -1,7 +1,7 @@
 from __future__ import annotations
 import numpy as np
-from services.chunker import Chunk
-from services.embedder import embed
+from backend.services.chunker import Chunk
+from backend.services.embedder import embed
 
 _DEDUP_THRESHOLD = 0.85
 

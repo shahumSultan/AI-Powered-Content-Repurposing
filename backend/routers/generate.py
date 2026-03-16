@@ -4,18 +4,12 @@ from urllib.parse import parse_qs, urlparse
 import trafilatura
 from fastapi import APIRouter, HTTPException
 from youtube_transcript_api import NoTranscriptFound, TranscriptsDisabled, YouTubeTranscriptApi
-from schemas.generate import GenerateRequest, GenerateResponse
-from schemas.ingest import TranscriptSegment
-from services.chunker import Chunk, chunk_text
-from services.exporter import to_csv
-from services.generator import generate_content_pack
-from services.ranker import rank
-# from backend.schemas.generate import GenerateRequest, GenerateResponse
-# from backend.schemas.ingest import TranscriptSegment
-# from backend.services.chunker import Chunk, chunk_text
-# from backend.services.exporter import to_csv
-# from backend.services.generator import generate_content_pack
-# from backend.services.ranker import rank
+from backend.schemas.generate import GenerateRequest, GenerateResponse
+from backend.schemas.ingest import TranscriptSegment
+from backend.services.chunker import Chunk, chunk_text
+from backend.services.exporter import to_csv
+from backend.services.generator import generate_content_pack
+from backend.services.ranker import rank
 
 router = APIRouter(prefix="/generate", tags=["generate"])
 

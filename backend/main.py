@@ -4,8 +4,8 @@ from dotenv import load_dotenv
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from routers import blog, generate, youtube
-from services import generator
+from backend.routers import blog, generate, youtube
+from backend.services import generator
 
 load_dotenv()  # loads .env from the repo root
 
