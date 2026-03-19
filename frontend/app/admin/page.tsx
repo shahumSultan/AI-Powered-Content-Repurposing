@@ -7,7 +7,7 @@ export default function AdminPage() {
       {/* Header */}
       <div className="mb-8 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-violet-600 to-pink-500">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-[#8500FA] to-[#DD578B]">
             <svg viewBox="0 0 20 20" fill="white" className="h-4 w-4">
               <path
                 fillRule="evenodd"

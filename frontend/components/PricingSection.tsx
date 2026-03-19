@@ -15,10 +15,10 @@ const TIERS: PricingTier[] = [
   {
     name: "Starter",
     price: "$10",
-    period: "",
+    period: "/month",
     description: "Perfect for trying it out with your own content.",
     features: [
-      "5 content pack generations / month",
+      "10 content pack generations / month",
       "YouTube & blog ingestion",
       "Hooks, LinkedIn, IG & Shorts",
       "CSV & JSON export",

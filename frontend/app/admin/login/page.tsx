@@ -11,7 +11,7 @@ export default function LoginPage() {
       <div className="w-full max-w-sm rounded-xl border border-zinc-800 bg-zinc-900 p-8 shadow-xl">
         {/* Logo */}
         <div className="mb-6 flex items-center gap-2">
-          <div className="flex h-7 w-7 items-center justify-center rounded-md bg-gradient-to-br from-violet-600 to-pink-500">
+          <div className="flex h-7 w-7 items-center justify-center rounded-md bg-gradient-to-br from-[#8500FA] to-[#DD578B]">
             <svg viewBox="0 0 20 20" fill="white" className="h-4 w-4">
               <path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clipRule="evenodd" />
             </svg>

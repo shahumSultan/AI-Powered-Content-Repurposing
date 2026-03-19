@@ -10,7 +10,7 @@ export default function TryItSection() {
         className="pointer-events-none absolute inset-0 z-0"
         style={{
           background:
-            "radial-gradient(ellipse 80% 60% at 50% 40%, rgba(124,58,237,0.07) 0%, transparent 70%)",
+            "radial-gradient(ellipse 80% 60% at 50% 40%, rgba(133,0,250,0.07) 0%, transparent 70%)",
         }}
       />
 
@@ -34,7 +34,7 @@ export default function TryItSection() {
         <AnimateOnScroll delay="200ms">
           <div
             className="rounded-2xl border border-white/5 bg-zinc-900/80 p-2 backdrop-blur-sm"
-            style={{ boxShadow: "0 25px 80px rgba(124,58,237,0.1)" }}
+            style={{ boxShadow: "0 25px 80px rgba(133,0,250,0.1)" }}
           >
             {/* Fake browser chrome */}
             <div className="mb-2 flex items-center gap-2 rounded-xl bg-zinc-800/60 px-4 py-3">
