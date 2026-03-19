@@ -1,5 +1,5 @@
 import AnimateOnScroll from "./AnimateOnScroll";
-import GenerateForm from "./GenerateForm";
+import TryItForm from "./TryItForm";
 
 export default function TryItSection() {
   return (
@@ -25,7 +25,7 @@ export default function TryItSection() {
           <AnimateOnScroll delay="100ms">
             <h2 className="mt-4 text-3xl font-bold text-zinc-100 md:text-4xl">Try It Now</h2>
             <p className="mt-3 text-zinc-400">
-              No account. No API key. Runs locally on your machine.
+              One free generation — no account needed to get started.
             </p>
           </AnimateOnScroll>
         </div>
@@ -48,7 +48,7 @@ export default function TryItSection() {
 
             {/* Actual form */}
             <div className="p-6">
-              <GenerateForm />
+              <TryItForm />
             </div>
           </div>
         </AnimateOnScroll>

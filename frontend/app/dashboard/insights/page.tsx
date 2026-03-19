@@ -1,13 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 
-const metricCards = [
-  { label: "Content Packs Generated", value: "0", unit: "packs" },
-  { label: "YouTube Links Processed", value: "0", unit: "videos" },
-  { label: "Blog Links Processed", value: "0", unit: "articles" },
-  { label: "Total Posts Created", value: "0", unit: "posts" },
-];
-
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString("en-US", {
     year: "numeric",
@@ -21,13 +14,34 @@ export default async function InsightsPage() {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-
   if (!user) redirect("/auth/login");
 
   const memberSince = formatDate(user.created_at);
-  const lastSignIn = user.last_sign_in_at
-    ? formatDate(user.last_sign_in_at)
-    : "N/A";
+  const lastSignIn = user.last_sign_in_at ? formatDate(user.last_sign_in_at) : "N/A";
+
+  // Fetch generation history
+  const { data: history } = await supabase
+    .from("generation_history")
+    .select("urls, created_at")
+    .eq("user_id", user.id)
+    .order("created_at", { ascending: false });
+
+  const rows = history ?? [];
+  const totalPacks = rows.length;
+  const allUrls = rows.flatMap((r) => r.urls as string[]);
+  const youtubeCount = allUrls.filter(
+    (u) => u.includes("youtube.com") || u.includes("youtu.be"),
+  ).length;
+  const blogCount = allUrls.length - youtubeCount;
+  // Each pack generates hooks(10) + linkedin(5) + twitter(10) + ig(5) + shorts(10) = 40
+  const totalPosts = totalPacks * 40;
+
+  const metricCards = [
+    { label: "Content Packs Generated", value: String(totalPacks), unit: "packs" },
+    { label: "YouTube Links Processed", value: String(youtubeCount), unit: "videos" },
+    { label: "Blog Links Processed", value: String(blogCount), unit: "articles" },
+    { label: "Total Posts Created", value: String(totalPosts), unit: "posts" },
+  ];
 
   return (
     <div className="max-w-2xl">
@@ -49,14 +63,11 @@ export default async function InsightsPage() {
       </div>
 
       {/* Usage metrics */}
-      <div className="mb-4">
+      <div className="mb-6">
         <h2 className="mb-3 text-sm font-semibold text-zinc-100">Usage metrics</h2>
         <div className="grid grid-cols-2 gap-3">
           {metricCards.map((card) => (
-            <div
-              key={card.label}
-              className="rounded-xl border border-zinc-800 bg-zinc-900 p-5"
-            >
+            <div key={card.label} className="rounded-xl border border-zinc-800 bg-zinc-900 p-5">
               <p className="mb-2 text-2xl font-bold text-zinc-100">{card.value}</p>
               <p className="text-xs font-medium text-zinc-400">{card.label}</p>
               <p className="text-xs text-zinc-600">{card.unit}</p>
@@ -65,17 +76,22 @@ export default async function InsightsPage() {
         </div>
       </div>
 
-      {/* Coming soon note */}
-      <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-5">
-        <div className="flex items-start gap-3">
-          <svg className="mt-0.5 h-4 w-4 shrink-0 text-violet-400" fill="none" stroke="currentColor" strokeWidth={1.75} viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z" />
-          </svg>
-          <p className="text-xs text-zinc-500">
-            Detailed analytics — including per-URL breakdowns, content type distribution, and generation history — are coming soon.
-          </p>
+      {/* Recent history */}
+      {rows.length > 0 && (
+        <div>
+          <h2 className="mb-3 text-sm font-semibold text-zinc-100">Recent generations</h2>
+          <div className="space-y-2">
+            {rows.slice(0, 10).map((row, i) => (
+              <div key={i} className="rounded-xl border border-zinc-800 bg-zinc-900 p-4">
+                <p className="mb-1 text-xs text-zinc-500">{formatDate(row.created_at)}</p>
+                {(row.urls as string[]).map((url, j) => (
+                  <p key={j} className="truncate text-xs text-zinc-400">{url}</p>
+                ))}
+              </div>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

@@ -4,7 +4,11 @@ import { useState } from "react";
 import { generateContentPack, type GenerateResponse } from "@/lib/api";
 import ContentPackView from "./ContentPackView";
 
-export default function GenerateForm() {
+interface Props {
+  onSuccess?: (urls: string[]) => Promise<void>;
+}
+
+export default function GenerateForm({ onSuccess }: Props) {
   const [urlsText, setUrlsText] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -26,6 +30,7 @@ export default function GenerateForm() {
     try {
       const data = await generateContentPack(urls);
       setResult(data);
+      await onSuccess?.(urls);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
     } finally {
