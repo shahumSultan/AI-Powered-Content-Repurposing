@@ -3,6 +3,9 @@
 :root {
   --background: #030307;
   --foreground: #fafafa;
+  /* Brand colours */
+  --brand:      #8500FA;
+  --brand-alt:  #DD578B;
 }
 
 @theme inline {
@@ -10,6 +13,32 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+  /* Override Tailwind's violet palette → brand purple (#8500FA) */
+  --color-violet-50:  #F9F0FF;
+  --color-violet-100: #F1DFFF;
+  --color-violet-200: #E2BFFE;
+  --color-violet-300: #CC88FD;
+  --color-violet-400: #B55BFC;
+  --color-violet-500: #9D27FB;
+  --color-violet-600: #8500FA;
+  --color-violet-700: #6900D4;
+  --color-violet-800: #5600AA;
+  --color-violet-900: #380070;
+  --color-violet-950: #1A0033;
+
+  /* Override Tailwind's pink palette → brand pink (#DD578B) */
+  --color-pink-50:  #FDF0F5;
+  --color-pink-100: #FAE0EC;
+  --color-pink-200: #F4C0D6;
+  --color-pink-300: #EE9FBF;
+  --color-pink-400: #E67BA5;
+  --color-pink-500: #DD578B;
+  --color-pink-600: #CC3D78;
+  --color-pink-700: #BB2567;
+  --color-pink-800: #880050;
+  --color-pink-900: #4A0028;
+  --color-pink-950: #1F0010;
 }
 
 body {
@@ -47,7 +76,7 @@ body {
 /* ─── Hero gradient text ─── */
 
 .hero-gradient-text {
-  background: linear-gradient(135deg, #7c3aed 0%, #d946ef 40%, #ec4899 70%, #7c3aed 100%);
+  background: linear-gradient(135deg, #8500FA 0%, #BB2567 40%, #DD578B 70%, #8500FA 100%);
   background-size: 200% auto;
   -webkit-background-clip: text;
   background-clip: text;
@@ -73,14 +102,14 @@ body {
 
 .card-glow:hover {
   transform: scale(1.02) translateY(-2px);
-  box-shadow: 0 0 32px 0 rgba(139, 92, 246, 0.2);
+  box-shadow: 0 0 32px 0 rgba(255, 255, 255, 0.2);
   border-color: rgba(139, 92, 246, 0.3);
 }
 
 /* ─── Popular pricing card ─── */
 
 .pricing-popular {
-  border-color: rgba(167, 139, 250, 0.4);
+  border-color: rgba(255, 255, 255, 0.4);
   box-shadow: 0 0 40px 0 rgba(139, 92, 246, 0.15);
 }
 

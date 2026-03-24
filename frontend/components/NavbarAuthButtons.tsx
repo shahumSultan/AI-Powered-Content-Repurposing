@@ -66,7 +66,7 @@ export default function NavbarAuthButtons() {
     <div className="flex items-center gap-3">
       <Link
         href="/auth/login"
-        className="text-sm text-zinc-400 transition hover:text-zinc-100"
+        className="btn-gradient rounded-lg px-4 py-2 text-sm font-semibold text-white"
       >
         Sign in
       </Link>

@@ -23,7 +23,7 @@ export default function Navbar() {
       <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
         {/* Logo */}
         <a href="#" className="flex items-center gap-2">
-          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-violet-600 to-pink-500">
+          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-[#8500FA] to-[#DD578B]">
             <svg className="h-4 w-4 text-white" fill="currentColor" viewBox="0 0 20 20">
               <path d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" />
             </svg>
