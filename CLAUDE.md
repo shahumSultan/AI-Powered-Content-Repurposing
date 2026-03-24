@@ -47,22 +47,15 @@ The backend is a FastAPI application under `backend/`:
 |---|---|---|
 | `POST /generate` | `{ "urls": ["<url>", ...] }` | `{ content_pack, errors, export_json, export_csv }` |
 
-Pipeline: ingest each URL → chunk (400–900 words) → embed (`all-MiniLM-L6-v2`) → semantic dedup + rank → local GGUF model generates content pack → CSV/JSON export.
+Pipeline: ingest each URL → chunk (400–900 words) → embed (TF-IDF) → semantic dedup + rank → Groq cloud inference generates content pack → CSV/JSON export.
 
-`content_pack` contains: 10 hooks, 5 LinkedIn posts, 10 Twitter/X posts, 5 IG captions, 10 Shorts ideas (with YouTube timestamps where available).
+`content_pack` contains: 5 hooks, 2 LinkedIn posts, 5 IG captions, 3 Shorts ideas (with YouTube timestamps where available).
 
-#### ML model — local GGUF via llama-cpp-python
+#### LLM — Groq cloud inference
 
-- Loaded lazily on first request inside `backend/services/generator.py`
-- **No HuggingFace account or API key required** — model runs fully locally
-- Place your `.gguf` file in `models/` and set `MODEL_PATH` in `.env`:
-  ```bash
-  cp .env.example .env
-  # edit .env → MODEL_PATH=models/your-model.gguf
-  ```
-- GPU is used automatically when available (`n_gpu_layers=-1`); falls back to CPU with no config change
-- First request loads the model (~2–10 s); subsequent requests are fast
-- If the model file is missing or inference fails, a stub fallback is returned automatically
+- Model: `llama-3.3-70b-versatile` via the Groq API
+- Set `GROQ_API_KEY` in `.env` (get a free key at console.groq.com)
+- If the API call fails, a stub fallback is returned automatically
 
 ## Frontend
 

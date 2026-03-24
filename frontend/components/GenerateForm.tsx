@@ -1,14 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { generateContentPack, type GenerateResponse } from "@/lib/api";
+import { useRouter } from "next/navigation";
+import type { GenerateResponse } from "@/lib/api";
 import ContentPackView from "./ContentPackView";
 
-interface Props {
-  onSuccess?: (urls: string[]) => Promise<void>;
-}
-
-export default function GenerateForm({ onSuccess }: Props) {
+export default function GenerateForm() {
+  const router = useRouter();
   const [urlsText, setUrlsText] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -28,9 +26,29 @@ export default function GenerateForm({ onSuccess }: Props) {
     setResult(null);
 
     try {
-      const data = await generateContentPack(urls);
+      const res = await fetch("/api/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ urls }),
+      });
+
+      if (res.status === 429) {
+        // Quota exceeded — refresh the page so the server component re-reads
+        // gens_used and shows the upgrade prompt instead of the form.
+        router.refresh();
+        return;
+      }
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ detail: "Unknown error" }));
+        setError(err.detail ?? `Request failed: ${res.status}`);
+        return;
+      }
+
+      const data: GenerateResponse = await res.json();
       setResult(data);
-      await onSuccess?.(urls);
+      // Refresh the server component so the usage counter updates
+      router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
     } finally {
