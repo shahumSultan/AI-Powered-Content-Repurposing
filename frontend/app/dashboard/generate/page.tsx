@@ -2,7 +2,6 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import GenerateForm from "@/components/GenerateForm";
-import { recordGeneration } from "./actions";
 
 export default async function GeneratePage() {
   const supabase = await createClient();
@@ -62,7 +61,7 @@ export default async function GeneratePage() {
           </Link>
         </div>
       ) : (
-        <GenerateForm onSuccess={recordGeneration} />
+        <GenerateForm />
       )}
     </div>
   );

@@ -28,7 +28,6 @@ export interface ShortsIdea {
 export interface ContentPack {
   hooks: { text: string }[];
   linkedin_posts: { text: string }[];
-  twitter_posts: { text: string }[];
   ig_captions: { text: string }[];
   shorts_ideas: ShortsIdea[];
 }
