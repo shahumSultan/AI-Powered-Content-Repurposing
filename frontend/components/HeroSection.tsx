@@ -63,7 +63,6 @@ export default function HeroSection() {
               {[
                 { value: "15", label: "posts per pack" },
                 { value: "< 60s", label: "generation time" },
-                { value: "Free", label: "to start" },
               ].map(({ value, label }) => (
                 <div key={label} className="flex items-baseline gap-2">
                   <span className="display-font text-2xl font-bold text-orange-400">{value}</span>

@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-import Link from "next/link";
+import StripeButtons from "@/components/dashboard/StripeButtons";
 
 const freeFeatures = [
   { label: "5 content packs / month", included: true },
@@ -32,11 +32,12 @@ export default async function PlanPage() {
 
   const { data: plan } = await supabase
     .from("user_plans")
-    .select("plan, gens_used, gens_limit")
+    .select("plan, gens_used, gens_limit, stripe_subscription_id")
     .eq("user_id", user.id)
     .single();
 
   const isPro = plan?.plan === "pro";
+  const hasSubscription = !!plan?.stripe_subscription_id;
   const gensUsed = plan?.gens_used ?? 0;
   const gensLimit = plan?.gens_limit ?? 5;
   const usagePct = isPro ? 0 : Math.min(100, (gensUsed / gensLimit) * 100);
@@ -112,12 +113,7 @@ export default async function PlanPage() {
           <p className="mb-4 text-sm text-zinc-400">
             Unlimited content packs, multiple URL processing, and priority support.
           </p>
-          <Link
-            href="/#pricing"
-            className="btn-primary inline-block rounded-lg px-5 py-2.5 text-sm font-semibold text-white"
-          >
-            Upgrade to Pro →
-          </Link>
+          <StripeButtons isPro={isPro} hasSubscription={hasSubscription} />
         </div>
       )}
     </div>

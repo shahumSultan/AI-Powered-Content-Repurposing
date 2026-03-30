@@ -20,7 +20,7 @@ const syne = Syne({
 });
 
 export const metadata: Metadata = {
-  title: "ContentFlow — Turn Any Content Into a Full Content Pack",
+  title: "ContentFlow — Turn Content Into a Full Content Pack",
   description:
     "Paste a YouTube video or blog URL and get hooks, LinkedIn posts, Instagram captions, and Shorts ideas in seconds. Runs locally, no API key required.",
 };
