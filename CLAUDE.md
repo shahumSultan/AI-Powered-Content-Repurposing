@@ -74,8 +74,9 @@ Run backend and frontend concurrently in separate terminals. The frontend calls
 ### Key files
 - `frontend/app/page.tsx` — root page: GenerateForm (primary) + IngestTabs (collapsible)
 - `frontend/components/GenerateForm.tsx` — multi-URL textarea → calls `/generate`
-- `frontend/components/ContentPackView.tsx` — tabbed display of all 5 content types + CSV/JSON export
+- `frontend/components/ContentPackView.tsx` — tabbed display of all 4 content types (hooks, LinkedIn, IG, Shorts) + CSV/JSON export
 - `frontend/components/IngestTabs.tsx` — YouTube / Blog tab switcher (dev/debug)
 - `frontend/components/YouTubeForm.tsx` — YouTube URL input + transcript display
 - `frontend/components/BlogForm.tsx` — Blog URL input + article display
 - `frontend/lib/api.ts` — typed fetch wrappers for all endpoints
+- `frontend/lib/config.ts` — shared constants (BACKEND_URL, GENERATE_PLACEHOLDER)

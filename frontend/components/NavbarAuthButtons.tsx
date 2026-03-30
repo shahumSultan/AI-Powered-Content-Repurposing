@@ -6,7 +6,7 @@ import type { User } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/client";
 import { signOut } from "@/app/auth/actions";
 
-export default function NavbarAuthButtons() {
+export default function zNavbarAuthButtons() {
   // undefined = still loading, null = not logged in, User = logged in
   const [user, setUser] = useState<User | null | undefined>(undefined);
 

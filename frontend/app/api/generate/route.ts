@@ -1,5 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextRequest, NextResponse } from "next/server";
+import { BACKEND_URL } from "@/lib/config";
 
 export async function POST(req: NextRequest) {
   // Parse body first — request body can only be read once
@@ -52,19 +53,24 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  // Validate body shape before using
+  const bodyObj = body as Record<string, unknown>;
+  if (!Array.isArray(bodyObj.urls)) {
+    return NextResponse.json({ detail: "Invalid request: urls must be an array" }, { status: 400 });
+  }
+
   // Record this generation in history (best-effort; don't block on failure)
   await supabase
     .from("generation_history")
-    .insert({ user_id: user.id, urls: (body as { urls: string[] }).urls })
+    .insert({ user_id: user.id, urls: bodyObj.urls as string[] })
     .then(({ error }) => {
       if (error) console.error("generation_history insert error:", error);
     });
 
   // Proxy the request to the FastAPI backend
-  const backendUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
   let upstream: Response;
   try {
-    upstream = await fetch(`${backendUrl}/generate`, {
+    upstream = await fetch(`${BACKEND_URL}/generate`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),

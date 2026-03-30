@@ -25,7 +25,10 @@ export default function TryItSection() {
           <AnimateOnScroll delay="100ms">
             <h2 className="mt-4 text-3xl font-bold text-zinc-100 md:text-4xl">Try It Now</h2>
             <p className="mt-3 text-zinc-400">
-              One free generation — no account needed to get started.
+              Paste a link below and see your content pack in under a minute — no account needed.
+            </p>
+            <p className="mt-2 text-sm text-zinc-600">
+              You&apos;ll get hooks, LinkedIn posts, Instagram captions and Shorts ideas — all written and ready to copy.
             </p>
           </AnimateOnScroll>
         </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { BACKEND_URL } from "@/lib/config";
 
 type Status = "loading" | "ok" | "error";
 
@@ -21,7 +22,7 @@ function StatusDot({ status }: { status: Status }) {
 export default function StatusCard() {
   const [health, setHealth] = useState<Status>("loading");
   const [ready, setReady] = useState<Status>("loading");
-  const base = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+  const base = BACKEND_URL;
 
   async function refresh() {
     setHealth("loading");

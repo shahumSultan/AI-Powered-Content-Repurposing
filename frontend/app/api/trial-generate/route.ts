@@ -1,5 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
+import { BACKEND_URL } from "@/lib/config";
 
 // Cookie-based counter is kept as a fast first check to avoid a DB round-trip
 // on every request. The DB is the authoritative source and cannot be bypassed
@@ -53,11 +54,10 @@ export async function POST(req: NextRequest) {
   }
 
   const body = await req.json();
-  const backendUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
   let upstream: Response;
   try {
-    upstream = await fetch(`${backendUrl}/generate`, {
+    upstream = await fetch(`${BACKEND_URL}/generate`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),

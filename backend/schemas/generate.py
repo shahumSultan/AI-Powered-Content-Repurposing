@@ -13,10 +13,6 @@ class LinkedInPost(BaseModel):
     text: str
 
 
-class TwitterPost(BaseModel):
-    text: str
-
-
 class IGCaption(BaseModel):
     text: str
 
@@ -31,7 +27,6 @@ class ShortsIdea(BaseModel):
 class ContentPack(BaseModel):
     hooks: list[Hook]
     linkedin_posts: list[LinkedInPost]
-    # twitter_posts: list[TwitterPost]
     ig_captions: list[IGCaption]
     shorts_ideas: list[ShortsIdea]
 

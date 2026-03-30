@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import type { GenerateResponse } from "@/lib/api";
+import { GENERATE_PLACEHOLDER } from "@/lib/config";
 import ContentPackView from "./ContentPackView";
 
 type Status = "idle" | "loading" | "done" | "limit_reached" | "error";
@@ -90,7 +91,7 @@ export default function TryItForm() {
           <textarea
             value={urlsText}
             onChange={(e) => setUrlsText(e.target.value)}
-            placeholder={"Paste your URL — YouTube or blog\nhttps://youtube.com/watch?v=...\nhttps://example.com/article"}
+            placeholder={GENERATE_PLACEHOLDER}
             rows={4}
             className="w-full resize-none rounded-lg border border-zinc-700 bg-zinc-800 px-4 py-3 text-sm text-zinc-100 placeholder-zinc-500 outline-none transition focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20"
             required

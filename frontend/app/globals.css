@@ -1,11 +1,10 @@
 @import "tailwindcss";
 
 :root {
-  --background: #030307;
-  --foreground: #fafafa;
-  /* Brand colours */
-  --brand:      #8500FA;
-  --brand-alt:  #DD578B;
+  --background: #0a0908;
+  --foreground: #fafaf9;
+  --accent: #f97316;
+  --accent-muted: #f59e0b;
 }
 
 @theme inline {
@@ -13,32 +12,7 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-
-  /* Override Tailwind's violet palette → brand purple (#8500FA) */
-  --color-violet-50:  #F9F0FF;
-  --color-violet-100: #F1DFFF;
-  --color-violet-200: #E2BFFE;
-  --color-violet-300: #CC88FD;
-  --color-violet-400: #B55BFC;
-  --color-violet-500: #9D27FB;
-  --color-violet-600: #8500FA;
-  --color-violet-700: #6900D4;
-  --color-violet-800: #5600AA;
-  --color-violet-900: #380070;
-  --color-violet-950: #1A0033;
-
-  /* Override Tailwind's pink palette → brand pink (#DD578B) */
-  --color-pink-50:  #FDF0F5;
-  --color-pink-100: #FAE0EC;
-  --color-pink-200: #F4C0D6;
-  --color-pink-300: #EE9FBF;
-  --color-pink-400: #E67BA5;
-  --color-pink-500: #DD578B;
-  --color-pink-600: #CC3D78;
-  --color-pink-700: #BB2567;
-  --color-pink-800: #880050;
-  --color-pink-900: #4A0028;
-  --color-pink-950: #1F0010;
+  --font-display: var(--font-syne);
 }
 
 body {
@@ -47,13 +21,13 @@ body {
   font-family: var(--font-geist-sans), Arial, sans-serif;
 }
 
-/* ─── Keyframes ─── */
+/* ─── Display font (Syne) for headings ─── */
 
-@keyframes orbFloat {
-  0%, 100% { transform: translateY(0px) scale(1);      }
-  33%       { transform: translateY(-20px) scale(1.05); }
-  66%       { transform: translateY(10px) scale(0.97);  }
+.display-font {
+  font-family: var(--font-syne), var(--font-geist-sans), sans-serif;
 }
+
+/* ─── Keyframes ─── */
 
 @keyframes textGradientPan {
   0%   { background-position: 0% center;   }
@@ -76,53 +50,86 @@ body {
 /* ─── Hero gradient text ─── */
 
 .hero-gradient-text {
-  background: linear-gradient(135deg, #8500FA 0%, #BB2567 40%, #DD578B 70%, #8500FA 100%);
+  background: linear-gradient(135deg, #f97316 0%, #fbbf24 40%, #f97316 70%, #ea580c 100%);
   background-size: 200% auto;
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
-  animation: textGradientPan 4s linear infinite;
+  animation: textGradientPan 5s linear infinite;
 }
 
-/* ─── Ambient orbs ─── */
+/* ─── Hero background — noise grain + faint grid ─── */
 
-.hero-orb {
+.hero-bg {
   position: absolute;
-  border-radius: 50%;
-  filter: blur(80px);
+  inset: 0;
   pointer-events: none;
-  animation: orbFloat 8s ease-in-out infinite;
 }
 
-/* ─── Card hover glow ─── */
+.hero-bg::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, black 30%, transparent 100%);
+}
+
+.hero-bg::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 200px 200px;
+  opacity: 0.4;
+}
+
+/* ─── Card hover ─── */
 
 .card-glow {
   transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
 }
 
 .card-glow:hover {
-  transform: scale(1.02) translateY(-2px);
-  box-shadow: 0 0 32px 0 rgba(255, 255, 255, 0.2);
-  border-color: rgba(139, 92, 246, 0.3);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 32px 0 rgba(249, 115, 22, 0.12);
+  border-color: rgba(249, 115, 22, 0.25);
 }
 
 /* ─── Popular pricing card ─── */
 
 .pricing-popular {
-  border-color: rgba(255, 255, 255, 0.4);
-  box-shadow: 0 0 40px 0 rgba(139, 92, 246, 0.15);
+  border-color: rgba(251, 191, 36, 0.35);
+  box-shadow: 0 0 40px 0 rgba(249, 115, 22, 0.1);
 }
 
-/* ─── Gradient CTA button ─── */
+/* ─── CTA button ─── */
 
+.btn-primary {
+  background: var(--accent);
+  color: #fff;
+  transition: background 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
+}
+
+.btn-primary:hover {
+  background: #ea580c;
+  box-shadow: 0 0 24px 0 rgba(249, 115, 22, 0.45);
+  transform: translateY(-1px);
+}
+
+/* Keep btn-gradient as alias for any remaining usages */
 .btn-gradient {
-  background: linear-gradient(135deg, #7c3aed, #d946ef, #ec4899);
-  transition: opacity 0.2s ease, box-shadow 0.2s ease;
+  background: var(--accent);
+  transition: background 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
 }
 
 .btn-gradient:hover {
-  opacity: 0.9;
-  box-shadow: 0 0 20px 0 rgba(217, 70, 239, 0.4);
+  background: #ea580c;
+  box-shadow: 0 0 24px 0 rgba(249, 115, 22, 0.45);
+  transform: translateY(-1px);
 }
 
 /* ─── Section divider ─── */
@@ -130,7 +137,7 @@ body {
 .section-divider {
   border: none;
   height: 1px;
-  background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.06), transparent);
+  background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.05), transparent);
 }
 
 /* ─── Smooth scroll ─── */

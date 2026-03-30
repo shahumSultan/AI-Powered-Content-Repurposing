@@ -2,7 +2,7 @@
 
 **Turn any YouTube video or blog article into a full social media content pack — in seconds.**
 
-ContentFlow is an AI-powered content repurposing tool. Paste one or more URLs, and the pipeline extracts, chunks, embeds, deduplicates, ranks, and generates platform-ready content using a local GGUF model — no cloud API keys required.
+ContentFlow is an AI-powered content repurposing tool. Paste one or more URLs, and the pipeline extracts, chunks, embeds, deduplicates, ranks, and generates platform-ready content using Groq cloud inference.
 
 ---
 
@@ -14,7 +14,6 @@ From a single run across your URLs, ContentFlow generates:
 |---|---|
 | Attention-grabbing hooks | 5 |
 | LinkedIn posts (90–140 words, CTA included) | 2 |
-| Twitter/X posts (≤280 chars, 1–2 hashtags) | 3 |
 | Instagram captions (30–60 words, 3 hashtags) | 5 |
 | YouTube Shorts ideas (with timestamps) | 3 |
 
@@ -28,8 +27,8 @@ All output is available as **CSV** and **JSON** export.
 - **FastAPI** — REST API
 - **youtube-transcript-api** — Timestamped YouTube transcript extraction
 - **trafilatura** — Blog/article scraping and cleaning
-- **sentence-transformers** (`all-MiniLM-L6-v2`) — Chunk embedding for semantic deduplication
-- **llama-cpp-python** `0.3.16` — Local GGUF model inference (GPU auto-detected)
+- **scikit-learn** — TF-IDF embedding for semantic deduplication
+- **Groq** (`llama-3.3-70b-versatile`) — Cloud LLM inference
 
 ### Frontend
 - **Next.js 16** — App Router, React 19
@@ -42,8 +41,7 @@ All output is available as **CSV** and **JSON** export.
 
 - Python 3.10+
 - Node.js 18+
-- A `.gguf` model file (e.g. `qwen2.5-3b-instruct-q4_k_m.gguf`)
-- GPU optional — falls back to CPU automatically
+- A Groq API key (free at [console.groq.com](https://console.groq.com))
 
 ---
 
@@ -64,17 +62,13 @@ source .venv/bin/activate          # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-### 3. Model
-
-Place your `.gguf` file in the `models/` directory, then configure the path:
+### 3. Environment
 
 ```bash
 cp .env.example .env
 # Edit .env and set:
-# MODEL_PATH=models/your-model.gguf
+# GROQ_API_KEY=your-key-here
 ```
-
-The model loads lazily on the first request (~2–10 s). Subsequent requests are fast. If the model file is missing or inference fails, a stub fallback is returned automatically.
 
 ### 4. Frontend
 
@@ -120,9 +114,10 @@ npm run dev
 │   │   └── generate.py          # Pydantic models for generation layer
 │   └── services/
 │       ├── chunker.py           # 400–900 word semantic chunking
-│       ├── embedder.py          # MiniLM embedding (singleton)
+│       ├── embedder.py          # TF-IDF embedding
 │       ├── ranker.py            # Cosine dedup + diversity ranking
-│       ├── generator.py         # llama-cpp-python inference + stub fallback
+│       ├── generator.py         # Groq inference + stub fallback
+│       ├── utils.py             # Shared utilities (YouTube ID extraction)
 │       └── exporter.py          # CSV / JSON export
 ├── frontend/
 │   ├── app/
@@ -198,7 +193,6 @@ Runs the full pipeline on one or more URLs and returns a content pack.
   "content_pack": {
     "hooks":          [{ "text": "..." }, ...],
     "linkedin_posts": [{ "text": "..." }, ...],
-    "twitter_posts":  [{ "text": "..." }, ...],
     "ig_captions":    [{ "text": "..." }, ...],
     "shorts_ideas":   [{ "title": "...", "what_to_say": "...", "timestamp_start": 42, "timestamp_end": 98 }, ...]
   },
@@ -221,26 +215,27 @@ Ingest (youtube-transcript-api / trafilatura)
  ↓
 Chunk (400–900 words, preserving timestamps)
  ↓
-Embed (all-MiniLM-L6-v2, 384-dim vectors)
+Embed (TF-IDF, 512 features)
  ↓
 Deduplicate (greedy cosine similarity, threshold 0.85)
  ↓
 Rank (most semantically unique chunks first)
  ↓
-Generate (local GGUF via llama-cpp-python)
+Generate (Groq — llama-3.3-70b-versatile)
  ↓
 Export (CSV + JSON)
 ```
 
-The model is loaded once on first request. If inference fails for any reason, a stub fallback is returned automatically — the API never returns a 500 due to model errors.
+If inference fails for any reason, a stub fallback is returned automatically — the API never returns a 500 due to model errors.
 
 ---
 
 ## Environment Variables
 
-| Variable | Default | Description |
+| Variable | Required | Description |
 |---|---|---|
-| `MODEL_PATH` | `models/qwen2.5-3b-instruct-q4_k_m.gguf` | Path to your local GGUF model file |
+| `GROQ_API_KEY` | Yes | Groq API key for LLM inference |
+| `NEXT_PUBLIC_API_URL` | No | Backend URL (defaults to `http://localhost:8000`) |
 
 ---
 
@@ -248,9 +243,8 @@ The model is loaded once on first request. If inference fails for any reason, a 
 
 | Tier | Price | Highlights |
 |---|---|---|
-| Starter | Free | 5 packs/month, all formats, CSV + JSON |
-| Creator | $20/mo | Unlimited generations, bulk URLs, priority queue |
-| Agency | $50/mo | Team seats, white-label export, API access |
+| Beginner | $7/mo | 5 packs/month, all formats, CSV + JSON |
+| Pro | $14/mo | Unlimited generations, multiple URLs, priority support |
 
 ---
 

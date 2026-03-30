@@ -15,7 +15,6 @@ const SECTION_META: Record<
 > = {
   hooks:   { label: "Hooks",     icon: "🪝", accent: { tab: "bg-amber-600",    border: "border-amber-800/40",    badge: "bg-amber-900/50 text-amber-400",    number: "text-amber-500"    } },
   linkedin:{ label: "LinkedIn",  icon: "in", accent: { tab: "bg-blue-600",      border: "border-blue-800/40",      badge: "bg-blue-900/50 text-blue-400",      number: "text-blue-500"     } },
-  // twitter: { label: "Twitter/X", icon: "𝕏",  accent: { tab: "bg-sky-600",       border: "border-sky-800/40",       badge: "bg-sky-900/50 text-sky-400",        number: "text-sky-500"      } },
   ig:      { label: "Instagram", icon: "IG", accent: { tab: "bg-fuchsia-600",   border: "border-fuchsia-800/40",   badge: "bg-fuchsia-900/50 text-fuchsia-400", number: "text-fuchsia-500"  } },
   shorts:  { label: "Shorts",    icon: "▶",  accent: { tab: "bg-red-600",        border: "border-red-800/40",       badge: "bg-red-900/50 text-red-400",        number: "text-red-500"      } },
 };
@@ -143,7 +142,6 @@ export default function ContentPackView({ pack, csv, json }: Props) {
   const visibleItems = {
     hooks:    pack.hooks.filter((i) => i.text !== ""),
     linkedin: pack.linkedin_posts.filter((i) => i.text !== ""),
-    // twitter:  pack.twitter_posts.filter((i) => i.text !== ""),
     ig:       pack.ig_captions.filter((i) => i.text !== ""),
     shorts:   pack.shorts_ideas.filter((i) => i.title !== "" || i.what_to_say !== ""),
   };

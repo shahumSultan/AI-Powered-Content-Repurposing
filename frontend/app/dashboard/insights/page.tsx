@@ -33,8 +33,8 @@ export default async function InsightsPage() {
     (u) => u.includes("youtube.com") || u.includes("youtu.be"),
   ).length;
   const blogCount = allUrls.length - youtubeCount;
-  // Each pack generates hooks(10) + linkedin(5) + twitter(10) + ig(5) + shorts(10) = 40
-  const totalPosts = totalPacks * 40;
+  // Each pack generates hooks(5) + linkedin(2) + ig(5) + shorts(3) = 15
+  const totalPosts = totalPacks * 15;
 
   const metricCards = [
     { label: "Content Packs Generated", value: String(totalPacks), unit: "packs" },

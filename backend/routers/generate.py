@@ -1,6 +1,6 @@
 from __future__ import annotations
 import json
-from urllib.parse import parse_qs, urlparse
+from urllib.parse import urlparse
 import trafilatura
 from fastapi import APIRouter, HTTPException
 from youtube_transcript_api import NoTranscriptFound, TranscriptsDisabled, YouTubeTranscriptApi
@@ -10,6 +10,7 @@ from backend.services.chunker import Chunk, chunk_text
 from backend.services.exporter import to_csv
 from backend.services.generator import generate_content_pack
 from backend.services.ranker import rank
+from backend.services.utils import extract_video_id
 
 router = APIRouter(prefix="/generate", tags=["generate"])
 
@@ -26,13 +27,10 @@ def _is_youtube(url: str) -> bool:
 
 
 def _extract_video_id(url: str) -> str:
-    parsed = urlparse(url)
-    if parsed.hostname == "youtu.be":
-        return parsed.path.lstrip("/")
-    qs = parse_qs(parsed.query)
-    if "v" in qs:
-        return qs["v"][0]
-    raise ValueError(f"Cannot extract video ID from: {url}")
+    vid = extract_video_id(url)
+    if vid is None:
+        raise ValueError(f"Cannot extract video ID from: {url}")
+    return vid
 
 
 def _ingest_youtube(url: str) -> tuple[str, list[TranscriptSegment]]:

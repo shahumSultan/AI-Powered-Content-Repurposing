@@ -5,7 +5,7 @@ import Link from "next/link";
 const freeFeatures = [
   { label: "5 content packs / month", included: true },
   { label: "YouTube & blog URL support", included: true },
-  { label: "LinkedIn, Twitter/X, Instagram captions", included: true },
+  { label: "LinkedIn, Instagram captions & Shorts ideas", included: true },
   { label: "YouTube Shorts ideas", included: true },
   { label: "CSV & JSON export", included: true },
   { label: "Unlimited content packs", included: false },
@@ -17,7 +17,7 @@ const proFeatures = [
   { label: "Unlimited content packs", included: true },
   { label: "Multiple URLs per generation", included: true },
   { label: "YouTube & blog URL support", included: true },
-  { label: "LinkedIn, Twitter/X, Instagram captions", included: true },
+  { label: "LinkedIn, Instagram captions & Shorts ideas", included: true },
   { label: "YouTube Shorts ideas", included: true },
   { label: "CSV & JSON export", included: true },
   { label: "Priority processing", included: true },
@@ -46,23 +46,23 @@ export default async function PlanPage() {
     <div className="max-w-2xl">
       <h1 className="mb-1 text-xl font-bold text-zinc-100">Your Plan</h1>
       <p className="mb-8 text-sm text-zinc-500">
-        You are currently on the {isPro ? "Pro" : "free"} plan.
+        You are currently on the {isPro ? "Pro" : "Beginner"} plan.
       </p>
 
       {/* Plan card */}
       <div className="mb-6 rounded-xl border border-zinc-800 bg-zinc-900 p-6">
         <div className="mb-4 flex items-center justify-between">
           <div>
-            <span className={`inline-block rounded-full px-3 py-1 text-xs font-semibold ${isPro ? "bg-violet-900/60 text-violet-300" : "bg-zinc-800 text-zinc-300"}`}>
-              {isPro ? "Pro Plan" : "Free Plan"}
+            <span className={`inline-block rounded-full px-3 py-1 text-xs font-semibold ${isPro ? "bg-orange-900/40 text-orange-300" : "bg-zinc-800 text-zinc-300"}`}>
+              {isPro ? "Pro Plan" : "Beginner Plan"}
             </span>
             <p className="mt-2 text-2xl font-bold text-zinc-100">
-              {isPro ? "$19" : "$0"}
+              {isPro ? "$14" : "$7"}
               <span className="text-sm font-normal text-zinc-500"> / month</span>
             </p>
           </div>
-          <div className={`flex h-10 w-10 items-center justify-center rounded-full ${isPro ? "bg-violet-900/50" : "bg-zinc-800"}`}>
-            <svg className={`h-5 w-5 ${isPro ? "text-violet-400" : "text-zinc-400"}`} fill="none" stroke="currentColor" strokeWidth={1.75} viewBox="0 0 24 24">
+          <div className={`flex h-10 w-10 items-center justify-center rounded-full ${isPro ? "bg-orange-900/40" : "bg-zinc-800"}`}>
+            <svg className={`h-5 w-5 ${isPro ? "text-orange-400" : "text-zinc-400"}`} fill="none" stroke="currentColor" strokeWidth={1.75} viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z" />
             </svg>
           </div>
@@ -77,7 +77,7 @@ export default async function PlanPage() {
             </div>
             <div className="h-2 w-full overflow-hidden rounded-full bg-zinc-800">
               <div
-                className="h-full rounded-full bg-violet-600 transition-all"
+                className="h-full rounded-full bg-orange-500 transition-all"
                 style={{ width: `${usagePct}%` }}
               />
             </div>
@@ -107,16 +107,16 @@ export default async function PlanPage() {
 
       {/* Upgrade CTA — only for free plan */}
       {!isPro && (
-        <div className="rounded-xl border border-violet-500/20 bg-violet-950/30 p-6">
-          <h2 className="mb-1 text-base font-semibold text-zinc-100">Upgrade to Pro</h2>
+        <div className="rounded-xl border border-orange-500/20 bg-orange-950/20 p-6">
+          <h2 className="mb-1 text-base font-semibold text-zinc-100">Upgrade to Pro — $14/month</h2>
           <p className="mb-4 text-sm text-zinc-400">
-            Get unlimited content packs, multiple URL processing, and priority support.
+            Unlimited content packs, multiple URL processing, and priority support.
           </p>
           <Link
             href="/#pricing"
-            className="btn-gradient inline-block rounded-lg px-5 py-2.5 text-sm font-semibold text-white"
+            className="btn-primary inline-block rounded-lg px-5 py-2.5 text-sm font-semibold text-white"
           >
-            See pricing →
+            Upgrade to Pro →
           </Link>
         </div>
       )}

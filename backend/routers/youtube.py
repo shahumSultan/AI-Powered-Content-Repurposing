@@ -1,7 +1,7 @@
-from urllib.parse import parse_qs, urlparse
 from fastapi import APIRouter, HTTPException
 from youtube_transcript_api import NoTranscriptFound, TranscriptsDisabled, YouTubeTranscriptApi
 from backend.schemas.ingest import IngestRequest, TranscriptSegment, YouTubeIngestResponse
+from backend.services.utils import extract_video_id
 
 ytt_api = YouTubeTranscriptApi()
 
@@ -9,14 +9,10 @@ router = APIRouter(prefix="/ingest", tags=["ingest"])
 
 
 def _extract_video_id(url: str) -> str:
-    parsed = urlparse(url)
-    if parsed.hostname in ("youtu.be",):
-        return parsed.path.lstrip("/")
-    if parsed.hostname in ("www.youtube.com", "youtube.com"):
-        qs = parse_qs(parsed.query)
-        if "v" in qs:
-            return qs["v"][0]
-    raise HTTPException(status_code=422, detail="Could not extract video ID from URL")
+    vid = extract_video_id(url)
+    if vid is None:
+        raise HTTPException(status_code=422, detail="Could not extract video ID from URL")
+    return vid
 
 
 @router.post("/youtube", response_model=YouTubeIngestResponse)

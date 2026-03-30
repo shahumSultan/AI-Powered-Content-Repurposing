@@ -3,24 +3,24 @@ import AnimateOnScroll from "./AnimateOnScroll";
 const STEPS = [
   {
     number: "01",
-    title: "Paste Your Links",
+    title: "Paste Your Link",
     description:
-      "Drop in a YouTube video or blog link. You can mix both in the same run.",
-    detail: "youtube.com, youtu.be, and any article URL",
+      "Drop in a YouTube video or article URL. Mix and match — the engine handles both in a single run.",
+    detail: "Works with YouTube videos and any blog or article.",
   },
   {
     number: "02",
-    title: "We Pull Out the Best Parts",
+    title: "The Engine Does the Work",
     description:
-      "We extract the transcript or text, find the strongest ideas and turn them into platform-ready drafts.",
-    detail: "No copy-pasting. No formatting. No manual rewriting.",
+      "It reads your content, finds the strongest ideas and angles, then writes the posts for you — while you get on with your day.",
+    detail: "Usually done in under a minute.",
   },
   {
     number: "03",
-    title: "Download Your Content Pack",
+    title: "Publish Across Every Channel",
     description:
-      "Get hooks, LinkedIn posts, Instagram captions and short-video ideas - ready to publish.",
-    detail: "Export as CSV or JSON in one click.",
+      "Your content pack lands ready to use: hooks that stop the scroll, LinkedIn posts that build authority, Instagram captions that drive engagement and Shorts ideas with exact timestamps.",
+    detail: "Download everything in one click.",
   },
 ];
 
@@ -32,13 +32,13 @@ export default function HowItWorksSection() {
       {/* Section header */}
       <div className="mx-auto mb-16 max-w-2xl text-center">
         <AnimateOnScroll delay="0ms">
-          <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-violet-400">
+          <p className="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-orange-400">
             How It Works
           </p>
-          <h2 className="text-3xl font-bold text-zinc-100 md:text-4xl">
-            From Long-Form Content to Ready-to-Post Social Content
+          <h2 className="display-font text-3xl font-extrabold tracking-tight text-zinc-100 md:text-4xl">
+            From One Link to a Week of Content
           </h2>
-          <p className="mt-4 text-zinc-400">Three steps. No setup.</p>
+          <p className="mt-4 text-zinc-400">Three steps. No setup required.</p>
         </AnimateOnScroll>
       </div>
 
@@ -48,10 +48,10 @@ export default function HowItWorksSection() {
           <AnimateOnScroll key={step.number} delay={DELAYS[i]}>
             <div className="flex flex-col items-start">
               {/* Number bubble */}
-              <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-full border border-violet-500/30 bg-violet-500/10 font-mono text-lg font-bold text-violet-400">
+              <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-full border border-orange-500/25 bg-orange-500/8 font-mono text-lg font-bold text-orange-400">
                 {step.number}
               </div>
-              <h3 className="mb-3 text-lg font-semibold text-zinc-100">{step.title}</h3>
+              <h3 className="display-font mb-3 text-lg font-bold text-zinc-100">{step.title}</h3>
               <p className="text-sm leading-relaxed text-zinc-400">{step.description}</p>
               <p className="mt-3 text-xs text-zinc-600">{step.detail}</p>
             </div>

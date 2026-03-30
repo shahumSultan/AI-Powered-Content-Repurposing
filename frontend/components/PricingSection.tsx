@@ -13,38 +13,36 @@ interface PricingTier {
 
 const TIERS: PricingTier[] = [
   {
-    name: "Starter",
-    price: "$10",
+    name: "Beginner",
+    price: "$7",
     period: "/month",
-    description: "Perfect for trying it out with your own content.",
+    description: "Everything you need to get started and publish consistently.",
     features: [
-      "10 content pack generations / month",
-      "YouTube & blog ingestion",
-      "Hooks, LinkedIn, IG & Shorts",
-      "CSV & JSON export",
-      "Local model (you provide)",
+      "5 content packs per month",
+      "YouTube videos & articles",
+      "Hooks, LinkedIn, Instagram & Shorts",
+      "Download as CSV or JSON",
       "Community support",
     ],
-    cta: "Get Started Free →",
-    ctaHref: "#try-it",
-    popular: true,
+    cta: "Get Beginner →",
+    ctaHref: "/auth/signup",
+    popular: false,
   },
   {
-    name: "Creator",
-    price: "$20",
+    name: "Pro",
+    price: "$14",
     period: "/month",
-    description: "For content creators who publish consistently.",
+    description: "For creators who publish consistently and can't afford to slow down.",
     features: [
-      "Unlimited generations",
-      "All content formats",
-      "Priority generation queue",
-      "Bulk URL processing (up to 10)",
-      "Batch CSV export",
-      "Email support",
+      "Unlimited content packs",
+      "Process multiple links at once",
+      "All formats: hooks, LinkedIn, Instagram & Shorts",
+      "Download as CSV or JSON",
+      "Priority support",
     ],
-    cta: "Contact Sales →",
-    ctaHref: "#try-it",
-    popular: false,
+    cta: "Get Pro →",
+    ctaHref: "/auth/signup",
+    popular: true,
   },
 ];
 
@@ -56,13 +54,13 @@ export default function PricingSection() {
       {/* Section header */}
       <div className="mx-auto mb-16 max-w-2xl text-center">
         <AnimateOnScroll delay="0ms">
-          <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-violet-400">
+          <p className="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-orange-400">
             Pricing
           </p>
-          <h2 className="text-3xl font-bold text-zinc-100 md:text-4xl">
-            Simple, Transparent Pricing
+          <h2 className="display-font text-3xl font-extrabold tracking-tight text-zinc-100 md:text-4xl">
+            Simple, Honest Pricing
           </h2>
-          <p className="mt-4 text-zinc-400">Start free. Scale when you&apos;re ready.</p>
+          <p className="mt-4 text-zinc-400">Pick your pace. Upgrade when you need more.</p>
         </AnimateOnScroll>
       </div>
 
@@ -79,12 +77,12 @@ export default function PricingSection() {
             >
               {/* Popular badge */}
               {tier.popular && (
-                <div className="mb-4 self-start rounded-full bg-violet-500/20 px-3 py-1 text-xs font-semibold text-violet-400">
+                <div className="mb-4 self-start rounded-full bg-orange-500/15 px-3 py-1 text-xs font-semibold text-orange-400">
                   Most Popular
                 </div>
               )}
 
-              <h3 className="text-xl font-bold text-zinc-100">{tier.name}</h3>
+              <h3 className="display-font text-xl font-bold text-zinc-100">{tier.name}</h3>
 
               <div className="mt-4 flex items-baseline gap-1">
                 <span className="text-4xl font-bold text-zinc-100">{tier.price}</span>
@@ -99,7 +97,7 @@ export default function PricingSection() {
                 {tier.features.map((feature) => (
                   <li key={feature} className="flex items-start gap-2.5 text-sm text-zinc-400">
                     <svg
-                      className="mt-0.5 h-4 w-4 shrink-0 text-violet-400"
+                      className="mt-0.5 h-4 w-4 shrink-0 text-orange-400"
                       fill="currentColor"
                       viewBox="0 0 20 20"
                     >
@@ -118,7 +116,7 @@ export default function PricingSection() {
                 href={tier.ctaHref}
                 className={
                   tier.popular
-                    ? "btn-gradient mt-8 block rounded-xl py-3 text-center text-sm font-semibold text-white"
+                    ? "btn-primary mt-8 block rounded-xl py-3 text-center text-sm font-semibold text-white"
                     : "mt-8 block rounded-xl border border-white/10 bg-white/5 py-3 text-center text-sm font-semibold text-zinc-300 transition hover:bg-white/10"
                 }
               >

@@ -10,10 +10,10 @@ export default function BillingPage() {
       <div className="mb-6 flex items-center justify-between rounded-xl border border-zinc-800 bg-zinc-900 p-5">
         <div>
           <p className="text-xs font-medium text-zinc-500">Current plan</p>
-          <p className="mt-0.5 text-base font-semibold text-zinc-100">Free</p>
+          <p className="mt-0.5 text-base font-semibold text-zinc-100">Beginner</p>
         </div>
         <span className="rounded-full bg-zinc-800 px-3 py-1 text-xs font-medium text-zinc-400">
-          $0 / month
+          $7 / month
         </span>
       </div>
 
@@ -26,7 +26,7 @@ export default function BillingPage() {
         </div>
         <p className="mb-1 text-sm font-medium text-zinc-300">No billing history</p>
         <p className="text-xs text-zinc-500">
-          You&apos;re on the free plan — no charges have been made.
+          No payments recorded yet. Billing will appear here once Stripe is connected.
         </p>
       </div>
 
@@ -39,16 +39,16 @@ export default function BillingPage() {
       </div>
 
       {/* Upgrade CTA */}
-      <div className="rounded-xl border border-violet-500/20 bg-violet-950/30 p-6">
-        <h2 className="mb-1 text-base font-semibold text-zinc-100">Ready to upgrade?</h2>
+      <div className="rounded-xl border border-orange-500/20 bg-orange-950/20 p-6">
+        <h2 className="mb-1 text-base font-semibold text-zinc-100">Upgrade to Pro — $14/month</h2>
         <p className="mb-4 text-sm text-zinc-400">
-          Unlock unlimited content generation and priority support with a Pro subscription.
+          Unlimited content packs, multiple URL processing, and priority support.
         </p>
         <Link
           href="/#pricing"
-          className="btn-gradient inline-block rounded-lg px-5 py-2.5 text-sm font-semibold text-white"
+          className="btn-primary inline-block rounded-lg px-5 py-2.5 text-sm font-semibold text-white"
         >
-          View plans →
+          Upgrade to Pro →
         </Link>
       </div>
     </div>

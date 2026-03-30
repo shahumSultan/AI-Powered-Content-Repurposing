@@ -35,16 +35,6 @@ export default function AdminPage() {
       {/* Cards */}
       <div className="grid gap-4 sm:grid-cols-2">
         <StatusCard />
-
-        <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-6">
-          <h2 className="mb-1 text-sm font-semibold text-zinc-300">
-            Usage Stats
-          </h2>
-          <p className="text-xs text-zinc-600">
-            Coming soon — will show generation counts and latency once tracking
-            is added.
-          </p>
-        </div>
       </div>
     </div>
   );

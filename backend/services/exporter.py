@@ -5,7 +5,7 @@ from backend.schemas.generate import ContentPack
 
 
 def to_csv(pack: ContentPack) -> str:
-    """Serialise *pack* to an RFC 4180 CSV string with 40 data rows."""
+    """Serialise *pack* to an RFC 4180 CSV string."""
     buf = io.StringIO()
     writer = csv.writer(buf, quoting=csv.QUOTE_ALL)
 
@@ -16,9 +16,6 @@ def to_csv(pack: ContentPack) -> str:
 
     for i, item in enumerate(pack.linkedin_posts, start=1):
         writer.writerow(["linkedin_post", i, item.text, "", ""])
-
-    # for i, item in enumerate(pack.twitter_posts, start=1):
-    #     writer.writerow(["twitter_post", i, item.text, "", ""])
 
     for i, item in enumerate(pack.ig_captions, start=1):
         writer.writerow(["ig_caption", i, item.text, "", ""])
