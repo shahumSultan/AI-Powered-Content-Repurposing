@@ -8,11 +8,11 @@ export default function LoginPage() {
   const [state, action, pending] = useActionState(signIn, null);
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#030307] px-4">
+    <div className="flex min-h-screen items-center justify-center bg-zinc-950 px-4">
       <div className="w-full max-w-sm rounded-xl border border-zinc-800 bg-zinc-900 p-8 shadow-xl">
         {/* Logo */}
         <div className="mb-6 flex items-center gap-2">
-          <div className="flex h-7 w-7 items-center justify-center rounded-md bg-gradient-to-br from-[#8500FA] to-[#DD578B]">
+          <div className="flex h-7 w-7 items-center justify-center rounded-md bg-gradient-to-br from-orange-500 to-amber-400">
             <svg viewBox="0 0 20 20" fill="white" className="h-4 w-4">
               <path
                 fillRule="evenodd"
@@ -29,7 +29,7 @@ export default function LoginPage() {
           No account?{" "}
           <Link
             href="/auth/signup"
-            className="text-violet-400 hover:text-violet-300"
+            className="text-orange-400 hover:text-orange-300"
           >
             Sign up free
           </Link>
@@ -45,7 +45,7 @@ export default function LoginPage() {
               name="email"
               required
               autoFocus
-              className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-4 py-2.5 text-sm text-zinc-100 outline-none transition focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20"
+              className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-4 py-2.5 text-sm text-zinc-100 outline-none transition focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20"
             />
           </div>
           <div>
@@ -56,7 +56,7 @@ export default function LoginPage() {
               type="password"
               name="password"
               required
-              className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-4 py-2.5 text-sm text-zinc-100 outline-none transition focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20"
+              className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-4 py-2.5 text-sm text-zinc-100 outline-none transition focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20"
             />
           </div>
 
@@ -67,7 +67,7 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={pending}
-            className="w-full rounded-lg bg-violet-600 py-2.5 text-sm font-semibold text-white transition hover:bg-violet-500 disabled:opacity-50"
+            className="btn-primary w-full rounded-lg py-2.5 text-sm font-semibold text-white disabled:opacity-50"
           >
             {pending ? "Signing in…" : "Sign in →"}
           </button>

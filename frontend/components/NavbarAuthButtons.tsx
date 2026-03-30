@@ -46,7 +46,7 @@ export default function zNavbarAuthButtons() {
           {firstName}
         </Link>
         <Link href="/dashboard">
-          <div className="flex h-7 w-7 items-center justify-center rounded-full bg-violet-700 text-xs font-bold text-white transition hover:bg-violet-600">
+          <div className="flex h-7 w-7 items-center justify-center rounded-full bg-orange-600 text-xs font-bold text-white transition hover:bg-orange-500">
             {initial}
           </div>
         </Link>

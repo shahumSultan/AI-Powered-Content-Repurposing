@@ -9,14 +9,14 @@ export default function NotFound() {
         className="pointer-events-none absolute inset-0"
         style={{
           background:
-            "radial-gradient(ellipse 60% 40% at 50% 40%, rgba(133,0,250,0.08) 0%, transparent 70%)",
+            "radial-gradient(ellipse 60% 40% at 50% 40%, rgba(249,115,22,0.06) 0%, transparent 70%)",
         }}
       />
 
       <div className="relative z-10 max-w-md">
         {/* Logo */}
         <Link href="/" className="mb-10 inline-flex items-center gap-2">
-          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-[#8500FA] to-[#DD578B]">
+          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-orange-500 to-amber-400">
             <svg className="h-4 w-4 text-white" fill="currentColor" viewBox="0 0 20 20">
               <path d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" />
             </svg>

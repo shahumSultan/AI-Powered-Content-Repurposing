@@ -56,9 +56,9 @@ export default function TryItForm() {
 
   if (status === "limit_reached") {
     return (
-      <div className="rounded-xl border border-violet-500/20 bg-violet-950/30 p-8 text-center">
-        <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-violet-900/50">
-          <svg className="h-6 w-6 text-violet-400" fill="none" stroke="currentColor" strokeWidth={1.75} viewBox="0 0 24 24">
+      <div className="rounded-xl border border-orange-500/20 bg-orange-950/20 p-8 text-center">
+        <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-orange-900/40">
+          <svg className="h-6 w-6 text-orange-400" fill="none" stroke="currentColor" strokeWidth={1.75} viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z" />
           </svg>
         </div>
@@ -69,7 +69,7 @@ export default function TryItForm() {
         <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
           <Link
             href="/auth/signup"
-            className="btn-gradient rounded-lg px-6 py-2.5 text-sm font-semibold text-white"
+            className="btn-primary rounded-lg px-6 py-2.5 text-sm font-semibold text-white"
           >
             Create free account →
           </Link>
@@ -93,13 +93,13 @@ export default function TryItForm() {
             onChange={(e) => setUrlsText(e.target.value)}
             placeholder={GENERATE_PLACEHOLDER}
             rows={4}
-            className="w-full resize-none rounded-lg border border-zinc-700 bg-zinc-800 px-4 py-3 text-sm text-zinc-100 placeholder-zinc-500 outline-none transition focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20"
+            className="w-full resize-none rounded-lg border border-zinc-700 bg-zinc-800 px-4 py-3 text-sm text-zinc-100 placeholder-zinc-500 outline-none transition focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20"
             required
           />
           <button
             type="submit"
             disabled={status === "loading"}
-            className="w-full rounded-lg bg-violet-600 py-2.5 text-sm font-semibold text-white transition hover:bg-violet-500 disabled:cursor-not-allowed disabled:opacity-50"
+            className="btn-primary w-full rounded-lg py-2.5 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50"
           >
             {status === "loading" ? (
               <span className="flex items-center justify-center gap-2">
@@ -125,13 +125,13 @@ export default function TryItForm() {
       {status === "done" && result && (
         <div className="space-y-4">
           {/* Soft signup banner */}
-          <div className="flex items-center justify-between rounded-lg border border-violet-500/20 bg-violet-950/30 px-4 py-3">
+          <div className="flex items-center justify-between rounded-lg border border-orange-500/20 bg-orange-950/20 px-4 py-3">
             <p className="text-sm text-zinc-300">
-              Enjoying it? Sign up for <span className="font-semibold text-violet-300">5 free packs/month</span>
+              Enjoying it? Sign up for <span className="font-semibold text-orange-300">5 free packs/month</span>
             </p>
             <Link
               href="/auth/signup"
-              className="ml-4 shrink-0 rounded-lg bg-violet-600 px-4 py-1.5 text-xs font-semibold text-white transition hover:bg-violet-500"
+              className="btn-primary ml-4 shrink-0 rounded-lg px-4 py-1.5 text-xs font-semibold text-white"
             >
               Sign up free →
             </Link>
