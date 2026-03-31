@@ -23,10 +23,11 @@ export default async function BillingPage({
   const justPaid = params.success === "true";
 
   const isPro = plan?.plan === "pro";
+  const isBeginner = plan?.plan === "beginner";
   const hasSubscription = !!(plan?.stripe_subscription_id);
   const subscriptionStatus = plan?.subscription_status ?? null;
-  const planLabel = isPro ? "Pro" : "Beginner";
-  const planPrice = isPro ? "$14" : "$7";
+  const planLabel = isPro ? "Pro" : isBeginner ? "Beginner" : "Free Trial";
+  const planPrice = isPro ? "$14" : isBeginner ? "$7" : "$0";
 
   return (
     <div className="max-w-2xl">

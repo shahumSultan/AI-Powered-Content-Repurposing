@@ -64,7 +64,7 @@ export async function POST(req: NextRequest) {
         {
           user_id: userId,
           plan: isActive ? plan : "free",
-          gens_limit: isActive && plan === "pro" ? 999999 : 5,
+          gens_limit: isActive ? (plan === "pro" ? 999999 : 5) : 3,
           stripe_subscription_id: sub.id,
           subscription_status: sub.status,
         },
@@ -82,7 +82,7 @@ export async function POST(req: NextRequest) {
         {
           user_id: userId,
           plan: "free",
-          gens_limit: 5,
+          gens_limit: 3,
           stripe_subscription_id: null,
           subscription_status: "canceled",
         },

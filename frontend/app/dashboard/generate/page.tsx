@@ -19,10 +19,11 @@ export default async function GeneratePage() {
 
   if (!plan) {
     await supabase.from("user_plans").insert({ user_id: user.id });
-    plan = { plan: "free", gens_used: 0, gens_limit: 5, period_start: new Date().toISOString() };
+    plan = { plan: "free", gens_used: 0, gens_limit: 3, period_start: new Date().toISOString() };
   }
 
   const isPro = plan.plan === "pro";
+  const isTrial = plan.plan === "free";
   const limitReached = !isPro && plan.gens_used >= plan.gens_limit;
 
   return (
@@ -34,7 +35,12 @@ export default async function GeneratePage() {
             Paste a YouTube or blog URL to generate your content pack.
           </p>
         </div>
-        {!isPro && (
+        {isTrial && (
+          <span className="mt-1 shrink-0 text-xs text-zinc-500">
+            {plan.gens_used} / {plan.gens_limit} trial generations used
+          </span>
+        )}
+        {!isPro && !isTrial && (
           <span className="mt-1 shrink-0 text-xs text-zinc-500">
             {plan.gens_used} / {plan.gens_limit} packs used
           </span>
@@ -43,21 +49,24 @@ export default async function GeneratePage() {
 
       {limitReached ? (
         <div className="rounded-xl border border-orange-500/20 bg-orange-950/20 p-8 text-center">
-          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-orange-900/40">
+          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-orange-500/15">
             <svg className="h-6 w-6 text-orange-400" fill="none" stroke="currentColor" strokeWidth={1.75} viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
             </svg>
           </div>
-          <p className="mb-2 text-base font-semibold text-zinc-100">Monthly limit reached</p>
+          <p className="mb-2 display-font text-base font-semibold text-zinc-100">
+            {isTrial ? "Trial limit reached" : "Monthly limit reached"}
+          </p>
           <p className="mb-6 text-sm text-zinc-400">
-            You have used all {plan.gens_limit} free content packs this month.
-            Upgrade to Pro for unlimited generations.
+            {isTrial
+              ? `You've used all ${plan.gens_limit} free trial generations. Subscribe to keep creating.`
+              : `You have used all ${plan.gens_limit} content packs this month. Upgrade to Pro for unlimited generations.`}
           </p>
           <Link
-            href="/#pricing"
+            href="/dashboard/plan"
             className="btn-gradient inline-block rounded-lg px-6 py-2.5 text-sm font-semibold text-white"
           >
-            Upgrade to Pro →
+            View Plans →
           </Link>
         </div>
       ) : (
