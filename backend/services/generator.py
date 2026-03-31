@@ -17,7 +17,6 @@ from backend.schemas.generate import (
     IGCaption,
     LinkedInPost,
     ShortsIdea,
-    TwitterPost,
 )
 from backend.services.chunker import Chunk
 

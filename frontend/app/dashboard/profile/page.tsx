@@ -21,12 +21,12 @@ export default async function ProfilePage() {
 
   return (
     <div className="max-w-2xl">
-      <h1 className="mb-1 text-xl font-bold text-zinc-100">Profile</h1>
+      <h1 className="mb-1 display-font text-2xl font-bold text-zinc-100">Profile</h1>
       <p className="mb-8 text-sm text-zinc-500">Manage your account details.</p>
 
       {/* Avatar + info card */}
       <div className="mb-6 flex items-center gap-4 rounded-xl border border-zinc-800 bg-zinc-900 p-6">
-        <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-violet-700 text-2xl font-bold text-white">
+        <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-orange-500 to-amber-400 text-2xl font-bold text-white">
           {initial}
         </div>
         <div>

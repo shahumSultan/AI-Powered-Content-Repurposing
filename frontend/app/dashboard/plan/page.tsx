@@ -45,7 +45,7 @@ export default async function PlanPage() {
 
   return (
     <div className="max-w-2xl">
-      <h1 className="mb-1 text-xl font-bold text-zinc-100">Your Plan</h1>
+      <h1 className="mb-1 display-font text-2xl font-bold text-zinc-100">Your Plan</h1>
       <p className="mb-8 text-sm text-zinc-500">
         You are currently on the {isPro ? "Pro" : "Beginner"} plan.
       </p>
@@ -54,7 +54,7 @@ export default async function PlanPage() {
       <div className="mb-6 rounded-xl border border-zinc-800 bg-zinc-900 p-6">
         <div className="mb-4 flex items-center justify-between">
           <div>
-            <span className={`inline-block rounded-full px-3 py-1 text-xs font-semibold ${isPro ? "bg-orange-900/40 text-orange-300" : "bg-zinc-800 text-zinc-300"}`}>
+            <span className={`inline-block rounded-full px-3 py-1 text-xs font-semibold ${isPro ? "bg-orange-500/15 text-orange-400" : "bg-zinc-800 text-zinc-300"}`}>
               {isPro ? "Pro Plan" : "Beginner Plan"}
             </span>
             <p className="mt-2 text-2xl font-bold text-zinc-100">
@@ -62,7 +62,7 @@ export default async function PlanPage() {
               <span className="text-sm font-normal text-zinc-500"> / month</span>
             </p>
           </div>
-          <div className={`flex h-10 w-10 items-center justify-center rounded-full ${isPro ? "bg-orange-900/40" : "bg-zinc-800"}`}>
+          <div className={`flex h-10 w-10 items-center justify-center rounded-full ${isPro ? "bg-orange-500/15" : "bg-zinc-800"}`}>
             <svg className={`h-5 w-5 ${isPro ? "text-orange-400" : "text-zinc-400"}`} fill="none" stroke="currentColor" strokeWidth={1.75} viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z" />
             </svg>
@@ -109,7 +109,7 @@ export default async function PlanPage() {
       {/* Upgrade CTA — only for free plan */}
       {!isPro && (
         <div className="rounded-xl border border-orange-500/20 bg-orange-950/20 p-6">
-          <h2 className="mb-1 text-base font-semibold text-zinc-100">Upgrade to Pro — $14/month</h2>
+          <h2 className="mb-1 display-font text-lg font-semibold text-zinc-100">Upgrade to Pro — $14/month</h2>
           <p className="mb-4 text-sm text-zinc-400">
             Unlimited content packs, multiple URL processing, and priority support.
           </p>

@@ -45,7 +45,7 @@ export default async function InsightsPage() {
 
   return (
     <div className="max-w-2xl">
-      <h1 className="mb-1 text-xl font-bold text-zinc-100">Insights</h1>
+      <h1 className="mb-1 display-font text-2xl font-bold text-zinc-100">Insights</h1>
       <p className="mb-8 text-sm text-zinc-500">
         Your account activity and usage statistics.
       </p>
@@ -64,11 +64,11 @@ export default async function InsightsPage() {
 
       {/* Usage metrics */}
       <div className="mb-6">
-        <h2 className="mb-3 text-sm font-semibold text-zinc-100">Usage metrics</h2>
+        <h2 className="mb-3 display-font text-sm font-semibold text-zinc-100">Usage metrics</h2>
         <div className="grid grid-cols-2 gap-3">
           {metricCards.map((card) => (
             <div key={card.label} className="rounded-xl border border-zinc-800 bg-zinc-900 p-5">
-              <p className="mb-2 text-2xl font-bold text-zinc-100">{card.value}</p>
+              <p className="mb-2 display-font text-2xl font-bold text-orange-400">{card.value}</p>
               <p className="text-xs font-medium text-zinc-400">{card.label}</p>
               <p className="text-xs text-zinc-600">{card.unit}</p>
             </div>
@@ -79,7 +79,7 @@ export default async function InsightsPage() {
       {/* Recent history */}
       {rows.length > 0 && (
         <div>
-          <h2 className="mb-3 text-sm font-semibold text-zinc-100">Recent generations</h2>
+          <h2 className="mb-3 display-font text-sm font-semibold text-zinc-100">Recent generations</h2>
           <div className="space-y-2">
             {rows.slice(0, 10).map((row, i) => (
               <div key={i} className="rounded-xl border border-zinc-800 bg-zinc-900 p-4">

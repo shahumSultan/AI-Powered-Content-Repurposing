@@ -30,7 +30,7 @@ export default async function BillingPage({
 
   return (
     <div className="max-w-2xl">
-      <h1 className="mb-1 text-xl font-bold text-zinc-100">Billing</h1>
+      <h1 className="mb-1 display-font text-2xl font-bold text-zinc-100">Billing</h1>
       <p className="mb-8 text-sm text-zinc-500">Manage your subscription and payment methods.</p>
 
       {/* Success banner */}
@@ -54,7 +54,7 @@ export default async function BillingPage({
             <p className="mt-0.5 text-xs text-amber-400 capitalize">{subscriptionStatus}</p>
           )}
         </div>
-        <span className={`rounded-full px-3 py-1 text-xs font-medium ${isPro ? "bg-orange-900/40 text-orange-300" : "bg-zinc-800 text-zinc-400"}`}>
+        <span className={`rounded-full px-3 py-1 text-xs font-medium ${isPro ? "bg-orange-500/15 text-orange-400" : "bg-zinc-800 text-zinc-400"}`}>
           {planPrice} / month
         </span>
       </div>

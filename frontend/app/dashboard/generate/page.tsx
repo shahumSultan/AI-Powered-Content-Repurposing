@@ -29,7 +29,7 @@ export default async function GeneratePage() {
     <div className="max-w-2xl">
       <div className="mb-6 flex items-start justify-between">
         <div>
-          <h1 className="mb-1 text-xl font-bold text-zinc-100">Generate Content</h1>
+          <h1 className="mb-1 display-font text-2xl font-bold text-zinc-100">Generate Content</h1>
           <p className="text-sm text-zinc-500">
             Paste a YouTube or blog URL to generate your content pack.
           </p>
