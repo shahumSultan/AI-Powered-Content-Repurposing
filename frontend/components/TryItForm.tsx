@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import type { GenerateResponse } from "@/lib/api";
 import { GENERATE_PLACEHOLDER } from "@/lib/config";
@@ -13,6 +13,13 @@ export default function TryItForm() {
   const [status, setStatus] = useState<Status>("idle");
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<GenerateResponse | null>(null);
+  const [previewSecret, setPreviewSecret] = useState<string | null>(null);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const secret = params.get("preview");
+    if (secret) setPreviewSecret(secret);
+  }, []);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -27,9 +34,12 @@ export default function TryItForm() {
     setResult(null);
 
     try {
+      const headers: Record<string, string> = { "Content-Type": "application/json" };
+      if (previewSecret) headers["x-preview-secret"] = previewSecret;
+
       const res = await fetch("/api/trial-generate", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers,
         body: JSON.stringify({ urls }),
       });
 
