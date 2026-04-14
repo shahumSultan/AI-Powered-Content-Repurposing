@@ -23,7 +23,7 @@ export async function signUp(
   if (error) return { error: error.message };
 
   revalidatePath("/", "layout");
-  redirect("/auth/signup?success=1");
+  redirect("/dashboard");
 }
 
 export async function signIn(
