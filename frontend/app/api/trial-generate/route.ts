@@ -34,6 +34,26 @@ function getSupabase() {
 }
 
 export async function POST(req: NextRequest) {
+  // Admin preview bypass — skip all trial checks if the correct secret is provided.
+  const bypassSecret = process.env.ADMIN_PREVIEW_SECRET;
+  const providedSecret = req.headers.get("x-preview-secret");
+  if (bypassSecret && providedSecret === bypassSecret) {
+    const body = await req.json();
+    let upstream: Response;
+    try {
+      upstream = await fetch(`${BACKEND_URL}/generate`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+    } catch {
+      return NextResponse.json({ detail: "Backend unreachable" }, { status: 502 });
+    }
+    const data = await upstream.json();
+    if (!upstream.ok) return NextResponse.json(data, { status: upstream.status });
+    return NextResponse.json(data);
+  }
+
   // Fast path: cookie already set means the client has used their trial.
   // Still verify against the DB below, but skip if cookie says used.
   const cookieCount = parseInt(req.cookies.get(COOKIE_NAME)?.value ?? "0", 10);
