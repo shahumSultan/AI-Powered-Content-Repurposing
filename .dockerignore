@@ -6,6 +6,8 @@ models/
 frontend/
 .git/
 .env
+.env.local
+.env.*.local
 *.gguf
 node_modules/
 .next/

@@ -47,3 +47,5 @@ htmlcov/
 models/*.gguf
 models/*.bin
 models/*.safetensors
+.env.local
+frontend/.env.local
