@@ -1,0 +1,38 @@
+services:
+  # ── FastAPI Backend ─────────────────────────────────────────────────────────
+  backend:
+    build: .
+    container_name: contentflow_backend
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      ALLOWED_ORIGINS: http://localhost:3000
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app/backend
+    command: uvicorn backend.main:app --host 0.0.0.0 --port 8000 --reload
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8000/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ── Next.js Frontend ────────────────────────────────────────────────────────
+  frontend:
+    build: ./frontend
+    container_name: contentflow_frontend
+    restart: unless-stopped
+    env_file: frontend/.env.local
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:8000
+      WATCHPACK_POLLING: "true"      # hot reload on WSL2
+      CHOKIDAR_USEPOLLING: "true"
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules            # isolate container node_modules
+      - /app/.next
+    depends_on:
+      - backend
