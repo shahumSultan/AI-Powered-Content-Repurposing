@@ -1,22 +1,17 @@
-import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+import { apiFetch } from "@/lib/auth";
+import type { AuthUser } from "@/lib/auth";
 import EditNameForm from "@/components/dashboard/EditNameForm";
 
 export default async function ProfilePage() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const res = await apiFetch("/auth/me");
+  if (!res.ok) redirect("/auth/login");
+  const user: AuthUser = await res.json();
 
-  if (!user) redirect("/auth/login");
-
-  const displayName =
-    (user.user_metadata?.full_name as string) || user.email || "Account";
+  const displayName = user.full_name || user.email || "Account";
   const initial = displayName[0].toUpperCase();
   const memberSince = new Date(user.created_at).toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
+    year: "numeric", month: "long", day: "numeric",
   });
 
   return (
@@ -24,7 +19,6 @@ export default async function ProfilePage() {
       <h1 className="mb-1 display-font text-2xl font-bold text-zinc-100">Profile</h1>
       <p className="mb-8 text-sm text-zinc-500">Manage your account details.</p>
 
-      {/* Avatar + info card */}
       <div className="mb-6 flex items-center gap-4 rounded-xl border border-zinc-800 bg-zinc-900 p-6">
         <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-orange-500 to-amber-400 text-2xl font-bold text-white">
           {initial}
@@ -36,21 +30,13 @@ export default async function ProfilePage() {
         </div>
       </div>
 
-      {/* Edit name */}
       <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-6">
         <h2 className="mb-4 text-sm font-semibold text-zinc-100">Edit profile</h2>
         <EditNameForm currentName={displayName} />
-
         <div className="mt-6 border-t border-zinc-800 pt-5">
-          <label className="mb-1.5 block text-xs font-medium text-zinc-400">
-            Email address
-          </label>
-          <p className="rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 text-sm text-zinc-400">
-            {user.email}
-          </p>
-          <p className="mt-1.5 text-xs text-zinc-600">
-            Email cannot be changed here. Contact support if needed.
-          </p>
+          <label className="mb-1.5 block text-xs font-medium text-zinc-400">Email address</label>
+          <p className="rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 text-sm text-zinc-400">{user.email}</p>
+          <p className="mt-1.5 text-xs text-zinc-600">Email cannot be changed here. Contact support if needed.</p>
         </div>
       </div>
     </div>

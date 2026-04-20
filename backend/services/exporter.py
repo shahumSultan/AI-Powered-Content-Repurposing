@@ -1,7 +1,7 @@
 from __future__ import annotations
 import csv
 import io
-from backend.schemas.generate import ContentPack
+from schemas.generate import ContentPack
 
 
 def to_csv(pack: ContentPack) -> str:

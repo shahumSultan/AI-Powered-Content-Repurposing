@@ -1,10 +1,20 @@
 "use client";
 
 import { useState } from "react";
+import { createClient } from "@/lib/supabase/client";
+import { BACKEND_URL } from "@/lib/config";
 
 interface Props {
   isPro: boolean;
   hasSubscription: boolean;
+}
+
+async function getAuthToken(): Promise<string> {
+  const supabase = createClient();
+  const { data } = await supabase.auth.getSession();
+  const token = data.session?.access_token;
+  if (!token) throw new Error("Not authenticated");
+  return token;
 }
 
 export default function StripeButtons({ isPro, hasSubscription }: Props) {
@@ -15,9 +25,13 @@ export default function StripeButtons({ isPro, hasSubscription }: Props) {
     setLoading(plan);
     setError(null);
     try {
-      const res = await fetch("/api/stripe/checkout", {
+      const token = await getAuthToken();
+      const res = await fetch(`${BACKEND_URL}/billing/checkout`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
         body: JSON.stringify({ plan }),
       });
       const data = await res.json();
@@ -33,7 +47,11 @@ export default function StripeButtons({ isPro, hasSubscription }: Props) {
     setLoading("portal");
     setError(null);
     try {
-      const res = await fetch("/api/stripe/portal", { method: "POST" });
+      const token = await getAuthToken();
+      const res = await fetch(`${BACKEND_URL}/billing/portal`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+      });
       const data = await res.json();
       if (!res.ok) throw new Error(data.detail ?? "Failed to open billing portal");
       window.location.href = data.url;

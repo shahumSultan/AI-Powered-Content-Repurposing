@@ -1,8 +1,3 @@
-import { createBrowserClient } from "@supabase/ssr";
-
-export function createClient() {
-  return createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY!
-  );
-}
+// Supabase removed — this file is intentionally empty.
+// Auth and data are now handled by the FastAPI backend.
+export {};

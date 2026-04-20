@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { createClient } from "@/lib/supabase/server";
+import { apiFetch } from "@/lib/auth";
 
 export async function updateDisplayName(
   _prev: { error?: string; success?: boolean } | null,
@@ -10,12 +10,15 @@ export async function updateDisplayName(
   const name = (formData.get("name") as string).trim();
   if (!name) return { error: "Name cannot be empty." };
 
-  const supabase = await createClient();
-  const { error } = await supabase.auth.updateUser({
-    data: { full_name: name },
+  const res = await apiFetch("/auth/me", {
+    method: "PATCH",
+    body: JSON.stringify({ full_name: name }),
   });
 
-  if (error) return { error: error.message };
+  if (!res.ok) {
+    const data = await res.json();
+    return { error: data.detail ?? "Failed to update name." };
+  }
 
   revalidatePath("/dashboard/profile");
   return { success: true };

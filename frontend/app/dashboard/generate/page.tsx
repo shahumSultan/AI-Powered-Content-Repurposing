@@ -1,26 +1,13 @@
-import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import { apiFetch } from "@/lib/auth";
 import GenerateForm from "@/components/GenerateForm";
 
 export default async function GeneratePage() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) redirect("/auth/login");
+  const res = await apiFetch("/user/plan");
+  if (res.status === 401) redirect("/auth/login");
 
-  // Fetch or bootstrap the user's plan row
-  let { data: plan } = await supabase
-    .from("user_plans")
-    .select("plan, gens_used, gens_limit, period_start")
-    .eq("user_id", user.id)
-    .single();
-
-  if (!plan) {
-    await supabase.from("user_plans").insert({ user_id: user.id });
-    plan = { plan: "free", gens_used: 0, gens_limit: 3, period_start: new Date().toISOString() };
-  }
+  const plan = res.ok ? await res.json() : { plan: "free", gens_used: 0, gens_limit: 3 };
 
   const isPro = plan.plan === "pro";
   const isTrial = plan.plan === "free";
@@ -31,19 +18,13 @@ export default async function GeneratePage() {
       <div className="mb-6 flex items-start justify-between">
         <div>
           <h1 className="mb-1 display-font text-2xl font-bold text-zinc-100">Generate Content</h1>
-          <p className="text-sm text-zinc-500">
-            Paste a YouTube or blog URL to generate your content pack.
-          </p>
+          <p className="text-sm text-zinc-500">Paste a YouTube or blog URL to generate your content pack.</p>
         </div>
         {isTrial && (
-          <span className="mt-1 shrink-0 text-xs text-zinc-500">
-            {plan.gens_used} / {plan.gens_limit} trial generations used
-          </span>
+          <span className="mt-1 shrink-0 text-xs text-zinc-500">{plan.gens_used} / {plan.gens_limit} trial generations used</span>
         )}
         {!isPro && !isTrial && (
-          <span className="mt-1 shrink-0 text-xs text-zinc-500">
-            {plan.gens_used} / {plan.gens_limit} packs used
-          </span>
+          <span className="mt-1 shrink-0 text-xs text-zinc-500">{plan.gens_used} / {plan.gens_limit} packs used</span>
         )}
       </div>
 
@@ -62,10 +43,7 @@ export default async function GeneratePage() {
               ? `You've used all ${plan.gens_limit} free trial generations. Subscribe to keep creating.`
               : `You have used all ${plan.gens_limit} content packs this month. Upgrade to Pro for unlimited generations.`}
           </p>
-          <Link
-            href="/dashboard/plan"
-            className="btn-gradient inline-block rounded-lg px-6 py-2.5 text-sm font-semibold text-white"
-          >
+          <Link href="/dashboard/plan" className="btn-gradient inline-block rounded-lg px-6 py-2.5 text-sm font-semibold text-white">
             View Plans →
           </Link>
         </div>

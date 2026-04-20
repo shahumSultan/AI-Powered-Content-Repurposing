@@ -2,15 +2,15 @@ from __future__ import annotations
 import json
 from urllib.parse import urlparse
 import trafilatura
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Header, HTTPException
 from youtube_transcript_api import NoTranscriptFound, TranscriptsDisabled, YouTubeTranscriptApi
-from backend.schemas.generate import GenerateRequest, GenerateResponse
-from backend.schemas.ingest import TranscriptSegment
-from backend.services.chunker import Chunk, chunk_text
-from backend.services.exporter import to_csv
-from backend.services.generator import generate_content_pack
-from backend.services.ranker import rank
-from backend.services.utils import extract_video_id
+from schemas.generate import GenerateRequest, GenerateResponse
+from schemas.ingest import TranscriptSegment
+from services.chunker import Chunk, chunk_text
+from services.exporter import to_csv
+from services.generator import generate_content_pack
+from services.ranker import rank
+from services.utils import extract_video_id
 
 router = APIRouter(prefix="/generate", tags=["generate"])
 
@@ -69,7 +69,11 @@ def _ingest_blog(url: str) -> str:
 # ---------------------------------------------------------------------------
 
 @router.post("", response_model=GenerateResponse)
-def generate(body: GenerateRequest) -> GenerateResponse:
+def generate(
+    body: GenerateRequest,
+    x_groq_api_key: str | None = Header(None),
+    x_openai_api_key: str | None = Header(None),
+) -> GenerateResponse:
     all_chunks: list[Chunk] = []
     errors: list[str] = []
 
@@ -94,7 +98,7 @@ def generate(body: GenerateRequest) -> GenerateResponse:
         )
 
     ranked = rank(all_chunks)
-    pack = generate_content_pack(ranked)
+    pack = generate_content_pack(ranked, groq_api_key=x_groq_api_key, openai_api_key=x_openai_api_key)
     csv_str = to_csv(pack)
 
     return GenerateResponse(

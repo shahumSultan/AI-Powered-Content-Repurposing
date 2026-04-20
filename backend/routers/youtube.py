@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException
 from youtube_transcript_api import NoTranscriptFound, TranscriptsDisabled, YouTubeTranscriptApi
-from backend.schemas.ingest import IngestRequest, TranscriptSegment, YouTubeIngestResponse
-from backend.services.utils import extract_video_id
+from schemas.ingest import IngestRequest, TranscriptSegment, YouTubeIngestResponse
+from services.utils import extract_video_id
 
 ytt_api = YouTubeTranscriptApi()
 

@@ -1,66 +1,51 @@
-import { createServerClient } from "@supabase/ssr";
+import { jwtVerify } from "jose";
 import { NextRequest, NextResponse } from "next/server";
+import { AUTH_COOKIE } from "@/lib/auth";
 
 async function sha256hex(text: string): Promise<string> {
-  const buf = await crypto.subtle.digest(
-    "SHA-256",
-    new TextEncoder().encode(text)
-  );
+  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));
   return Array.from(new Uint8Array(buf))
     .map((b) => b.toString(16).padStart(2, "0"))
     .join("");
 }
 
+async function isValidToken(token: string): Promise<boolean> {
+  try {
+    const secret = new TextEncoder().encode(process.env.JWT_SECRET ?? "dev-secret-change-in-production");
+    await jwtVerify(token, secret);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 export async function middleware(req: NextRequest) {
-  // ── 1. Supabase session refresh (keeps auth tokens alive for SSR) ─────────
-  let response = NextResponse.next({ request: req });
-
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY!,
-    {
-      cookies: {
-        getAll: () => req.cookies.getAll(),
-        setAll: (toSet) => {
-          toSet.forEach(({ name, value }) => req.cookies.set(name, value));
-          response = NextResponse.next({ request: req });
-          toSet.forEach(({ name, value, options }) =>
-            response.cookies.set(name, value, options)
-          );
-        },
-      },
-    }
-  );
-
-  // Must call getUser() — this is what actually refreshes the session token
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  // ── 2. Route protection ───────────────────────────────────────────────────
   const { pathname } = req.nextUrl;
 
-  // Dashboard requires an authenticated Supabase user
-  if (pathname.startsWith("/dashboard") && !user) {
-    return NextResponse.redirect(new URL("/auth/login", req.url));
+  // ── Dashboard protection ───────────────────────────────────────────────────
+  if (pathname.startsWith("/dashboard")) {
+    const token = req.cookies.get(AUTH_COOKIE)?.value;
+    const authenticated = token ? await isValidToken(token) : false;
+    if (!authenticated) {
+      return NextResponse.redirect(new URL("/auth/login", req.url));
+    }
   }
 
+  // ── Admin protection ───────────────────────────────────────────────────────
   if (pathname.startsWith("/admin") && pathname !== "/admin/login") {
     const token = req.cookies.get("admin_token")?.value;
     const expected = process.env.ADMIN_PASSWORD ?? "";
     const expectedHash = await sha256hex(expected);
-
     if (!token || token !== expectedHash) {
       return NextResponse.redirect(new URL("/admin/login", req.url));
     }
   }
 
-  return response;
+  return NextResponse.next();
 }
 
 export const config = {
   matcher: [
-    // Run on all routes except Next.js internals and static files
     "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };

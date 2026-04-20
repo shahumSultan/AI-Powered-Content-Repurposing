@@ -2,17 +2,20 @@ import os
 from contextlib import asynccontextmanager
 from dotenv import load_dotenv
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from backend.routers import blog, generate, youtube
-from backend.services import generator
 
-load_dotenv()  # loads .env from the repo root
+from routers import billing, blog, generate, youtube
+from routers import auth, user, trial
+from services import generator
+
+load_dotenv()
+
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
-    generator.load_model()   # blocks until model is loaded (or fails gracefully)
-    yield                    # server is now running
+    generator.load_model()
+    yield
 
 
 app = FastAPI(
@@ -35,6 +38,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.include_router(auth.router)
+app.include_router(user.router)
+app.include_router(trial.router)
+app.include_router(billing.router)
 app.include_router(youtube.router)
 app.include_router(blog.router)
 app.include_router(generate.router)
@@ -42,13 +49,12 @@ app.include_router(generate.router)
 
 @app.get("/health")
 def health() -> dict:
-    """Always returns OK — does not touch the LLM."""
     return {"status": "ok"}
 
 
 @app.get("/ready")
 def ready() -> dict:
-    """Returns OK only if the LLM has been loaded. Use this for readiness probes."""
+    from fastapi import HTTPException
     if not generator.is_ready():
         raise HTTPException(status_code=503, detail="Model not loaded")
     return {"status": "ready"}

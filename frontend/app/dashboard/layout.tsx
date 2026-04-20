@@ -1,25 +1,18 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/server";
+import { apiFetch } from "@/lib/auth";
 import { signOut } from "@/app/auth/actions";
 import DashboardNav from "@/components/dashboard/DashboardNav";
+import type { AuthUser } from "@/lib/auth";
 
-export default async function DashboardLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
+  const res = await apiFetch("/auth/me");
+  if (!res.ok) redirect("/auth/login");
 
-  if (!user) redirect("/auth/login");
-
-  const displayName =
-    (user.user_metadata?.full_name as string) || user.email || "Account";
+  const user: AuthUser = await res.json();
+  const displayName = user.full_name || user.email || "Account";
   const initial = displayName[0].toUpperCase();
-  const email = user.email ?? "";
+  const email = user.email;
 
   return (
     <div className="min-h-screen bg-zinc-950">
@@ -39,7 +32,6 @@ export default async function DashboardLayout({
       <div className="flex">
         {/* Sidebar — desktop */}
         <aside className="hidden w-60 shrink-0 flex-col border-r border-zinc-800 bg-zinc-900 md:flex" style={{ minHeight: "100vh" }}>
-          {/* Logo */}
           <div className="border-b border-zinc-800 px-5 py-4">
             <Link href="/" className="flex items-center gap-2">
               <div className="flex h-6 w-6 items-center justify-center rounded-md bg-gradient-to-br from-orange-500 to-amber-400">
@@ -51,7 +43,6 @@ export default async function DashboardLayout({
             </Link>
           </div>
 
-          {/* User info */}
           <div className="border-b border-zinc-800 px-5 py-4">
             <div className="flex items-center gap-3">
               <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-orange-600 text-sm font-bold text-white">
@@ -64,18 +55,13 @@ export default async function DashboardLayout({
             </div>
           </div>
 
-          {/* Nav */}
           <div className="flex-1 px-3 py-4">
             <DashboardNav />
           </div>
 
-          {/* Sign out */}
           <div className="border-t border-zinc-800 px-5 py-4">
             <form action={signOut}>
-              <button
-                type="submit"
-                className="flex w-full items-center gap-2 text-sm text-zinc-400 transition hover:text-zinc-100"
-              >
+              <button type="submit" className="flex w-full items-center gap-2 text-sm text-zinc-400 transition hover:text-zinc-100">
                 <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={1.75} viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15M12 9l-3 3m0 0 3 3m-3-3h12.75" />
                 </svg>
@@ -85,10 +71,7 @@ export default async function DashboardLayout({
           </div>
         </aside>
 
-        {/* Main content */}
-        <main className="flex-1 px-4 py-6 md:px-8 md:py-10">
-          {children}
-        </main>
+        <main className="flex-1 px-4 py-6 md:px-8 md:py-10">{children}</main>
       </div>
 
       {/* Bottom nav on mobile */}
@@ -98,12 +81,9 @@ export default async function DashboardLayout({
           { href: "/dashboard/plan", label: "Plan" },
           { href: "/dashboard/billing", label: "Billing" },
           { href: "/dashboard/insights", label: "Insights" },
+          { href: "/dashboard/settings", label: "Settings" },
         ].map((item) => (
-          <Link
-            key={item.href}
-            href={item.href}
-            className="flex flex-1 flex-col items-center py-3 text-xs text-zinc-400 hover:text-zinc-100"
-          >
+          <Link key={item.href} href={item.href} className="flex flex-1 flex-col items-center py-3 text-xs text-zinc-400 hover:text-zinc-100">
             {item.label}
           </Link>
         ))}

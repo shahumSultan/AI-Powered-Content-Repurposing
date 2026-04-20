@@ -1,9 +1,8 @@
-import { createServerClient } from "@supabase/ssr";
 import { NextRequest, NextResponse } from "next/server";
+import { AUTH_COOKIE } from "@/lib/auth";
 import { BACKEND_URL } from "@/lib/config";
 
 export async function POST(req: NextRequest) {
-  // Parse body first — request body can only be read once
   let body: unknown;
   try {
     body = await req.json();
@@ -11,68 +10,51 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ detail: "Invalid JSON body" }, { status: 400 });
   }
 
-  // Build a Supabase client from the request cookies (reads the user's session)
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY!,
-    {
-      cookies: {
-        getAll: () => req.cookies.getAll(),
-        setAll: () => {}, // read-only in route handlers
-      },
-    }
-  );
+  const token = req.cookies.get(AUTH_COOKIE)?.value;
+  if (!token) return NextResponse.json({ detail: "Unauthorized" }, { status: 401 });
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    return NextResponse.json({ detail: "Unauthorized" }, { status: 401 });
+  const bodyObj = body as Record<string, unknown>;
+  if (!Array.isArray(bodyObj.urls)) {
+    return NextResponse.json({ detail: "Invalid request: urls must be an array" }, { status: 400 });
   }
 
-  // Atomically check quota and increment — handled entirely in the DB to
-  // prevent race conditions from concurrent requests.
-  const { data: result, error: rpcError } = await supabase.rpc(
-    "try_consume_generation",
-    { p_user_id: user.id }
-  );
+  // Check and consume generation quota
+  const quotaRes = await fetch(`${BACKEND_URL}/user/consume-generation`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}` },
+  });
 
-  if (rpcError) {
-    console.error("try_consume_generation RPC error:", rpcError);
-    return NextResponse.json(
-      { detail: "Could not verify generation quota" },
-      { status: 500 }
-    );
+  if (!quotaRes.ok) {
+    return NextResponse.json({ detail: "Could not verify generation quota" }, { status: 500 });
   }
 
-  if (result === "limit_reached") {
+  const { status: quotaStatus } = await quotaRes.json();
+  if (quotaStatus === "limit_reached") {
     return NextResponse.json(
       { detail: "Monthly generation limit reached. Upgrade to Pro for unlimited generations." },
       { status: 429 }
     );
   }
 
-  // Validate body shape before using
-  const bodyObj = body as Record<string, unknown>;
-  if (!Array.isArray(bodyObj.urls)) {
-    return NextResponse.json({ detail: "Invalid request: urls must be an array" }, { status: 400 });
+  // Fetch user's API key settings
+  const settingsRes = await fetch(`${BACKEND_URL}/user/settings`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  const settings = settingsRes.ok ? await settingsRes.json() : null;
+
+  const backendHeaders: Record<string, string> = { "Content-Type": "application/json" };
+  if (settings?.preferred_provider === "openai" && settings.openai_api_key) {
+    backendHeaders["X-Openai-Api-Key"] = settings.openai_api_key;
+  } else if (settings?.groq_api_key) {
+    backendHeaders["X-Groq-Api-Key"] = settings.groq_api_key;
   }
 
-  // Record this generation in history (best-effort; don't block on failure)
-  await supabase
-    .from("generation_history")
-    .insert({ user_id: user.id, urls: bodyObj.urls as string[] })
-    .then(({ error }) => {
-      if (error) console.error("generation_history insert error:", error);
-    });
-
-  // Proxy the request to the FastAPI backend
+  // Proxy to FastAPI generate
   let upstream: Response;
   try {
     upstream = await fetch(`${BACKEND_URL}/generate`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: backendHeaders,
       body: JSON.stringify(body),
     });
   } catch {
@@ -81,5 +63,13 @@ export async function POST(req: NextRequest) {
 
   const data = await upstream.json();
   if (!upstream.ok) return NextResponse.json(data, { status: upstream.status });
+
+  // Record generation history (best-effort)
+  fetch(`${BACKEND_URL}/user/record-generation`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+    body: JSON.stringify({ urls: bodyObj.urls }),
+  }).catch(() => {});
+
   return NextResponse.json(data);
 }

@@ -1,8 +1,11 @@
 """
-Content pack generator — Groq cloud inference.
+Content pack generator — Groq (default) or OpenAI.
 
-Set GROQ_API_KEY in your environment (or .env).
-If the API call fails for any reason the stub fallback is returned automatically.
+Priority for API keys:
+  1. openai_api_key passed per-request  → use OpenAI
+  2. groq_api_key passed per-request    → use Groq with that key
+  3. GROQ_API_KEY env var               → use Groq with env key
+  4. None of the above                  → stub fallback
 """
 
 from __future__ import annotations
@@ -11,41 +14,45 @@ import logging
 import os
 import re
 from groq import Groq
-from backend.schemas.generate import (
+from openai import OpenAI
+from schemas.generate import (
     ContentPack,
     Hook,
     IGCaption,
     LinkedInPost,
     ShortsIdea,
 )
-from backend.services.chunker import Chunk
+from services.chunker import Chunk
 
 logger = logging.getLogger(__name__)
 
-_GROQ_MODEL = "llama-3.3-70b-versatile"
+_GROQ_MODEL   = "llama-3.3-70b-versatile"
+_OPENAI_MODEL = "gpt-4o-mini"
 _MAX_PROMPT_WORDS = 1_500
 _TOP_CHUNKS = 3
 
-_client: Groq | None = None
+# Module-level singleton for the env-level Groq client only
+_env_client: Groq | None = None
 
 
-def _get_client() -> Groq:
-    global _client
-    if _client is None:
-        _client = Groq(api_key=os.environ["GROQ_API_KEY"])
-    return _client
+def _get_env_groq_client() -> Groq | None:
+    global _env_client
+    key = os.getenv("GROQ_API_KEY")
+    if not key:
+        return None
+    if _env_client is None:
+        _env_client = Groq(api_key=key)
+    return _env_client
 
 
 def load_model() -> None:
-    """Called at server startup. Validates API key is present."""
     if os.getenv("GROQ_API_KEY"):
         logger.info("Groq API key found — ready.")
     else:
-        logger.warning("GROQ_API_KEY not set. Stub fallback will be used.")
+        logger.warning("GROQ_API_KEY not set. User-supplied keys or stub fallback will be used.")
 
 
 def is_ready() -> bool:
-    """Return True if the Groq API key is configured."""
     return bool(os.getenv("GROQ_API_KEY"))
 
 
@@ -157,33 +164,67 @@ def _stub_pack(chunks: list[Chunk]) -> ContentPack:
 
 
 # ---------------------------------------------------------------------------
+# LLM call helpers
+# ---------------------------------------------------------------------------
+
+def _call_groq(client: Groq, source: str) -> str:
+    response = client.chat.completions.create(
+        model=_GROQ_MODEL,
+        messages=[
+            {"role": "system", "content": _SYSTEM_PROMPT},
+            {"role": "user", "content": _USER_TEMPLATE.format(source=source)},
+        ],
+        max_tokens=2048,
+        temperature=0.7,
+    )
+    return response.choices[0].message.content
+
+
+def _call_openai(client: OpenAI, source: str) -> str:
+    response = client.chat.completions.create(
+        model=_OPENAI_MODEL,
+        messages=[
+            {"role": "system", "content": _SYSTEM_PROMPT},
+            {"role": "user", "content": _USER_TEMPLATE.format(source=source)},
+        ],
+        max_tokens=2048,
+        temperature=0.7,
+    )
+    return response.choices[0].message.content
+
+
+# ---------------------------------------------------------------------------
 # Public entry point
 # ---------------------------------------------------------------------------
 
-def generate_content_pack(chunks: list[Chunk]) -> ContentPack:
+def generate_content_pack(
+    chunks: list[Chunk],
+    *,
+    groq_api_key: str | None = None,
+    openai_api_key: str | None = None,
+) -> ContentPack:
     try:
-        client = _get_client()
-
         selected = chunks[:_TOP_CHUNKS]
         source = "\n\n".join(c.text for c in selected)
         words = source.split()
         if len(words) > _MAX_PROMPT_WORDS:
             source = " ".join(words[:_MAX_PROMPT_WORDS])
 
-        response = client.chat.completions.create(
-            model=_GROQ_MODEL,
-            messages=[
-                {"role": "system", "content": _SYSTEM_PROMPT},
-                {"role": "user", "content": _USER_TEMPLATE.format(source=source)},
-            ],
-            max_tokens=2048,
-            temperature=0.7,
-        )
-        raw_output = response.choices[0].message.content
+        if openai_api_key:
+            raw_output = _call_openai(OpenAI(api_key=openai_api_key), source)
+            logger.info("Generated with user-supplied OpenAI key.")
+        elif groq_api_key:
+            raw_output = _call_groq(Groq(api_key=groq_api_key), source)
+            logger.info("Generated with user-supplied Groq key.")
+        else:
+            client = _get_env_groq_client()
+            if client is None:
+                raise ValueError("No API key available")
+            raw_output = _call_groq(client, source)
+
         data = _extract_json(raw_output)
         pack = _pack_from_dict(data, chunks)
 
-        # Pad any under-count sections with stub items
         stub = _stub_pack(chunks)
 
         def _pad(lst: list, target: int, fallback: list) -> list:
@@ -199,5 +240,5 @@ def generate_content_pack(chunks: list[Chunk]) -> ContentPack:
         return pack
 
     except Exception as exc:
-        logger.warning("Groq inference failed (%s), using stub fallback.", exc)
+        logger.warning("Inference failed (%s), using stub fallback.", exc)
         return _stub_pack(chunks)

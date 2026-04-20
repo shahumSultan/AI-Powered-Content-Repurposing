@@ -1,39 +1,26 @@
-import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+import { apiFetch } from "@/lib/auth";
+import type { AuthUser } from "@/lib/auth";
 
 function formatDate(iso: string) {
-  return new Date(iso).toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
+  return new Date(iso).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
 }
 
 export default async function InsightsPage() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) redirect("/auth/login");
+  const [meRes, historyRes] = await Promise.all([
+    apiFetch("/auth/me"),
+    apiFetch("/user/history"),
+  ]);
+  if (meRes.status === 401) redirect("/auth/login");
+
+  const user: AuthUser = await meRes.json();
+  const rows: Array<{ urls: string[]; created_at: string }> = historyRes.ok ? await historyRes.json() : [];
 
   const memberSince = formatDate(user.created_at);
-  const lastSignIn = user.last_sign_in_at ? formatDate(user.last_sign_in_at) : "N/A";
-
-  // Fetch generation history
-  const { data: history } = await supabase
-    .from("generation_history")
-    .select("urls, created_at")
-    .eq("user_id", user.id)
-    .order("created_at", { ascending: false });
-
-  const rows = history ?? [];
   const totalPacks = rows.length;
-  const allUrls = rows.flatMap((r) => r.urls as string[]);
-  const youtubeCount = allUrls.filter(
-    (u) => u.includes("youtube.com") || u.includes("youtu.be"),
-  ).length;
+  const allUrls = rows.flatMap((r) => r.urls);
+  const youtubeCount = allUrls.filter((u) => u.includes("youtube.com") || u.includes("youtu.be")).length;
   const blogCount = allUrls.length - youtubeCount;
-  // Each pack generates hooks(5) + linkedin(2) + ig(5) + shorts(3) = 15
   const totalPosts = totalPacks * 15;
 
   const metricCards = [
@@ -46,23 +33,19 @@ export default async function InsightsPage() {
   return (
     <div className="max-w-2xl">
       <h1 className="mb-1 display-font text-2xl font-bold text-zinc-100">Insights</h1>
-      <p className="mb-8 text-sm text-zinc-500">
-        Your account activity and usage statistics.
-      </p>
+      <p className="mb-8 text-sm text-zinc-500">Your account activity and usage statistics.</p>
 
-      {/* Account stats */}
       <div className="mb-6 grid grid-cols-2 gap-3">
         <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-5">
           <p className="mb-1 text-xs font-medium text-zinc-500">Member since</p>
           <p className="text-sm font-semibold text-zinc-100">{memberSince}</p>
         </div>
         <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-5">
-          <p className="mb-1 text-xs font-medium text-zinc-500">Last sign-in</p>
-          <p className="text-sm font-semibold text-zinc-100">{lastSignIn}</p>
+          <p className="mb-1 text-xs font-medium text-zinc-500">Total generations</p>
+          <p className="text-sm font-semibold text-zinc-100">{totalPacks}</p>
         </div>
       </div>
 
-      {/* Usage metrics */}
       <div className="mb-6">
         <h2 className="mb-3 display-font text-sm font-semibold text-zinc-100">Usage metrics</h2>
         <div className="grid grid-cols-2 gap-3">
@@ -76,7 +59,6 @@ export default async function InsightsPage() {
         </div>
       </div>
 
-      {/* Recent history */}
       {rows.length > 0 && (
         <div>
           <h2 className="mb-3 display-font text-sm font-semibold text-zinc-100">Recent generations</h2>
@@ -84,7 +66,7 @@ export default async function InsightsPage() {
             {rows.slice(0, 10).map((row, i) => (
               <div key={i} className="rounded-xl border border-zinc-800 bg-zinc-900 p-4">
                 <p className="mb-1 text-xs text-zinc-500">{formatDate(row.created_at)}</p>
-                {(row.urls as string[]).map((url, j) => (
+                {row.urls.map((url, j) => (
                   <p key={j} className="truncate text-xs text-zinc-400">{url}</p>
                 ))}
               </div>
