@@ -49,7 +49,7 @@ async def create_checkout(
     customer_id = sc.stripe_customer_id if sc else None
 
     if not customer_id:
-        customer = stripe.customers.create(
+        customer = stripe.Customer.create(
             email=current_user.email,
             metadata={"user_id": current_user.id},
         )
@@ -57,7 +57,7 @@ async def create_checkout(
         db.add(StripeCustomer(user_id=current_user.id, stripe_customer_id=customer_id))
         await db.commit()
 
-    session = stripe.checkout.sessions.create(
+    session = stripe.checkout.Session.create(
         customer=customer_id,
         client_reference_id=current_user.id,
         mode="subscription",
@@ -102,7 +102,7 @@ async def stripe_webhook(request: Request, db: AsyncSession = Depends(get_db)):
         user_id = obj.get("client_reference_id")
         sub_id = obj.get("subscription")
         if user_id and sub_id:
-            sub = stripe.subscriptions.retrieve(sub_id)
+            sub = stripe.Subscription.retrieve(sub_id)
             plan = sub.metadata.get("plan", "beginner")
             await _upsert_plan(db, user_id,
                 plan=plan,
@@ -148,7 +148,7 @@ async def billing_portal(
     if not sc:
         raise HTTPException(status_code=404, detail="No billing account found")
 
-    portal = stripe.billing_portal.sessions.create(
+    portal = stripe.billing_portal.Session.create(
         customer=sc.stripe_customer_id,
         return_url=f"{FRONTEND_URL}/dashboard/billing",
     )
