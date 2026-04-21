@@ -44,6 +44,7 @@ async def get_plan(
         "period_start": plan.period_start.isoformat(),
         "stripe_subscription_id": plan.stripe_subscription_id,
         "subscription_status": plan.subscription_status,
+        "is_admin": current_user.is_admin,
     }
 
 
@@ -65,8 +66,8 @@ async def consume_generation(
         plan.gens_used = 0
         plan.period_start = now
 
-    # Pro is unlimited
-    if plan.plan == "pro":
+    # Admins and pro users are unlimited
+    if current_user.is_admin or plan.plan == "pro":
         plan.gens_used += 1
         await db.commit()
         return {"status": "ok"}
