@@ -132,7 +132,7 @@ function downloadBlob(content: string, filename: string, mime: string) {
 
 interface Props {
   pack: ContentPack;
-  csv: string;
+  csv: string | null;
   json: Record<string, unknown>;
 }
 
@@ -152,12 +152,14 @@ export default function ContentPackView({ pack, csv, json }: Props) {
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <p className="text-sm font-medium text-zinc-300">Content Pack</p>
         <div className="flex gap-2">
+          {csv !== null && (
           <button
-            onClick={() => downloadBlob(csv, "content-pack.csv", "text/csv")}
+            onClick={() => downloadBlob(csv!, "content-pack.csv", "text/csv")}
             className="rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-1.5 text-xs font-medium text-zinc-300 transition hover:bg-zinc-700 hover:text-white"
           >
             ↓ CSV
           </button>
+          )}
           <button
             onClick={() =>
               downloadBlob(JSON.stringify(json, null, 2), "content-pack.json", "application/json")

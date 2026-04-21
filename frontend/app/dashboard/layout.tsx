@@ -157,8 +157,8 @@ export default async function DashboardLayout({ children }: { children: React.Re
       {/* Bottom nav on mobile */}
       <nav className="fixed bottom-0 left-0 right-0 flex border-t border-zinc-800 bg-zinc-900 md:hidden">
         {[
-          { href: "/dashboard/profile", label: "Profile" },
-          { href: "/dashboard/plan", label: "Plan" },
+          { href: "/dashboard/generate", label: "Generate" },
+          { href: "/dashboard/history", label: "History" },
           { href: "/dashboard/billing", label: "Billing" },
           { href: "/dashboard/insights", label: "Insights" },
           { href: "/dashboard/settings", label: "Settings" },

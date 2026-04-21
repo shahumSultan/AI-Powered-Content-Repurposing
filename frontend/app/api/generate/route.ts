@@ -64,11 +64,21 @@ export async function POST(req: NextRequest) {
   const data = await upstream.json();
   if (!upstream.ok) return NextResponse.json(data, { status: upstream.status });
 
-  // Record generation history (best-effort)
+  // Derive a readable title from the first URL
+  const firstUrl = String((bodyObj.urls as string[])[0] ?? "");
+  const title = firstUrl.includes("youtube.com") || firstUrl.includes("youtu.be")
+    ? `YouTube — ${firstUrl}`
+    : firstUrl;
+
+  // Record generation history with full content pack (best-effort)
   fetch(`${BACKEND_URL}/user/record-generation`, {
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-    body: JSON.stringify({ urls: bodyObj.urls }),
+    body: JSON.stringify({
+      urls: bodyObj.urls,
+      title,
+      content_pack: data.export_json,
+    }),
   }).catch(() => {});
 
   return NextResponse.json(data);

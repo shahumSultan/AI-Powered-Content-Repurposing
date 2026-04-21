@@ -57,7 +57,9 @@ class GenerationHistory(Base):
 
     id: Mapped[str] = mapped_column(UUID(as_uuid=False), primary_key=True, default=lambda: str(uuid.uuid4()))
     user_id: Mapped[str] = mapped_column(UUID(as_uuid=False), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    title: Mapped[str | None] = mapped_column(String(500), nullable=True)
     urls: Mapped[list] = mapped_column(JSONB, nullable=False, default=list)
+    content_pack: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
 
     user: Mapped["User"] = relationship("User", back_populates="history")

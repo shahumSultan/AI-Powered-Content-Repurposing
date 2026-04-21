@@ -84,6 +84,8 @@ async def consume_generation(
 
 class RecordHistoryRequest(BaseModel):
     urls: list[str]
+    content_pack: dict | None = None
+    title: str | None = None
 
 
 @router.post("/record-generation")
@@ -92,10 +94,17 @@ async def record_generation(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
-    record = GenerationHistory(user_id=current_user.id, urls=body.urls)
+    title = body.title or (body.urls[0] if body.urls else None)
+    record = GenerationHistory(
+        user_id=current_user.id,
+        urls=body.urls,
+        content_pack=body.content_pack,
+        title=title,
+    )
     db.add(record)
     await db.commit()
-    return {"ok": True}
+    await db.refresh(record)
+    return {"ok": True, "id": record.id}
 
 
 @router.get("/history")
@@ -109,7 +118,39 @@ async def get_history(
         .order_by(GenerationHistory.created_at.desc())
     )
     rows = result.scalars().all()
-    return [{"urls": r.urls, "created_at": r.created_at.isoformat()} for r in rows]
+    return [
+        {
+            "id": r.id,
+            "title": r.title,
+            "urls": r.urls,
+            "created_at": r.created_at.isoformat(),
+            "has_content": r.content_pack is not None,
+        }
+        for r in rows
+    ]
+
+
+@router.get("/history/{record_id}")
+async def get_history_item(
+    record_id: str,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    result = await db.execute(
+        select(GenerationHistory)
+        .where(GenerationHistory.id == record_id)
+        .where(GenerationHistory.user_id == current_user.id)
+    )
+    record = result.scalar_one_or_none()
+    if not record:
+        raise HTTPException(status_code=404, detail="Not found")
+    return {
+        "id": record.id,
+        "title": record.title,
+        "urls": record.urls,
+        "content_pack": record.content_pack,
+        "created_at": record.created_at.isoformat(),
+    }
 
 
 # ── Settings ──────────────────────────────────────────────────────────────────
