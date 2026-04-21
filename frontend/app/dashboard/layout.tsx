@@ -5,6 +5,76 @@ import { signOut } from "@/app/auth/actions";
 import DashboardNav from "@/components/dashboard/DashboardNav";
 import type { AuthUser } from "@/lib/auth";
 
+interface PlanData {
+  plan: string;
+  gens_used: number;
+  gens_limit: number;
+  subscription_status: string | null;
+  is_admin: boolean;
+}
+
+function PlanBadge({ data }: { data: PlanData | null }) {
+  if (!data) return null;
+
+  const { plan, gens_used, gens_limit, is_admin } = data;
+
+  if (is_admin) {
+    return (
+      <div className="mx-3 mb-3 flex items-center gap-1.5 rounded-lg border border-purple-500/20 bg-purple-500/10 px-3 py-2 text-xs font-medium text-purple-400">
+        <svg className="h-3 w-3" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" />
+        </svg>
+        Admin — unlimited
+      </div>
+    );
+  }
+
+  if (plan === "pro" || plan === "beginner") {
+    return (
+      <div className="mx-3 mb-3 flex items-center gap-1.5 rounded-lg border border-green-500/20 bg-green-500/10 px-3 py-2 text-xs font-medium text-green-400 capitalize">
+        <svg className="h-3 w-3" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" />
+        </svg>
+        {plan} plan
+      </div>
+    );
+  }
+
+  const remaining = Math.max(0, gens_limit - gens_used);
+  const pct = gens_limit > 0 ? Math.min(100, (gens_used / gens_limit) * 100) : 100;
+  const exhausted = remaining === 0;
+
+  return (
+    <Link
+      href="/dashboard/billing"
+      className={`mx-3 mb-3 block rounded-lg border px-3 py-2 text-xs transition-colors ${
+        exhausted
+          ? "border-red-500/20 bg-red-500/10 text-red-400 hover:bg-red-500/20"
+          : "border-amber-500/20 bg-amber-500/10 text-amber-400 hover:bg-amber-500/20"
+      }`}
+    >
+      <div className="mb-1.5 flex items-center justify-between font-medium">
+        <span className="flex items-center gap-1.5">
+          <svg className="h-3 w-3" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" />
+          </svg>
+          {exhausted ? "Limit reached" : "Free tier"}
+        </span>
+        <span>{remaining}/{gens_limit} left</span>
+      </div>
+      <div className="h-1 w-full overflow-hidden rounded-full bg-zinc-700">
+        <div
+          className={`h-full rounded-full transition-all ${exhausted ? "bg-red-500" : "bg-amber-500"}`}
+          style={{ width: `${pct}%` }}
+        />
+      </div>
+      <p className="mt-1.5 text-[10px] opacity-70">
+        {exhausted ? "Upgrade to keep generating →" : "Upgrade for unlimited access →"}
+      </p>
+    </Link>
+  );
+}
+
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const res = await apiFetch("/auth/me");
   if (!res.ok) redirect("/auth/login");
@@ -13,6 +83,14 @@ export default async function DashboardLayout({ children }: { children: React.Re
   const displayName = user.full_name || user.email || "Account";
   const initial = displayName[0].toUpperCase();
   const email = user.email;
+
+  let planData: PlanData | null = null;
+  try {
+    const planRes = await apiFetch("/user/plan");
+    if (planRes.ok) planData = await planRes.json();
+  } catch {
+    // non-fatal — badge simply won't render
+  }
 
   return (
     <div className="min-h-screen bg-zinc-950">
@@ -58,6 +136,8 @@ export default async function DashboardLayout({ children }: { children: React.Re
           <div className="flex-1 px-3 py-4">
             <DashboardNav />
           </div>
+
+          <PlanBadge data={planData} />
 
           <div className="border-t border-zinc-800 px-5 py-4">
             <form action={signOut}>
