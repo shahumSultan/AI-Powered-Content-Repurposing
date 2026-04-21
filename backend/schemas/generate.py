@@ -1,8 +1,17 @@
-from pydantic import BaseModel, HttpUrl
+from pydantic import BaseModel, HttpUrl, field_validator
 
 
 class GenerateRequest(BaseModel):
     urls: list[HttpUrl]
+
+    @field_validator("urls")
+    @classmethod
+    def validate_urls(cls, v):
+        if not v:
+            raise ValueError("At least one URL is required")
+        if len(v) > 5:
+            raise ValueError("Maximum 5 URLs per request")
+        return v
 
 
 class Hook(BaseModel):

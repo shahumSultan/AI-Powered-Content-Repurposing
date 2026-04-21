@@ -1,4 +1,6 @@
-from fastapi import APIRouter, Depends, HTTPException
+import re
+
+from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel, EmailStr
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -6,9 +8,20 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from core.database import get_db
 from core.deps import get_current_user
 from core.security import create_token, hash_password, verify_password
+from core.limiter import limiter
 from models import User
 
 router = APIRouter(prefix="/auth", tags=["auth"])
+
+_PASSWORD_RE = re.compile(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$')
+
+
+def _validate_password(password: str) -> None:
+    if not _PASSWORD_RE.match(password):
+        raise HTTPException(
+            status_code=400,
+            detail="Password must be at least 8 characters and contain uppercase, lowercase, and a number",
+        )
 
 
 # ── Schemas ───────────────────────────────────────────────────────────────────
@@ -46,13 +59,13 @@ def _user_dict(user: User) -> dict:
 # ── Endpoints ─────────────────────────────────────────────────────────────────
 
 @router.post("/register", response_model=TokenResponse)
-async def register(body: RegisterRequest, db: AsyncSession = Depends(get_db)):
+@limiter.limit("5/minute")
+async def register(request: Request, body: RegisterRequest, db: AsyncSession = Depends(get_db)):
+    _validate_password(body.password)
+
     existing = await db.execute(select(User).where(User.email == body.email))
     if existing.scalar_one_or_none():
         raise HTTPException(status_code=409, detail="Email already registered")
-
-    if len(body.password) < 8:
-        raise HTTPException(status_code=400, detail="Password must be at least 8 characters")
 
     user = User(
         email=body.email,
@@ -68,12 +81,15 @@ async def register(body: RegisterRequest, db: AsyncSession = Depends(get_db)):
 
 
 @router.post("/login", response_model=TokenResponse)
-async def login(body: LoginRequest, db: AsyncSession = Depends(get_db)):
+@limiter.limit("10/minute")
+async def login(request: Request, body: LoginRequest, db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(User).where(User.email == body.email))
     user = result.scalar_one_or_none()
 
-    if not user or not verify_password(body.password, user.password_hash):
-        raise HTTPException(status_code=401, detail="Invalid email or password")
+    # Always run verify_password to prevent timing-based user enumeration
+    password_ok = verify_password(body.password, user.password_hash) if user else False
+    if not user or not password_ok:
+        raise HTTPException(status_code=401, detail="Invalid credentials")
 
     token = create_token(user.id, user.email, user.full_name)
     return TokenResponse(access_token=token, user=_user_dict(user))

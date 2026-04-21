@@ -2,16 +2,11 @@ import { jwtVerify } from "jose";
 import { NextRequest, NextResponse } from "next/server";
 import { AUTH_COOKIE } from "@/lib/auth";
 
-async function sha256hex(text: string): Promise<string> {
-  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));
-  return Array.from(new Uint8Array(buf))
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("");
-}
-
 async function isValidToken(token: string): Promise<boolean> {
+  const raw = process.env.JWT_SECRET;
+  if (!raw) return false;
   try {
-    const secret = new TextEncoder().encode(process.env.JWT_SECRET ?? "dev-secret-change-in-production");
+    const secret = new TextEncoder().encode(raw);
     await jwtVerify(token, secret);
     return true;
   } catch {
@@ -21,6 +16,16 @@ async function isValidToken(token: string): Promise<boolean> {
 
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
+
+  // Enforce HTTPS in production
+  if (
+    process.env.NODE_ENV === "production" &&
+    req.headers.get("x-forwarded-proto") === "http"
+  ) {
+    const url = req.nextUrl.clone();
+    url.protocol = "https:";
+    return NextResponse.redirect(url, 301);
+  }
 
   // ── Dashboard protection ───────────────────────────────────────────────────
   if (pathname.startsWith("/dashboard")) {
@@ -35,13 +40,16 @@ export async function middleware(req: NextRequest) {
   if (pathname.startsWith("/admin") && pathname !== "/admin/login") {
     const token = req.cookies.get("admin_token")?.value;
     const expected = process.env.ADMIN_PASSWORD ?? "";
-    const expectedHash = await sha256hex(expected);
-    if (!token || token !== expectedHash) {
+    if (!token || !expected || token !== expected) {
       return NextResponse.redirect(new URL("/admin/login", req.url));
     }
   }
 
-  return NextResponse.next();
+  const response = NextResponse.next();
+  response.headers.set("X-Content-Type-Options", "nosniff");
+  response.headers.set("X-Frame-Options", "DENY");
+  response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
+  return response;
 }
 
 export const config = {

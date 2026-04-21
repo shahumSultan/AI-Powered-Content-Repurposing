@@ -11,15 +11,12 @@ from services.exporter import to_csv
 from services.generator import generate_content_pack
 from services.ranker import rank
 from services.utils import extract_video_id
+from core.ssrf import assert_safe_url
 
 router = APIRouter(prefix="/generate", tags=["generate"])
 
 _ytt_api = YouTubeTranscriptApi()
 
-
-# ---------------------------------------------------------------------------
-# Internal ingestion helpers (no HTTP round-trip)
-# ---------------------------------------------------------------------------
 
 def _is_youtube(url: str) -> bool:
     host = urlparse(url).hostname or ""
@@ -34,7 +31,7 @@ def _extract_video_id(url: str) -> str:
 
 
 def _ingest_youtube(url: str) -> tuple[str, list[TranscriptSegment]]:
-    """Return (full_text, segments). Raises ValueError on failure."""
+    assert_safe_url(url)
     video_id = _extract_video_id(url)
     try:
         raw = _ytt_api.fetch(video_id)
@@ -54,7 +51,7 @@ def _ingest_youtube(url: str) -> tuple[str, list[TranscriptSegment]]:
 
 
 def _ingest_blog(url: str) -> str:
-    """Return cleaned article text. Raises ValueError on failure."""
+    assert_safe_url(url)
     downloaded = trafilatura.fetch_url(url)
     if downloaded is None:
         raise ValueError("Failed to fetch URL")
@@ -63,10 +60,6 @@ def _ingest_blog(url: str) -> str:
         raise ValueError("Could not extract article text from URL")
     return text
 
-
-# ---------------------------------------------------------------------------
-# Endpoint
-# ---------------------------------------------------------------------------
 
 @router.post("", response_model=GenerateResponse)
 def generate(

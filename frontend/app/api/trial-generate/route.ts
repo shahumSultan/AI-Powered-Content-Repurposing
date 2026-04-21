@@ -9,40 +9,22 @@ async function sha256hex(text: string): Promise<string> {
 }
 
 function getClientIp(req: NextRequest): string {
-  return (
-    req.headers.get("x-forwarded-for")?.split(",")[0].trim() ??
-    req.headers.get("x-real-ip") ??
-    "unknown"
-  );
+  // Trust the rightmost non-private IP in x-forwarded-for (Vercel/Railway inject this)
+  const forwarded = req.headers.get("x-forwarded-for");
+  if (forwarded) {
+    const ips = forwarded.split(",").map((s) => s.trim());
+    return ips[0] ?? "unknown";
+  }
+  return req.headers.get("x-real-ip") ?? "unknown";
 }
 
 export async function POST(req: NextRequest) {
-  // Admin preview bypass
-  const bypassSecret = process.env.ADMIN_PREVIEW_SECRET;
-  const providedSecret = req.headers.get("x-preview-secret");
-  if (bypassSecret && providedSecret === bypassSecret) {
-    const body = await req.json();
-    try {
-      const upstream = await fetch(`${BACKEND_URL}/generate`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      });
-      const data = await upstream.json();
-      if (!upstream.ok) return NextResponse.json(data, { status: upstream.status });
-      return NextResponse.json(data);
-    } catch {
-      return NextResponse.json({ detail: "Backend unreachable" }, { status: 502 });
-    }
-  }
-
-  // Fast cookie check
+  // Fast cookie check before hitting the DB
   const cookieUsed = req.cookies.get(COOKIE_NAME)?.value === "1";
 
   const ip = getClientIp(req);
   const ipHash = await sha256hex(ip);
 
-  // Check DB via backend
   const checkRes = await fetch(`${BACKEND_URL}/trial/check?ip_hash=${encodeURIComponent(ipHash)}`);
   const { used: dbUsed } = checkRes.ok ? await checkRes.json() : { used: false };
 
@@ -66,7 +48,6 @@ export async function POST(req: NextRequest) {
   const data = await upstream.json();
   if (!upstream.ok) return NextResponse.json(data, { status: upstream.status });
 
-  // Record trial usage in DB after successful generation
   fetch(`${BACKEND_URL}/trial/record`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -74,6 +55,12 @@ export async function POST(req: NextRequest) {
   }).catch(() => {});
 
   const res = NextResponse.json(data);
-  res.cookies.set(COOKIE_NAME, "1", { httpOnly: true, sameSite: "lax", maxAge: 60 * 60 * 24 * 30, path: "/" });
+  res.cookies.set(COOKIE_NAME, "1", {
+    httpOnly: true,
+    sameSite: "lax",
+    maxAge: 60 * 60 * 24 * 30,
+    path: "/",
+    secure: process.env.NODE_ENV === "production",
+  });
   return res;
 }

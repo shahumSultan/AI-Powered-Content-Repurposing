@@ -1,18 +1,22 @@
 """
 User plan, settings, history, and quota management.
 """
+import json
 from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from core.crypto import decrypt, encrypt
 from core.database import get_db
 from core.deps import get_current_user
 from models import GenerationHistory, User, UserPlan, UserSettings
 
 router = APIRouter(prefix="/user", tags=["user"])
+
+_MAX_CONTENT_PACK_BYTES = 500_000  # 500 KB
 
 
 # ── Plan ──────────────────────────────────────────────────────────────────────
@@ -34,9 +38,6 @@ async def get_plan(
     db: AsyncSession = Depends(get_db),
 ):
     plan = await _get_or_create_plan(current_user, db)
-    stripe_res = await db.execute(
-        select(UserPlan.stripe_subscription_id).where(UserPlan.user_id == current_user.id)
-    )
     return {
         "plan": plan.plan,
         "gens_used": plan.gens_used,
@@ -55,18 +56,15 @@ async def consume_generation(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
-    """Atomically check and increment generation quota. Returns {"status": "ok"} or 429."""
     plan = await _get_or_create_plan(current_user, db)
 
     now = datetime.now(timezone.utc)
 
-    # Reset monthly window if 30 days have passed
     delta = now - plan.period_start.replace(tzinfo=timezone.utc)
     if delta.days >= 30:
         plan.gens_used = 0
         plan.period_start = now
 
-    # Admins and pro users are unlimited
     if current_user.is_admin or plan.plan == "pro":
         plan.gens_used += 1
         await db.commit()
@@ -86,6 +84,20 @@ class RecordHistoryRequest(BaseModel):
     urls: list[str]
     content_pack: dict | None = None
     title: str | None = None
+
+    @field_validator("content_pack")
+    @classmethod
+    def limit_size(cls, v):
+        if v and len(json.dumps(v)) > _MAX_CONTENT_PACK_BYTES:
+            raise ValueError("Content pack too large (max 500 KB)")
+        return v
+
+    @field_validator("urls")
+    @classmethod
+    def limit_urls(cls, v):
+        if len(v) > 5:
+            raise ValueError("Maximum 5 URLs")
+        return v
 
 
 @router.post("/record-generation")
@@ -171,8 +183,8 @@ async def get_settings(
     if not s:
         return {"groq_api_key": None, "openai_api_key": None, "preferred_provider": "groq"}
     return {
-        "groq_api_key": s.groq_api_key,
-        "openai_api_key": s.openai_api_key,
+        "groq_api_key": decrypt(s.groq_api_key),
+        "openai_api_key": decrypt(s.openai_api_key),
         "preferred_provider": s.preferred_provider,
     }
 
@@ -185,15 +197,17 @@ async def save_settings(
 ):
     result = await db.execute(select(UserSettings).where(UserSettings.user_id == current_user.id))
     s = result.scalar_one_or_none()
+    encrypted_groq = encrypt(body.groq_api_key)
+    encrypted_openai = encrypt(body.openai_api_key)
     if s:
-        s.groq_api_key = body.groq_api_key
-        s.openai_api_key = body.openai_api_key
+        s.groq_api_key = encrypted_groq
+        s.openai_api_key = encrypted_openai
         s.preferred_provider = body.preferred_provider
     else:
         s = UserSettings(
             user_id=current_user.id,
-            groq_api_key=body.groq_api_key,
-            openai_api_key=body.openai_api_key,
+            groq_api_key=encrypted_groq,
+            openai_api_key=encrypted_openai,
             preferred_provider=body.preferred_provider,
         )
         db.add(s)

@@ -2,6 +2,7 @@ import logging
 
 import stripe
 from fastapi import APIRouter, Depends, Header, HTTPException, Request, status
+from core.limiter import limiter
 from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -84,6 +85,7 @@ async def _upsert_plan(db: AsyncSession, user_id: str, **kwargs):
 
 
 @router.post("/webhook", status_code=status.HTTP_200_OK)
+@limiter.limit("120/minute")
 async def stripe_webhook(request: Request, db: AsyncSession = Depends(get_db)):
     body = await request.body()
     signature = request.headers.get("stripe-signature")

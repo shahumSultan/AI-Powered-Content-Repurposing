@@ -2,6 +2,7 @@ import json
 import trafilatura
 from fastapi import APIRouter, HTTPException
 from schemas.ingest import BlogIngestResponse, IngestRequest
+from core.ssrf import assert_safe_url
 
 router = APIRouter(prefix="/ingest", tags=["ingest"])
 
@@ -9,6 +10,11 @@ router = APIRouter(prefix="/ingest", tags=["ingest"])
 @router.post("/blog", response_model=BlogIngestResponse)
 def ingest_blog(body: IngestRequest) -> BlogIngestResponse:
     url = str(body.url)
+
+    try:
+        assert_safe_url(url)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
 
     downloaded = trafilatura.fetch_url(url)
     if downloaded is None:
