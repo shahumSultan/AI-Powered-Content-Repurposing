@@ -17,7 +17,7 @@ export default function EditNameForm({ currentName }: { currentName: string }) {
           name="name"
           required
           defaultValue={currentName}
-          className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-4 py-2.5 text-sm text-zinc-100 outline-none transition focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20"
+          className="w-full rounded-lg border border-cf-violet/25 bg-cf-panel-alt px-4 py-2.5 text-sm text-zinc-100 outline-none transition focus:border-cf-violet focus:ring-2 focus:ring-cf-violet/20"
         />
       </div>
 
@@ -32,7 +32,7 @@ export default function EditNameForm({ currentName }: { currentName: string }) {
         <button
           type="submit"
           disabled={pending}
-          className="rounded-lg bg-violet-600 px-5 py-2 text-sm font-semibold text-white transition hover:bg-violet-500 disabled:opacity-50"
+          className="btn-primary rounded-lg px-5 py-2 text-sm font-semibold text-white disabled:opacity-50"
         >
           {pending ? "Saving…" : "Save changes"}
         </button>

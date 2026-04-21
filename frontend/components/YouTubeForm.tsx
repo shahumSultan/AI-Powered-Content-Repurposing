@@ -41,13 +41,13 @@ export default function YouTubeForm() {
           value={url}
           onChange={(e) => setUrl(e.target.value)}
           placeholder="https://youtube.com/watch?v=..."
-          className="flex-1 rounded-lg border border-zinc-700 bg-zinc-800 px-4 py-2.5 text-sm text-zinc-100 placeholder-zinc-500 outline-none transition focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20"
+          className="flex-1 rounded-lg border border-cf-violet/25 bg-cf-panel-alt px-4 py-2.5 text-sm text-zinc-100 placeholder-zinc-500 outline-none transition focus:border-cf-violet focus:ring-2 focus:ring-cf-violet/20"
           required
         />
         <button
           type="submit"
           disabled={loading}
-          className="rounded-lg bg-violet-600 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-violet-500 disabled:cursor-not-allowed disabled:opacity-50"
+          className="btn-primary rounded-lg px-5 py-2.5 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-50"
         >
           {loading ? (
             <span className="flex items-center gap-2">
@@ -70,10 +70,10 @@ export default function YouTubeForm() {
       )}
 
       {result && (
-        <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4">
+        <div className="rounded-lg border border-cf-violet/14 bg-cf-panel p-4">
           <div className="mb-3 flex items-center justify-between">
             <p className="text-xs text-zinc-500">
-              Video ID: <span className="font-mono text-violet-400">{result.video_id}</span>
+              Video ID: <span className="font-mono text-cf-cyan">{result.video_id}</span>
             </p>
             <p className="text-xs text-zinc-500">
               {result.transcript.length} segments
@@ -81,8 +81,8 @@ export default function YouTubeForm() {
           </div>
           <div className="max-h-96 space-y-1 overflow-y-auto pr-1">
             {result.transcript.map((seg, i) => (
-              <div key={i} className="flex gap-3 rounded-md px-2 py-1.5 hover:bg-zinc-800/50">
-                <span className="mt-0.5 shrink-0 rounded bg-zinc-800 px-1.5 py-0.5 font-mono text-xs text-violet-400">
+              <div key={i} className="flex gap-3 rounded-md px-2 py-1.5 hover:bg-cf-panel-alt/50">
+                <span className="mt-0.5 shrink-0 rounded bg-cf-panel-alt px-1.5 py-0.5 font-mono text-xs text-cf-violet">
                   {formatTime(seg.start)}
                 </span>
                 <p className="text-sm leading-relaxed text-zinc-300">{seg.text}</p>

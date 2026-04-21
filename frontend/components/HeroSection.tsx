@@ -9,12 +9,12 @@ export default function HeroSection() {
       {/* Subtle grid + noise texture */}
       <div className="hero-bg" aria-hidden="true" />
 
-      {/* Warm ambient glow — single, restrained */}
+      {/* Violet ambient glow */}
       <div
         aria-hidden="true"
         className="pointer-events-none absolute -top-32 -right-32 h-[600px] w-[600px] rounded-full opacity-20"
         style={{
-          background: "radial-gradient(circle, rgba(249,115,22,0.3) 0%, transparent 70%)",
+          background: "radial-gradient(circle, rgba(124,92,252,0.35) 0%, transparent 70%)",
           filter: "blur(60px)",
         }}
       />
@@ -22,9 +22,9 @@ export default function HeroSection() {
       {/* Content — left-aligned on desktop */}
       <div className="relative z-10 mx-auto w-full max-w-6xl px-6">
         <div className="max-w-3xl">
-          {/* Eyebrow — no animated dot, just a clean label */}
+          {/* Eyebrow */}
           <AnimateOnScroll delay="0ms">
-            <p className="mb-6 text-xs font-semibold uppercase tracking-[0.2em] text-orange-400">
+            <p className="mb-6 text-xs font-semibold uppercase tracking-[0.2em] text-cf-violet">
               AI Content Repurposing Engine
             </p>
           </AnimateOnScroll>
@@ -59,13 +59,13 @@ export default function HeroSection() {
 
           {/* Mini stats strip */}
           <AnimateOnScroll delay="320ms">
-            <div className="mt-10 flex flex-wrap items-center gap-x-8 gap-y-3 border-t border-white/5 pt-8">
+            <div className="mt-10 flex flex-wrap items-center gap-x-8 gap-y-3 border-t border-cf-violet/14 pt-8">
               {[
                 { value: "15", label: "posts per pack" },
                 { value: "< 60s", label: "generation time" },
               ].map(({ value, label }) => (
                 <div key={label} className="flex items-baseline gap-2">
-                  <span className="display-font text-2xl font-bold text-orange-400">{value}</span>
+                  <span className="display-font text-2xl font-bold text-cf-cyan">{value}</span>
                   <span className="text-sm text-zinc-500">{label}</span>
                 </div>
               ))}

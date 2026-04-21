@@ -12,7 +12,7 @@ function StatusDot({ status }: { status: Status }) {
         status === "ok"
           ? "inline-block h-2.5 w-2.5 rounded-full bg-emerald-400"
           : status === "loading"
-          ? "inline-block h-2.5 w-2.5 animate-pulse rounded-full bg-amber-400"
+          ? "inline-block h-2.5 w-2.5 animate-pulse rounded-full bg-cf-cyan"
           : "inline-block h-2.5 w-2.5 rounded-full bg-red-500"
       }
     />
@@ -59,7 +59,7 @@ export default function StatusCard() {
   ];
 
   return (
-    <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-6">
+    <div className="rounded-xl border border-cf-violet/14 bg-cf-panel p-6">
       <div className="mb-4 flex items-center justify-between">
         <h2 className="text-sm font-semibold text-zinc-300">Backend Status</h2>
         <button

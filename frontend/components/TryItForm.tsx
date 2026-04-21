@@ -66,9 +66,9 @@ export default function TryItForm() {
 
   if (status === "limit_reached") {
     return (
-      <div className="rounded-xl border border-orange-500/20 bg-orange-950/20 p-8 text-center">
-        <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-orange-900/40">
-          <svg className="h-6 w-6 text-orange-400" fill="none" stroke="currentColor" strokeWidth={1.75} viewBox="0 0 24 24">
+      <div className="rounded-xl border border-cf-violet/20 bg-cf-violet/8 p-8 text-center">
+        <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-cf-violet/20">
+          <svg className="h-6 w-6 text-cf-violet" fill="none" stroke="currentColor" strokeWidth={1.75} viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z" />
           </svg>
         </div>
@@ -103,7 +103,7 @@ export default function TryItForm() {
             onChange={(e) => setUrlsText(e.target.value)}
             placeholder={GENERATE_PLACEHOLDER}
             rows={4}
-            className="w-full resize-none rounded-lg border border-zinc-700 bg-zinc-800 px-4 py-3 text-sm text-zinc-100 placeholder-zinc-500 outline-none transition focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20"
+            className="w-full resize-none rounded-lg border border-cf-violet/25 bg-cf-panel-alt px-4 py-3 text-sm text-zinc-100 placeholder-zinc-500 outline-none transition focus:border-cf-violet focus:ring-2 focus:ring-cf-violet/20"
             required
           />
           <button
@@ -135,9 +135,9 @@ export default function TryItForm() {
       {status === "done" && result && (
         <div className="space-y-4">
           {/* Soft signup banner */}
-          <div className="flex items-center justify-between rounded-lg border border-orange-500/20 bg-orange-950/20 px-4 py-3">
+          <div className="flex items-center justify-between rounded-lg border border-cf-violet/20 bg-cf-violet/8 px-4 py-3">
             <p className="text-sm text-zinc-300">
-              Enjoying it? Sign up for <span className="font-semibold text-orange-300">5 free packs/month</span>
+              Enjoying it? Sign up for <span className="font-semibold text-cf-cyan">5 free packs/month</span>
             </p>
             <Link
               href="/auth/signup"

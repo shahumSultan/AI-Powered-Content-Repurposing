@@ -50,11 +50,11 @@ const DELAYS = ["0ms", "100ms", "200ms"];
 
 export default function PricingSection() {
   return (
-    <section id="pricing" className="bg-zinc-950 px-6 py-24">
+    <section id="pricing" className="bg-cf-bg px-6 py-24">
       {/* Section header */}
       <div className="mx-auto mb-16 max-w-2xl text-center">
         <AnimateOnScroll delay="0ms">
-          <p className="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-orange-400">
+          <p className="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-cf-violet">
             Pricing
           </p>
           <h2 className="display-font text-3xl font-extrabold tracking-tight text-zinc-100 md:text-4xl">
@@ -71,13 +71,13 @@ export default function PricingSection() {
             <div
               className={
                 tier.popular
-                  ? "card-glow pricing-popular flex flex-col rounded-2xl border p-8 bg-zinc-900 flex-1"
-                  : "card-glow flex flex-col rounded-2xl border border-white/5 bg-zinc-900/80 p-8 flex-1"
+                  ? "card-glow pricing-popular flex flex-col rounded-2xl border p-8 bg-cf-panel flex-1"
+                  : "card-glow flex flex-col rounded-2xl border border-cf-violet/14 bg-cf-panel/80 p-8 flex-1"
               }
             >
               {/* Popular badge */}
               {tier.popular && (
-                <div className="mb-4 self-start rounded-full bg-orange-500/15 px-3 py-1 text-xs font-semibold text-orange-400">
+                <div className="mb-4 self-start rounded-full bg-cf-violet/15 px-3 py-1 text-xs font-semibold text-cf-violet">
                   Most Popular
                 </div>
               )}
@@ -97,7 +97,7 @@ export default function PricingSection() {
                 {tier.features.map((feature) => (
                   <li key={feature} className="flex items-start gap-2.5 text-sm text-zinc-400">
                     <svg
-                      className="mt-0.5 h-4 w-4 shrink-0 text-orange-400"
+                      className="mt-0.5 h-4 w-4 shrink-0 text-cf-cyan"
                       fill="currentColor"
                       viewBox="0 0 20 20"
                     >

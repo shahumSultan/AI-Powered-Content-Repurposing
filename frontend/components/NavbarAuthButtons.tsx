@@ -22,7 +22,7 @@ export default function NavbarAuthButtons() {
   }, []);
 
   if (user === undefined) {
-    return <div className="h-9 w-24 animate-pulse rounded-lg bg-zinc-800" />;
+    return <div className="h-9 w-24 animate-pulse rounded-lg bg-cf-panel-alt" />;
   }
 
   if (user) {
@@ -36,7 +36,7 @@ export default function NavbarAuthButtons() {
           {firstName}
         </Link>
         <Link href="/dashboard">
-          <div className="flex h-7 w-7 items-center justify-center rounded-full bg-orange-600 text-xs font-bold text-white transition hover:bg-orange-500">
+          <div className="flex h-7 w-7 items-center justify-center rounded-full bg-cf-violet text-xs font-bold text-white transition hover:bg-cf-violet/80">
             {initial}
           </div>
         </Link>

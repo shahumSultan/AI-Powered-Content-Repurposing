@@ -10,7 +10,7 @@ export default function TryItSection() {
         className="pointer-events-none absolute inset-0 z-0"
         style={{
           background:
-            "radial-gradient(ellipse 80% 60% at 50% 40%, rgba(249,115,22,0.06) 0%, transparent 70%)",
+            "radial-gradient(ellipse 80% 60% at 50% 40%, rgba(124,92,252,0.07) 0%, transparent 70%)",
         }}
       />
 
@@ -18,7 +18,7 @@ export default function TryItSection() {
         {/* Section header */}
         <div className="mb-12 text-center">
           <AnimateOnScroll delay="0ms" className="flex justify-center">
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-400/30 bg-amber-400/10 px-3 py-1 text-xs font-medium text-amber-400">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-cf-cyan/30 bg-cf-cyan/10 px-3 py-1 text-xs font-medium text-cf-cyan">
               Live Demo
             </span>
           </AnimateOnScroll>
@@ -36,15 +36,15 @@ export default function TryItSection() {
         {/* Product UI frame */}
         <AnimateOnScroll delay="200ms">
           <div
-            className="rounded-2xl border border-white/5 bg-zinc-900/80 p-2 backdrop-blur-sm"
-            style={{ boxShadow: "0 25px 80px rgba(249,115,22,0.08)" }}
+            className="rounded-2xl border border-cf-violet/14 bg-cf-panel/80 p-2 backdrop-blur-sm"
+            style={{ boxShadow: "0 25px 80px rgba(124,92,252,0.1)" }}
           >
             {/* Fake browser chrome */}
-            <div className="mb-2 flex items-center gap-2 rounded-xl bg-zinc-800/60 px-4 py-3">
+            <div className="mb-2 flex items-center gap-2 rounded-xl bg-cf-panel-alt/60 px-4 py-3">
               <div className="h-3 w-3 rounded-full bg-red-500/60" />
-              <div className="h-3 w-3 rounded-full bg-amber-400/60" />
-              <div className="h-3 w-3 rounded-full bg-emerald-500/60" />
-              <div className="ml-4 flex-1 rounded-md bg-zinc-900/80 px-3 py-1 font-mono text-xs text-zinc-600">
+              <div className="h-3 w-3 rounded-full bg-cf-pink/60" />
+              <div className="h-3 w-3 rounded-full bg-cf-cyan/60" />
+              <div className="ml-4 flex-1 rounded-md bg-cf-panel/80 px-3 py-1 font-mono text-xs text-zinc-600">
                 contentflow.ai/generate
               </div>
             </div>

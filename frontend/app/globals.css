@@ -1,30 +1,36 @@
 @import "tailwindcss";
 
 :root {
-  --background: #0a0908;
-  --foreground: #fafaf9;
-  --accent: #f97316;
-  --accent-muted: #f59e0b;
+  --background: #0d0b14;
+  --foreground: #f2f0fa;
+  --accent: #7C5CFC;
+  --accent-secondary: #F050A8;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-cf-bg:        #0d0b14;
+  --color-cf-panel:     #14111f;
+  --color-cf-panel-alt: #1a1628;
+  --color-cf-violet:    #7C5CFC;
+  --color-cf-pink:      #F050A8;
+  --color-cf-cyan:      #00D4C8;
+  --font-sans: var(--font-dm-sans);
+  --font-mono: var(--font-dm-mono);
   --font-display: var(--font-syne);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-geist-sans), Arial, sans-serif;
+  font-family: var(--font-dm-sans), Arial, sans-serif;
 }
 
 /* ─── Display font (Syne) for headings ─── */
 
 .display-font {
-  font-family: var(--font-syne), var(--font-geist-sans), sans-serif;
+  font-family: var(--font-syne), var(--font-dm-sans), sans-serif;
 }
 
 /* ─── Keyframes ─── */
@@ -50,7 +56,7 @@ body {
 /* ─── Hero gradient text ─── */
 
 .hero-gradient-text {
-  background: linear-gradient(135deg, #f97316 0%, #fbbf24 40%, #f97316 70%, #ea580c 100%);
+  background: linear-gradient(135deg, #7C5CFC 0%, #F050A8 50%, #7C5CFC 100%);
   background-size: 200% auto;
   -webkit-background-clip: text;
   background-clip: text;
@@ -71,8 +77,8 @@ body {
   position: absolute;
   inset: 0;
   background-image:
-    linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+    linear-gradient(rgba(124,92,252,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(124,92,252,0.04) 1px, transparent 1px);
   background-size: 64px 64px;
   mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, black 30%, transparent 100%);
 }
@@ -95,40 +101,40 @@ body {
 
 .card-glow:hover {
   transform: translateY(-3px);
-  box-shadow: 0 8px 32px 0 rgba(249, 115, 22, 0.12);
-  border-color: rgba(249, 115, 22, 0.25);
+  box-shadow: 0 8px 32px 0 rgba(124, 92, 252, 0.15);
+  border-color: rgba(124, 92, 252, 0.3);
 }
 
 /* ─── Popular pricing card ─── */
 
 .pricing-popular {
-  border-color: rgba(251, 191, 36, 0.35);
-  box-shadow: 0 0 40px 0 rgba(249, 115, 22, 0.1);
+  border-color: rgba(124, 92, 252, 0.35);
+  box-shadow: 0 0 40px 0 rgba(124, 92, 252, 0.12);
 }
 
 /* ─── CTA button ─── */
 
 .btn-primary {
-  background: var(--accent);
+  background: linear-gradient(135deg, #7C5CFC 0%, #F050A8 100%);
   color: #fff;
-  transition: background 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
+  transition: opacity 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
 }
 
 .btn-primary:hover {
-  background: #ea580c;
-  box-shadow: 0 0 24px 0 rgba(249, 115, 22, 0.45);
+  opacity: 0.88;
+  box-shadow: 0 0 28px 0 rgba(124, 92, 252, 0.5);
   transform: translateY(-1px);
 }
 
 /* Keep btn-gradient as alias for any remaining usages */
 .btn-gradient {
-  background: var(--accent);
-  transition: background 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
+  background: linear-gradient(135deg, #7C5CFC 0%, #F050A8 100%);
+  transition: opacity 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
 }
 
 .btn-gradient:hover {
-  background: #ea580c;
-  box-shadow: 0 0 24px 0 rgba(249, 115, 22, 0.45);
+  opacity: 0.88;
+  box-shadow: 0 0 28px 0 rgba(124, 92, 252, 0.5);
   transform: translateY(-1px);
 }
 
@@ -137,7 +143,7 @@ body {
 .section-divider {
   border: none;
   height: 1px;
-  background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.05), transparent);
+  background: linear-gradient(to right, transparent, rgba(124, 92, 252, 0.12), transparent);
 }
 
 /* ─── Smooth scroll ─── */

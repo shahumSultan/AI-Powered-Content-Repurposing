@@ -32,7 +32,7 @@ export default function HowItWorksSection() {
       {/* Section header */}
       <div className="mx-auto mb-16 max-w-2xl text-center">
         <AnimateOnScroll delay="0ms">
-          <p className="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-orange-400">
+          <p className="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-cf-violet">
             How It Works
           </p>
           <h2 className="display-font text-3xl font-extrabold tracking-tight text-zinc-100 md:text-4xl">
@@ -48,7 +48,7 @@ export default function HowItWorksSection() {
           <AnimateOnScroll key={step.number} delay={DELAYS[i]}>
             <div className="flex flex-col items-start">
               {/* Number bubble */}
-              <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-full border border-orange-500/25 bg-orange-500/8 font-mono text-lg font-bold text-orange-400">
+              <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-full border border-cf-violet/25 bg-cf-violet/8 font-mono text-lg font-bold text-cf-violet">
                 {step.number}
               </div>
               <h3 className="display-font mb-3 text-lg font-bold text-zinc-100">{step.title}</h3>

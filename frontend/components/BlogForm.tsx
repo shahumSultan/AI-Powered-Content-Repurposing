@@ -35,13 +35,13 @@ export default function BlogForm() {
           value={url}
           onChange={(e) => setUrl(e.target.value)}
           placeholder="https://example.com/article"
-          className="flex-1 rounded-lg border border-zinc-700 bg-zinc-800 px-4 py-2.5 text-sm text-zinc-100 placeholder-zinc-500 outline-none transition focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20"
+          className="flex-1 rounded-lg border border-cf-violet/25 bg-cf-panel-alt px-4 py-2.5 text-sm text-zinc-100 placeholder-zinc-500 outline-none transition focus:border-cf-violet focus:ring-2 focus:ring-cf-violet/20"
           required
         />
         <button
           type="submit"
           disabled={loading}
-          className="rounded-lg bg-violet-600 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-violet-500 disabled:cursor-not-allowed disabled:opacity-50"
+          className="btn-primary rounded-lg px-5 py-2.5 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-50"
         >
           {loading ? (
             <span className="flex items-center gap-2">
@@ -64,7 +64,7 @@ export default function BlogForm() {
       )}
 
       {result && (
-        <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-5">
+        <div className="rounded-lg border border-cf-violet/14 bg-cf-panel p-5">
           {result.title && (
             <h2 className="mb-3 text-lg font-semibold text-zinc-100">{result.title}</h2>
           )}

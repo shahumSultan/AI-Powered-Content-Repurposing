@@ -32,7 +32,7 @@ export default function FeaturesSection() {
       {/* Section header */}
       <div className="mx-auto mb-16 max-w-6xl">
         <AnimateOnScroll delay="0ms">
-          <p className="mb-4 text-xs font-semibold uppercase tracking-[0.2em] text-orange-400">
+          <p className="mb-4 text-xs font-semibold uppercase tracking-[0.2em] text-cf-violet">
             What It Does
           </p>
           <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
@@ -47,12 +47,12 @@ export default function FeaturesSection() {
       </div>
 
       {/* Feature rows — alternating editorial layout */}
-      <div className="mx-auto max-w-6xl divide-y divide-white/5">
+      <div className="mx-auto max-w-6xl divide-y divide-cf-violet/10">
         {FEATURES.map((feature, i) => (
           <AnimateOnScroll key={feature.number} delay={DELAYS[i]}>
             <div className="grid grid-cols-1 gap-6 py-12 md:grid-cols-[120px_1fr_240px]">
               {/* Large number */}
-              <div className="display-font text-6xl font-extrabold leading-none text-orange-400/20 md:text-7xl">
+              <div className="display-font text-6xl font-extrabold leading-none text-cf-violet/20 md:text-7xl">
                 {feature.number}
               </div>
 
@@ -68,7 +68,7 @@ export default function FeaturesSection() {
 
               {/* Aside callout */}
               <div className="flex items-center md:justify-end">
-                <p className="rounded-lg border border-white/5 bg-white/[0.03] px-4 py-3 text-xs leading-relaxed text-zinc-500">
+                <p className="rounded-lg border border-cf-violet/14 bg-cf-panel px-4 py-3 text-xs leading-relaxed text-zinc-500">
                   {feature.aside}
                 </p>
               </div>

@@ -83,8 +83,8 @@ export default function DashboardNav() {
             href={item.href}
             className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
               active
-                ? "bg-zinc-800 text-orange-400"
-                : "text-zinc-400 hover:bg-zinc-800/60 hover:text-zinc-100"
+                ? "bg-cf-panel-alt text-cf-violet"
+                : "text-zinc-400 hover:bg-cf-panel-alt/60 hover:text-zinc-100"
             }`}
           >
             {item.icon}

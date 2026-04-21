@@ -35,20 +35,20 @@ export default async function BillingPage({
         </div>
       )}
 
-      <div className="mb-6 flex items-center justify-between rounded-xl border border-zinc-800 bg-zinc-900 p-5">
+      <div className="mb-6 flex items-center justify-between rounded-xl border border-cf-violet/14 bg-cf-panel p-5">
         <div>
           <p className="text-xs font-medium text-zinc-500">Current plan</p>
           <p className="mt-0.5 text-base font-semibold text-zinc-100">{planLabel}</p>
           {subscriptionStatus && subscriptionStatus !== "active" && (
-            <p className="mt-0.5 text-xs text-amber-400 capitalize">{subscriptionStatus}</p>
+            <p className="mt-0.5 text-xs text-cf-cyan capitalize">{subscriptionStatus}</p>
           )}
         </div>
-        <span className={`rounded-full px-3 py-1 text-xs font-medium ${isPro ? "bg-orange-500/15 text-orange-400" : "bg-zinc-800 text-zinc-400"}`}>
+        <span className={`rounded-full px-3 py-1 text-xs font-medium ${isPro ? "bg-cf-violet/15 text-cf-violet" : "bg-cf-panel-alt text-zinc-400"}`}>
           {planPrice} / month
         </span>
       </div>
 
-      <div className="mb-6 rounded-xl border border-zinc-800 bg-zinc-900 p-5">
+      <div className="mb-6 rounded-xl border border-cf-violet/14 bg-cf-panel p-5">
         <h2 className="mb-4 text-sm font-semibold text-zinc-100">{isPro ? "Manage your subscription" : "Upgrade your plan"}</h2>
         {!isPro && (
           <div className="mb-5">
@@ -59,7 +59,7 @@ export default async function BillingPage({
         <StripeButtons isPro={isPro} hasSubscription={hasSubscription} />
       </div>
 
-      <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-5">
+      <div className="rounded-xl border border-cf-violet/14 bg-cf-panel p-5">
         <h2 className="mb-2 text-sm font-semibold text-zinc-100">Payment method</h2>
         {hasSubscription ? (
           <p className="text-sm text-zinc-500">Managed by Stripe. Click &ldquo;Manage Billing&rdquo; above to update your card or view invoices.</p>

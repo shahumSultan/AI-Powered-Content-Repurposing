@@ -44,7 +44,7 @@ export default async function HistoryDetailPage({ params }: { params: Promise<{ 
               href={url}
               target="_blank"
               rel="noopener noreferrer"
-              className="truncate max-w-xs text-xs text-orange-400/80 hover:text-orange-400 transition-colors"
+              className="truncate max-w-xs text-xs text-cf-violet/80 hover:text-cf-violet transition-colors"
             >
               {url}
             </a>
@@ -59,7 +59,7 @@ export default async function HistoryDetailPage({ params }: { params: Promise<{ 
           json={record.content_pack as unknown as Record<string, unknown>}
         />
       ) : (
-        <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-8 text-center">
+        <div className="rounded-xl border border-cf-violet/14 bg-cf-panel p-8 text-center">
           <p className="text-sm text-zinc-500">Content pack data was not saved for this generation.</p>
         </div>
       )}

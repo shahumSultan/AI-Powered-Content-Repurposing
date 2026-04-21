@@ -55,7 +55,7 @@ export default function StripeButtons({ isPro, hasSubscription }: Props) {
         <button
           onClick={handleManageBilling}
           disabled={loading !== null}
-          className="w-full rounded-lg border border-zinc-700 bg-zinc-800 py-2.5 text-sm font-medium text-zinc-300 transition hover:bg-zinc-700 hover:text-white disabled:opacity-50"
+          className="w-full rounded-lg border border-cf-violet/25 bg-cf-panel-alt py-2.5 text-sm font-medium text-zinc-300 transition hover:bg-cf-panel-alt/80 hover:text-white disabled:opacity-50"
         >
           {loading === "portal" ? "Opening portal…" : "Manage Billing →"}
         </button>
@@ -75,7 +75,7 @@ export default function StripeButtons({ isPro, hasSubscription }: Props) {
         <button
           onClick={() => handleUpgrade("beginner")}
           disabled={loading !== null}
-          className="w-full rounded-lg border border-zinc-700 bg-zinc-800 py-2.5 text-sm font-medium text-zinc-400 transition hover:bg-zinc-700 hover:text-white disabled:opacity-50"
+          className="w-full rounded-lg border border-cf-violet/25 bg-cf-panel-alt py-2.5 text-sm font-medium text-zinc-400 transition hover:bg-cf-panel-alt/80 hover:text-white disabled:opacity-50"
         >
           {loading === "beginner" ? "Redirecting to Stripe…" : "Start Beginner plan — $7/month"}
         </button>

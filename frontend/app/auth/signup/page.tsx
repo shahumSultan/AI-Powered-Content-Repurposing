@@ -11,11 +11,11 @@ function SignUpContent() {
   const success = params.get("success") === "1";
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-950 px-4">
-      <div className="w-full max-w-sm rounded-xl border border-zinc-800 bg-zinc-900 p-8 shadow-xl">
+    <div className="flex min-h-screen items-center justify-center bg-cf-bg px-4">
+      <div className="w-full max-w-sm rounded-xl border border-cf-violet/14 bg-cf-panel p-8 shadow-xl">
         {/* Logo */}
         <div className="mb-6 flex items-center gap-2">
-          <div className="flex h-7 w-7 items-center justify-center rounded-md bg-gradient-to-br from-orange-500 to-amber-400">
+          <div className="flex h-7 w-7 items-center justify-center rounded-md bg-gradient-to-br from-cf-violet to-cf-pink">
             <svg viewBox="0 0 20 20" fill="white" className="h-4 w-4">
               <path
                 fillRule="evenodd"
@@ -38,7 +38,7 @@ function SignUpContent() {
             </p>
             <Link
               href="/"
-              className="mt-6 block text-center text-sm text-orange-400 hover:text-orange-300"
+              className="mt-6 block text-center text-sm text-cf-violet hover:text-cf-violet/80"
             >
               Back to ContentFlow →
             </Link>
@@ -52,7 +52,7 @@ function SignUpContent() {
               Already have one?{" "}
               <Link
                 href="/auth/login"
-                className="text-orange-400 hover:text-orange-300"
+                className="text-cf-violet hover:text-cf-violet/80"
               >
                 Sign in
               </Link>
@@ -68,7 +68,7 @@ function SignUpContent() {
                   name="name"
                   required
                   autoFocus
-                  className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-4 py-2.5 text-sm text-zinc-100 outline-none transition focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20"
+                  className="w-full rounded-lg border border-cf-violet/25 bg-cf-panel-alt px-4 py-2.5 text-sm text-zinc-100 outline-none transition focus:border-cf-violet focus:ring-2 focus:ring-cf-violet/20"
                 />
               </div>
               <div>
@@ -79,7 +79,7 @@ function SignUpContent() {
                   type="email"
                   name="email"
                   required
-                  className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-4 py-2.5 text-sm text-zinc-100 outline-none transition focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20"
+                  className="w-full rounded-lg border border-cf-violet/25 bg-cf-panel-alt px-4 py-2.5 text-sm text-zinc-100 outline-none transition focus:border-cf-violet focus:ring-2 focus:ring-cf-violet/20"
                 />
               </div>
               <div>
@@ -91,7 +91,7 @@ function SignUpContent() {
                   name="password"
                   required
                   minLength={8}
-                  className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-4 py-2.5 text-sm text-zinc-100 outline-none transition focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20"
+                  className="w-full rounded-lg border border-cf-violet/25 bg-cf-panel-alt px-4 py-2.5 text-sm text-zinc-100 outline-none transition focus:border-cf-violet focus:ring-2 focus:ring-cf-violet/20"
                 />
               </div>
 

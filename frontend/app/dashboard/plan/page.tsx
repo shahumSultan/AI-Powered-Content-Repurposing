@@ -44,10 +44,10 @@ export default async function PlanPage() {
       <h1 className="mb-1 display-font text-2xl font-bold text-zinc-100">Your Plan</h1>
       <p className="mb-8 text-sm text-zinc-500">You are currently on the {planSubtitle}.</p>
 
-      <div className="mb-6 rounded-xl border border-zinc-800 bg-zinc-900 p-6">
+      <div className="mb-6 rounded-xl border border-cf-violet/14 bg-cf-panel p-6">
         <div className="mb-4 flex items-center justify-between">
           <div>
-            <span className={`inline-block rounded-full px-3 py-1 text-xs font-semibold ${isPro || isBeginner ? "bg-orange-500/15 text-orange-400" : "bg-zinc-800 text-zinc-300"}`}>
+            <span className={`inline-block rounded-full px-3 py-1 text-xs font-semibold ${isPro || isBeginner ? "bg-cf-violet/15 text-cf-violet" : "bg-cf-panel-alt text-zinc-300"}`}>
               {planName}
             </span>
             <p className="mt-2 text-2xl font-bold text-zinc-100">
@@ -63,8 +63,8 @@ export default async function PlanPage() {
               <span>{isTrial ? "Trial generations used" : "Content packs used this month"}</span>
               <span>{gensUsed} / {gensLimit}</span>
             </div>
-            <div className="h-2 w-full overflow-hidden rounded-full bg-zinc-800">
-              <div className="h-full rounded-full bg-orange-500 transition-all" style={{ width: `${usagePct}%` }} />
+            <div className="h-2 w-full overflow-hidden rounded-full bg-cf-panel-alt">
+              <div className="h-full rounded-full bg-cf-violet transition-all" style={{ width: `${usagePct}%` }} />
             </div>
           </div>
         )}
@@ -73,7 +73,7 @@ export default async function PlanPage() {
           {features.map((f) => (
             <li key={f.label} className="flex items-center gap-2.5 text-sm">
               {f.included ? (
-                <svg className="h-4 w-4 shrink-0 text-emerald-400" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                <svg className="h-4 w-4 shrink-0 text-cf-cyan" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
                 </svg>
               ) : (
@@ -88,7 +88,7 @@ export default async function PlanPage() {
       </div>
 
       {!isPro && (
-        <div className="rounded-xl border border-orange-500/20 bg-orange-950/20 p-6">
+        <div className="rounded-xl border border-cf-violet/20 bg-cf-violet/8 p-6">
           <h2 className="mb-1 display-font text-lg font-semibold text-zinc-100">
             {isTrial ? "Subscribe to keep creating" : "Upgrade to Pro — $14/month"}
           </h2>

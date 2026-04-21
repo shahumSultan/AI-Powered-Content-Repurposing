@@ -25,7 +25,7 @@ export default function AdminPage() {
         <form action={logoutAction}>
           <button
             type="submit"
-            className="rounded-lg border border-zinc-800 px-3 py-1.5 text-xs text-zinc-400 transition hover:border-zinc-700 hover:text-zinc-200"
+            className="rounded-lg border border-cf-violet/14 px-3 py-1.5 text-xs text-zinc-400 transition hover:border-cf-violet/25 hover:text-zinc-200"
           >
             Sign out
           </button>

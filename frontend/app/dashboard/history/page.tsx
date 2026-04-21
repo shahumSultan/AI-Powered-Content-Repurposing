@@ -44,9 +44,9 @@ export default async function HistoryPage() {
       </div>
 
       {rows.length === 0 ? (
-        <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-10 text-center">
+        <div className="rounded-xl border border-cf-violet/14 bg-cf-panel p-10 text-center">
           <p className="text-sm text-zinc-500">No generations yet. Head to Generate to create your first content pack.</p>
-          <Link href="/dashboard/generate" className="mt-4 inline-block rounded-lg bg-orange-600 px-5 py-2 text-sm font-semibold text-white hover:bg-orange-500 transition-colors">
+          <Link href="/dashboard/generate" className="btn-primary mt-4 inline-block rounded-lg px-5 py-2 text-sm font-semibold text-white transition-colors">
             Generate →
           </Link>
         </div>
@@ -56,8 +56,8 @@ export default async function HistoryPage() {
             <Link
               key={row.id}
               href={row.has_content ? `/dashboard/history/${row.id}` : "#"}
-              className={`block rounded-xl border border-zinc-800 bg-zinc-900 p-4 transition-colors ${
-                row.has_content ? "hover:border-zinc-700 hover:bg-zinc-800/60" : "opacity-60 cursor-default"
+              className={`block rounded-xl border border-cf-violet/14 bg-cf-panel p-4 transition-colors ${
+                row.has_content ? "hover:border-cf-violet/25 hover:bg-cf-panel-alt/60" : "opacity-60 cursor-default"
               }`}
             >
               <div className="flex items-start justify-between gap-4">
@@ -76,11 +76,11 @@ export default async function HistoryPage() {
                 <div className="flex shrink-0 flex-col items-end gap-1.5">
                   <span className="text-xs text-zinc-500">{timeAgo(row.created_at)}</span>
                   {row.has_content ? (
-                    <span className="rounded-full bg-orange-500/10 px-2 py-0.5 text-[10px] font-medium text-orange-400">
+                    <span className="rounded-full bg-cf-violet/10 px-2 py-0.5 text-[10px] font-medium text-cf-violet">
                       View pack →
                     </span>
                   ) : (
-                    <span className="rounded-full bg-zinc-800 px-2 py-0.5 text-[10px] text-zinc-600">
+                    <span className="rounded-full bg-cf-panel-alt px-2 py-0.5 text-[10px] text-zinc-600">
                       No content saved
                     </span>
                   )}

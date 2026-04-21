@@ -40,7 +40,7 @@ function ApiKeyInput({
   return (
     <div>
       <label className="mb-1.5 block text-sm font-medium text-zinc-300">{label}</label>
-      <div className="flex items-center gap-2 rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 focus-within:border-orange-500/60 focus-within:ring-1 focus-within:ring-orange-500/20">
+      <div className="flex items-center gap-2 rounded-lg border border-cf-violet/25 bg-cf-panel-alt px-3 py-2 focus-within:border-cf-violet/60 focus-within:ring-1 focus-within:ring-cf-violet/20">
         <input
           type={show ? "text" : "password"}
           value={value}
@@ -107,10 +107,10 @@ export default function SettingsPage() {
   if (loading) {
     return (
       <div className="max-w-xl">
-        <div className="h-6 w-32 animate-pulse rounded bg-zinc-800" />
+        <div className="h-6 w-32 animate-pulse rounded bg-cf-panel-alt" />
         <div className="mt-6 space-y-4">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="h-12 animate-pulse rounded-lg bg-zinc-800" />
+            <div key={i} className="h-12 animate-pulse rounded-lg bg-cf-panel-alt" />
           ))}
         </div>
       </div>
@@ -126,7 +126,7 @@ export default function SettingsPage() {
 
       <form onSubmit={handleSave} className="space-y-6">
         {/* Provider preference */}
-        <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-5">
+        <div className="rounded-xl border border-cf-violet/14 bg-cf-panel p-5">
           <p className="mb-3 text-sm font-semibold text-zinc-100">Preferred provider</p>
           <div className="flex gap-3">
             {(["groq", "openai"] as Provider[]).map((p) => (
@@ -136,8 +136,8 @@ export default function SettingsPage() {
                 onClick={() => setProvider(p)}
                 className={`flex-1 rounded-lg border py-2.5 text-sm font-medium capitalize transition ${
                   provider === p
-                    ? "border-orange-500/60 bg-orange-500/10 text-orange-400"
-                    : "border-zinc-700 bg-zinc-800 text-zinc-400 hover:border-zinc-600 hover:text-zinc-200"
+                    ? "border-cf-violet/60 bg-cf-violet/10 text-cf-violet"
+                    : "border-cf-violet/25 bg-cf-panel-alt text-zinc-400 hover:border-cf-violet/40 hover:text-zinc-200"
                 }`}
               >
                 {p === "groq" ? "Groq" : "OpenAI"}
@@ -152,7 +152,7 @@ export default function SettingsPage() {
         </div>
 
         {/* API Keys */}
-        <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-5 space-y-5">
+        <div className="rounded-xl border border-cf-violet/14 bg-cf-panel p-5 space-y-5">
           <p className="text-sm font-semibold text-zinc-100">API keys</p>
 
           <ApiKeyInput

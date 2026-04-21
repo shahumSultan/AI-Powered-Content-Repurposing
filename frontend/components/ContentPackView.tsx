@@ -13,10 +13,10 @@ const SECTION_META: Record<
     accent: { tab: string; border: string; badge: string; number: string };
   }
 > = {
-  hooks:   { label: "Hooks",     icon: "🪝", accent: { tab: "bg-amber-600",    border: "border-amber-800/40",    badge: "bg-amber-900/50 text-amber-400",    number: "text-amber-500"    } },
-  linkedin:{ label: "LinkedIn",  icon: "in", accent: { tab: "bg-blue-600",      border: "border-blue-800/40",      badge: "bg-blue-900/50 text-blue-400",      number: "text-blue-500"     } },
-  ig:      { label: "Instagram", icon: "IG", accent: { tab: "bg-fuchsia-600",   border: "border-fuchsia-800/40",   badge: "bg-fuchsia-900/50 text-fuchsia-400", number: "text-fuchsia-500"  } },
-  shorts:  { label: "Shorts",    icon: "▶",  accent: { tab: "bg-red-600",        border: "border-red-800/40",       badge: "bg-red-900/50 text-red-400",        number: "text-red-500"      } },
+  hooks:   { label: "Hooks",     icon: "🪝", accent: { tab: "bg-cf-cyan",    border: "border-cf-cyan/40",    badge: "bg-cf-cyan/10 text-cf-cyan",    number: "text-cf-cyan"    } },
+  linkedin:{ label: "LinkedIn",  icon: "in", accent: { tab: "bg-cf-violet",   border: "border-cf-violet/40",  badge: "bg-cf-violet/10 text-cf-violet", number: "text-cf-violet"  } },
+  ig:      { label: "Instagram", icon: "IG", accent: { tab: "bg-cf-pink",     border: "border-cf-pink/40",    badge: "bg-cf-pink/10 text-cf-pink",     number: "text-cf-pink"    } },
+  shorts:  { label: "Shorts",    icon: "▶",  accent: { tab: "bg-red-600",      border: "border-red-800/40",    badge: "bg-red-900/50 text-red-400",     number: "text-red-500"    } },
 };
 
 const SECTION_ORDER: SectionKey[] = ["hooks", "linkedin", "ig", "shorts"];
@@ -40,8 +40,8 @@ function CopyButton({ text }: { text: string }) {
       onClick={copy}
       className={`shrink-0 flex items-center gap-1 rounded px-2 py-1 text-xs font-medium transition-colors ${
         copied
-          ? "bg-emerald-900/50 text-emerald-400"
-          : "text-zinc-500 hover:bg-zinc-700 hover:text-zinc-300"
+          ? "bg-cf-cyan/10 text-cf-cyan"
+          : "text-zinc-500 hover:bg-cf-panel-alt hover:text-zinc-300"
       }`}
     >
       {copied ? (
@@ -75,7 +75,7 @@ function TextCard({
   const { accent } = SECTION_META[sectionKey];
   const padding = sectionKey === "linkedin" ? "p-5" : "p-4";
   return (
-    <div className={`flex items-start gap-3 rounded-lg border ${accent.border} bg-zinc-900 ${padding}`}>
+    <div className={`flex items-start gap-3 rounded-lg border ${accent.border} bg-cf-panel ${padding}`}>
       <span className={`mt-0.5 shrink-0 font-mono text-xs ${accent.number}`}>
         {String(index).padStart(2, "0")}
       </span>
@@ -88,7 +88,7 @@ function TextCard({
 function ShortsCard({ index, idea }: { index: number; idea: ShortsIdea }) {
   const { accent } = SECTION_META.shorts;
   return (
-    <div className={`rounded-lg border ${accent.border} bg-zinc-900 p-4 space-y-2`}>
+    <div className={`rounded-lg border ${accent.border} bg-cf-panel p-4 space-y-2`}>
       <div className="flex items-start gap-3">
         <span className={`mt-0.5 shrink-0 font-mono text-xs ${accent.number}`}>
           {String(index).padStart(2, "0")}
@@ -147,7 +147,7 @@ export default function ContentPackView({ pack, csv, json }: Props) {
   };
 
   return (
-    <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-6 space-y-5">
+    <div className="rounded-xl border border-cf-violet/14 bg-cf-panel/50 p-6 space-y-5">
       {/* Header + export buttons */}
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <p className="text-sm font-medium text-zinc-300">Content Pack</p>
@@ -155,7 +155,7 @@ export default function ContentPackView({ pack, csv, json }: Props) {
           {csv !== null && (
           <button
             onClick={() => downloadBlob(csv!, "content-pack.csv", "text/csv")}
-            className="rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-1.5 text-xs font-medium text-zinc-300 transition hover:bg-zinc-700 hover:text-white"
+            className="rounded-lg border border-cf-violet/25 bg-cf-panel-alt px-3 py-1.5 text-xs font-medium text-zinc-300 transition hover:bg-cf-panel-alt/80 hover:text-white"
           >
             ↓ CSV
           </button>
@@ -164,7 +164,7 @@ export default function ContentPackView({ pack, csv, json }: Props) {
             onClick={() =>
               downloadBlob(JSON.stringify(json, null, 2), "content-pack.json", "application/json")
             }
-            className="rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-1.5 text-xs font-medium text-zinc-300 transition hover:bg-zinc-700 hover:text-white"
+            className="rounded-lg border border-cf-violet/25 bg-cf-panel-alt px-3 py-1.5 text-xs font-medium text-zinc-300 transition hover:bg-cf-panel-alt/80 hover:text-white"
           >
             ↓ JSON
           </button>
@@ -172,7 +172,7 @@ export default function ContentPackView({ pack, csv, json }: Props) {
       </div>
 
       {/* Section tabs */}
-      <div className="flex gap-1 overflow-x-auto rounded-lg bg-zinc-800/60 p-1">
+      <div className="flex gap-1 overflow-x-auto rounded-lg bg-cf-panel-alt/60 p-1">
         {SECTION_ORDER.map((key) => {
           const meta = SECTION_META[key];
           const count = visibleItems[key].length;

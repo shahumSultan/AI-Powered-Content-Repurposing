@@ -36,11 +36,11 @@ export default async function InsightsPage() {
       <p className="mb-8 text-sm text-zinc-500">Your account activity and usage statistics.</p>
 
       <div className="mb-6 grid grid-cols-2 gap-3">
-        <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-5">
+        <div className="rounded-xl border border-cf-violet/14 bg-cf-panel p-5">
           <p className="mb-1 text-xs font-medium text-zinc-500">Member since</p>
           <p className="text-sm font-semibold text-zinc-100">{memberSince}</p>
         </div>
-        <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-5">
+        <div className="rounded-xl border border-cf-violet/14 bg-cf-panel p-5">
           <p className="mb-1 text-xs font-medium text-zinc-500">Total generations</p>
           <p className="text-sm font-semibold text-zinc-100">{totalPacks}</p>
         </div>
@@ -50,8 +50,8 @@ export default async function InsightsPage() {
         <h2 className="mb-3 display-font text-sm font-semibold text-zinc-100">Usage metrics</h2>
         <div className="grid grid-cols-2 gap-3">
           {metricCards.map((card) => (
-            <div key={card.label} className="rounded-xl border border-zinc-800 bg-zinc-900 p-5">
-              <p className="mb-2 display-font text-2xl font-bold text-orange-400">{card.value}</p>
+            <div key={card.label} className="rounded-xl border border-cf-violet/14 bg-cf-panel p-5">
+              <p className="mb-2 display-font text-2xl font-bold text-cf-cyan">{card.value}</p>
               <p className="text-xs font-medium text-zinc-400">{card.label}</p>
               <p className="text-xs text-zinc-600">{card.unit}</p>
             </div>
@@ -64,7 +64,7 @@ export default async function InsightsPage() {
           <h2 className="mb-3 display-font text-sm font-semibold text-zinc-100">Recent generations</h2>
           <div className="space-y-2">
             {rows.slice(0, 10).map((row, i) => (
-              <div key={i} className="rounded-xl border border-zinc-800 bg-zinc-900 p-4">
+              <div key={i} className="rounded-xl border border-cf-violet/14 bg-cf-panel p-4">
                 <p className="mb-1 text-xs text-zinc-500">{formatDate(row.created_at)}</p>
                 {row.urls.map((url, j) => (
                   <p key={j} className="truncate text-xs text-zinc-400">{url}</p>
