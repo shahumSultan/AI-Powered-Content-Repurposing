@@ -64,10 +64,10 @@ export default async function InsightsPage() {
           <h2 className="mb-3 display-font text-sm font-semibold text-zinc-100">Recent generations</h2>
           <div className="space-y-2">
             {rows.slice(0, 10).map((row, i) => (
-              <div key={i} className="rounded-xl border border-cf-violet/14 bg-cf-panel p-4">
+              <div key={i} className="overflow-hidden rounded-xl border border-cf-violet/14 bg-cf-panel p-4">
                 <p className="mb-1 text-xs text-zinc-500">{formatDate(row.created_at)}</p>
                 {row.urls.map((url, j) => (
-                  <p key={j} className="truncate text-xs text-zinc-400">{url}</p>
+                  <p key={j} className="break-all text-xs text-zinc-400">{url}</p>
                 ))}
               </div>
             ))}

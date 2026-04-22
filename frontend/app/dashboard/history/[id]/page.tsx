@@ -36,7 +36,7 @@ export default async function HistoryDetailPage({ params }: { params: Promise<{ 
         <h1 className="mb-1 display-font text-2xl font-bold text-zinc-100 break-words">
           {record.title ?? record.urls[0] ?? "Content Pack"}
         </h1>
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="mt-1 flex flex-col gap-1">
           <span className="text-xs text-zinc-500">{date}</span>
           {record.urls.map((url, i) => (
             <a
@@ -44,7 +44,7 @@ export default async function HistoryDetailPage({ params }: { params: Promise<{ 
               href={url}
               target="_blank"
               rel="noopener noreferrer"
-              className="truncate max-w-xs text-xs text-cf-violet/80 hover:text-cf-violet transition-colors"
+              className="block truncate text-xs text-cf-violet/80 hover:text-cf-violet transition-colors"
             >
               {url}
             </a>

@@ -152,7 +152,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
           </div>
         </aside>
 
-        <main className="flex-1 px-4 py-6 pb-28 md:px-8 md:py-10 md:pb-10">{children}</main>
+        <main className="flex-1 min-w-0 overflow-x-hidden px-4 py-6 pb-28 md:px-8 md:py-10 md:pb-10">{children}</main>
       </div>
 
       {/* Bottom nav on mobile */}

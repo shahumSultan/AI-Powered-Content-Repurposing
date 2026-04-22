@@ -65,11 +65,11 @@ export default async function HistoryPage() {
                   <p className="mb-1 truncate text-sm font-medium text-zinc-100">
                     {row.title ?? row.urls[0] ?? "Untitled"}
                   </p>
-                  <div className="flex flex-wrap gap-x-3 gap-y-0.5">
+                  <div className="min-w-0 space-y-0.5">
                     {row.urls.map((url, i) => (
-                      <span key={i} className="text-xs text-zinc-500 truncate max-w-xs">
+                      <p key={i} className="truncate text-xs text-zinc-500">
                         {urlLabel(url)}
-                      </span>
+                      </p>
                     ))}
                   </div>
                 </div>
