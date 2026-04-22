@@ -3,6 +3,7 @@ import Link from "next/link";
 import { apiFetch } from "@/lib/auth";
 import { signOut } from "@/app/auth/actions";
 import DashboardNav from "@/components/dashboard/DashboardNav";
+import MobileBottomNav from "@/components/dashboard/MobileBottomNav";
 import type { AuthUser } from "@/lib/auth";
 
 interface PlanData {
@@ -151,23 +152,11 @@ export default async function DashboardLayout({ children }: { children: React.Re
           </div>
         </aside>
 
-        <main className="flex-1 px-4 py-6 md:px-8 md:py-10">{children}</main>
+        <main className="flex-1 px-4 py-6 pb-28 md:px-8 md:py-10 md:pb-10">{children}</main>
       </div>
 
       {/* Bottom nav on mobile */}
-      <nav className="fixed bottom-0 left-0 right-0 flex border-t border-cf-violet/14 bg-cf-panel md:hidden">
-        {[
-          { href: "/dashboard/generate", label: "Generate" },
-          { href: "/dashboard/history", label: "History" },
-          { href: "/dashboard/billing", label: "Billing" },
-          { href: "/dashboard/insights", label: "Insights" },
-          { href: "/dashboard/settings", label: "Settings" },
-        ].map((item) => (
-          <Link key={item.href} href={item.href} className="flex flex-1 flex-col items-center py-3 text-xs text-zinc-400 hover:text-zinc-100">
-            {item.label}
-          </Link>
-        ))}
-      </nav>
+      <MobileBottomNav />
     </div>
   );
 }

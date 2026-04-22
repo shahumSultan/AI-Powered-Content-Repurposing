@@ -15,16 +15,16 @@ export default async function GeneratePage() {
 
   return (
     <div className="max-w-2xl">
-      <div className="mb-6 flex items-start justify-between">
+      <div className="mb-6 flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <h1 className="mb-1 display-font text-2xl font-bold text-zinc-100">Generate Content</h1>
           <p className="text-sm text-zinc-500">Paste a YouTube or blog URL to generate your content pack.</p>
         </div>
         {isTrial && (
-          <span className="mt-1 shrink-0 text-xs text-zinc-500">{plan.gens_used} / {plan.gens_limit} trial generations used</span>
+          <span className="text-xs text-zinc-500 sm:mt-1 sm:shrink-0">{plan.gens_used} / {plan.gens_limit} trial generations used</span>
         )}
         {!isPro && !isTrial && (
-          <span className="mt-1 shrink-0 text-xs text-zinc-500">{plan.gens_used} / {plan.gens_limit} packs used</span>
+          <span className="text-xs text-zinc-500 sm:mt-1 sm:shrink-0">{plan.gens_used} / {plan.gens_limit} packs used</span>
         )}
       </div>
 
