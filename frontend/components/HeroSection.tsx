@@ -31,7 +31,7 @@ export default function HeroSection() {
 
           {/* Headline */}
           <AnimateOnScroll delay="80ms">
-            <h1 className="display-font text-5xl font-extrabold leading-[1.05] tracking-tighter text-zinc-100 md:text-6xl lg:text-7xl">
+            <h1 className="display-font text-[2.25rem] font-extrabold leading-[1.05] tracking-tighter text-zinc-100 sm:text-5xl md:text-6xl lg:text-7xl">
               Stop Rewriting.
               <span className="hero-gradient-text mt-2 block">Start Repurposing.</span>
             </h1>
