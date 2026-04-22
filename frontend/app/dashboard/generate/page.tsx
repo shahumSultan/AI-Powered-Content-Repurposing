@@ -11,7 +11,7 @@ export default async function GeneratePage() {
 
   const isPro = plan.plan === "pro";
   const isTrial = plan.plan === "free";
-  const limitReached = !isPro && plan.gens_used >= plan.gens_limit;
+  const limitReached = !isPro && !plan.is_admin && plan.gens_used >= plan.gens_limit;
 
   return (
     <div className="max-w-2xl">
