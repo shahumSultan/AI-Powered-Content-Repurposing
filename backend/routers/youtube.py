@@ -3,6 +3,7 @@ import json
 import os
 import urllib.request
 
+import httpx
 import requests
 import yt_dlp
 from fastapi import APIRouter, HTTPException
@@ -12,6 +13,40 @@ from youtube_transcript_api import NoTranscriptFound, TranscriptsDisabled, YouTu
 from youtube_transcript_api.proxies import GenericProxyConfig, WebshareProxyConfig
 
 router = APIRouter(prefix="/ingest", tags=["ingest"])
+
+SUPADATA_API_URL = "https://api.supadata.ai/v1/youtube/transcript"
+
+
+def _fetch_via_supadata(video_id: str) -> list[TranscriptSegment]:
+    api_key = os.getenv("SUPADATA_API_KEY")
+    if not api_key:
+        raise ValueError("SUPADATA_API_KEY not set")
+
+    resp = httpx.get(
+        SUPADATA_API_URL,
+        params={"videoId": video_id},
+        headers={"x-api-key": api_key},
+        timeout=30,
+    )
+    if resp.status_code == 206:
+        raise ValueError("Transcript unavailable for this video")
+    resp.raise_for_status()
+
+    data = resp.json()
+    segments: list[TranscriptSegment] = []
+    for chunk in data.get("content", []):
+        text = chunk.get("text", "").strip()
+        if not text:
+            continue
+        segments.append(TranscriptSegment(
+            text=text,
+            start=chunk.get("offset", 0) / 1000.0,
+            duration=chunk.get("duration", 0) / 1000.0,
+        ))
+
+    if not segments:
+        raise ValueError("Supadata returned empty transcript")
+    return segments
 
 
 def _make_api() -> YouTubeTranscriptApi:
@@ -108,6 +143,14 @@ def ingest_youtube(body: IngestRequest) -> YouTubeIngestResponse:
     url = str(body.url)
     video_id = _extract_video_id(url)
 
+    # 1. Supadata (cloud-safe, never blocked)
+    try:
+        transcript = _fetch_via_supadata(video_id)
+        return YouTubeIngestResponse(url=url, video_id=video_id, transcript=transcript)
+    except Exception:
+        pass
+
+    # 2. youtube-transcript-api (with proxy if configured)
     try:
         raw = _make_api().fetch(video_id)
         transcript = [
@@ -122,6 +165,7 @@ def ingest_youtube(body: IngestRequest) -> YouTubeIngestResponse:
     except Exception:
         pass
 
+    # 3. yt-dlp (with proxy if configured)
     try:
         transcript = _fetch_via_ytdlp(video_id)
         return YouTubeIngestResponse(url=url, video_id=video_id, transcript=transcript)
@@ -129,8 +173,7 @@ def ingest_youtube(body: IngestRequest) -> YouTubeIngestResponse:
         raise HTTPException(
             status_code=502,
             detail=(
-                f"YouTube is blocking requests from this server's IP ({e}). "
-                "Fix: sign up at webshare.io (free tier) and set "
-                "WEBSHARE_PROXY_USERNAME and WEBSHARE_PROXY_PASSWORD in Railway env vars."
+                f"Could not fetch transcript ({e}). "
+                "Set SUPADATA_API_KEY in Railway env vars for a permanent fix (supadata.ai)."
             ),
         )
