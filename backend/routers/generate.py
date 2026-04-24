@@ -3,19 +3,18 @@ import json
 from urllib.parse import urlparse
 import trafilatura
 from fastapi import APIRouter, Header, HTTPException
-from youtube_transcript_api import NoTranscriptFound, TranscriptsDisabled, YouTubeTranscriptApi
+from youtube_transcript_api import NoTranscriptFound, TranscriptsDisabled
 from schemas.generate import GenerateRequest, GenerateResponse
 from schemas.ingest import TranscriptSegment
 from services.chunker import Chunk, chunk_text
 from services.exporter import to_csv
 from services.generator import generate_content_pack
 from services.ranker import rank
+from services.transcript import fetch_transcript
 from services.utils import extract_video_id
 from core.ssrf import assert_safe_url
 
 router = APIRouter(prefix="/generate", tags=["generate"])
-
-_ytt_api = YouTubeTranscriptApi()
 
 
 def _is_youtube(url: str) -> bool:
@@ -34,7 +33,7 @@ def _ingest_youtube(url: str) -> tuple[str, list[TranscriptSegment]]:
     assert_safe_url(url)
     video_id = _extract_video_id(url)
     try:
-        raw = _ytt_api.fetch(video_id)
+        segments = fetch_transcript(video_id)
     except TranscriptsDisabled:
         raise ValueError("Transcripts are disabled for this video")
     except NoTranscriptFound:
@@ -42,10 +41,6 @@ def _ingest_youtube(url: str) -> tuple[str, list[TranscriptSegment]]:
     except Exception as e:
         raise ValueError(f"Failed to fetch transcript: {e}")
 
-    segments = [
-        TranscriptSegment(text=seg.text, start=seg.start, duration=seg.duration)
-        for seg in raw
-    ]
     full_text = " ".join(seg.text for seg in segments)
     return full_text, segments
 
