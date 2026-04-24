@@ -9,11 +9,32 @@ from fastapi import APIRouter, HTTPException
 from schemas.ingest import IngestRequest, TranscriptSegment, YouTubeIngestResponse
 from services.utils import extract_video_id
 from youtube_transcript_api import NoTranscriptFound, TranscriptsDisabled, YouTubeTranscriptApi
+from youtube_transcript_api.proxies import GenericProxyConfig, WebshareProxyConfig
 
 router = APIRouter(prefix="/ingest", tags=["ingest"])
 
 
 def _make_api() -> YouTubeTranscriptApi:
+    ws_user = os.getenv("WEBSHARE_PROXY_USERNAME")
+    ws_pass = os.getenv("WEBSHARE_PROXY_PASSWORD")
+    if ws_user and ws_pass:
+        return YouTubeTranscriptApi(
+            proxy_config=WebshareProxyConfig(
+                proxy_username=ws_user,
+                proxy_password=ws_pass,
+            )
+        )
+
+    http_proxy = os.getenv("HTTP_PROXY") or os.getenv("http_proxy")
+    https_proxy = os.getenv("HTTPS_PROXY") or os.getenv("https_proxy")
+    if http_proxy or https_proxy:
+        return YouTubeTranscriptApi(
+            proxy_config=GenericProxyConfig(
+                http_url=http_proxy,
+                https_url=https_proxy,
+            )
+        )
+
     cookies_file = os.getenv("YOUTUBE_COOKIES_FILE")
     if cookies_file and os.path.isfile(cookies_file):
         jar = http.cookiejar.MozillaCookieJar(cookies_file)
@@ -21,16 +42,24 @@ def _make_api() -> YouTubeTranscriptApi:
         session = requests.Session()
         session.cookies = jar  # type: ignore[assignment]
         return YouTubeTranscriptApi(http_client=session)
+
     return YouTubeTranscriptApi()
+
+
+def _proxy_opts_for_ytdlp() -> dict:
+    ws_user = os.getenv("WEBSHARE_PROXY_USERNAME")
+    ws_pass = os.getenv("WEBSHARE_PROXY_PASSWORD")
+    if ws_user and ws_pass:
+        return {"proxy": f"http://{ws_user}:{ws_pass}@p.webshare.io:80"}
+    http_proxy = os.getenv("HTTPS_PROXY") or os.getenv("HTTP_PROXY") or os.getenv("https_proxy") or os.getenv("http_proxy")
+    if http_proxy:
+        return {"proxy": http_proxy}
+    return {}
 
 
 def _fetch_via_ytdlp(video_id: str) -> list[TranscriptSegment]:
     url = f"https://www.youtube.com/watch?v={video_id}"
-    ydl_opts = {
-        "quiet": True,
-        "no_warnings": True,
-        "extract_flat": False,
-    }
+    ydl_opts = {"quiet": True, "no_warnings": True, **_proxy_opts_for_ytdlp()}
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         info = ydl.extract_info(url, download=False)
 
@@ -40,7 +69,6 @@ def _fetch_via_ytdlp(video_id: str) -> list[TranscriptSegment]:
     cap_list = manual_subs.get("en") or auto_caps.get("en") or []
     json3_entry = next((c for c in cap_list if c.get("ext") == "json3"), None)
     if not json3_entry:
-        # Try any available language
         for lang_caps in list(manual_subs.values()) + list(auto_caps.values()):
             json3_entry = next((c for c in lang_caps if c.get("ext") == "json3"), None)
             if json3_entry:
@@ -80,7 +108,6 @@ def ingest_youtube(body: IngestRequest) -> YouTubeIngestResponse:
     url = str(body.url)
     video_id = _extract_video_id(url)
 
-    # Primary: youtube-transcript-api (with optional browser cookies)
     try:
         raw = _make_api().fetch(video_id)
         transcript = [
@@ -93,9 +120,8 @@ def ingest_youtube(body: IngestRequest) -> YouTubeIngestResponse:
     except NoTranscriptFound:
         raise HTTPException(status_code=404, detail="No transcript found for this video")
     except Exception:
-        pass  # fall through to yt-dlp
+        pass
 
-    # Fallback: yt-dlp
     try:
         transcript = _fetch_via_ytdlp(video_id)
         return YouTubeIngestResponse(url=url, video_id=video_id, transcript=transcript)
@@ -103,8 +129,8 @@ def ingest_youtube(body: IngestRequest) -> YouTubeIngestResponse:
         raise HTTPException(
             status_code=502,
             detail=(
-                f"Could not fetch transcript: {e}. "
-                "Tip: export browser cookies to a Netscape-format file and set "
-                "YOUTUBE_COOKIES_FILE=/path/to/cookies.txt in your .env"
+                f"YouTube is blocking requests from this server's IP ({e}). "
+                "Fix: sign up at webshare.io (free tier) and set "
+                "WEBSHARE_PROXY_USERNAME and WEBSHARE_PROXY_PASSWORD in Railway env vars."
             ),
         )
