@@ -5,10 +5,7 @@ export const metadata = {
 
 export default function MaintenancePage() {
   return (
-    <div
-      className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden px-6 text-center"
-      style={{ background: "var(--background)" }}
-    >
+    <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden px-6 text-center bg-cf-bg">
       {/* Ambient glows */}
       <div
         aria-hidden="true"
@@ -21,7 +18,7 @@ export default function MaintenancePage() {
       />
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute bottom-0 left-1/2 h-[400px] w-[400px] -translate-x-1/2 rounded-full opacity-15"
+        className="pointer-events-none absolute bottom-0 left-1/2 h-[400px] w-[400px] -translate-x-1/2 rounded-full opacity-10"
         style={{
           background:
             "radial-gradient(circle, rgba(240,80,168,0.35) 0%, transparent 70%)",
@@ -30,10 +27,10 @@ export default function MaintenancePage() {
       />
 
       {/* Card */}
-      <div className="relative z-10 flex flex-col items-center gap-8 rounded-2xl border border-white/5 bg-white/[0.03] p-10 shadow-2xl backdrop-blur-sm sm:p-14 max-w-lg w-full">
+      <div className="relative z-10 flex flex-col items-center gap-8 rounded-2xl border border-white/5 bg-cf-panel p-10 shadow-2xl sm:p-14 max-w-lg w-full">
         {/* Logo */}
         <div className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-orange-500 to-amber-400">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-cf-violet to-cf-pink">
             <svg className="h-4 w-4 text-white" fill="currentColor" viewBox="0 0 20 20">
               <path d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" />
             </svg>
@@ -70,15 +67,15 @@ export default function MaintenancePage() {
         </div>
 
         {/* Divider */}
-        <div className="h-px w-full bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+        <div className="h-px w-full bg-gradient-to-r from-transparent via-cf-violet/20 to-transparent" />
 
         {/* Status pill */}
-        <div className="flex items-center gap-2 rounded-full border border-amber-500/20 bg-amber-500/10 px-4 py-2">
+        <div className="flex items-center gap-2 rounded-full border border-cf-violet/20 bg-cf-violet/10 px-4 py-2">
           <span className="relative flex h-2 w-2">
-            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-400 opacity-75" />
-            <span className="relative inline-flex h-2 w-2 rounded-full bg-amber-400" />
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-cf-violet opacity-75" />
+            <span className="relative inline-flex h-2 w-2 rounded-full bg-cf-violet" />
           </span>
-          <span className="text-sm font-medium text-amber-300">
+          <span className="text-sm font-medium text-cf-violet">
             Maintenance in progress
           </span>
         </div>
