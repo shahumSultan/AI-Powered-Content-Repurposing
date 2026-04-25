@@ -62,3 +62,20 @@ export const fetchBlogArticle = (url: string) =>
 
 export const generateContentPack = (urls: string[]) =>
   post<GenerateResponse>("/generate", { urls });
+
+export const generateFromText = (text: string) =>
+  post<GenerateResponse>("/generate/text", { text });
+
+export async function generateFromAudio(file: File): Promise<GenerateResponse> {
+  const formData = new FormData();
+  formData.append("file", file, file.name);
+  const res = await fetch(`${API_BASE}/generate/audio`, {
+    method: "POST",
+    body: formData,
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: "Unknown error" }));
+    throw new Error(err.detail ?? `Request failed: ${res.status}`);
+  }
+  return res.json();
+}
