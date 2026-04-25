@@ -17,6 +17,14 @@ async function isValidToken(token: string): Promise<boolean> {
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
+  // ── Maintenance mode ───────────────────────────────────────────────────────
+  if (
+    process.env.NEXT_PUBLIC_MAINTENANCE_MODE === "true" &&
+    pathname !== "/maintenance"
+  ) {
+    return NextResponse.redirect(new URL("/maintenance", req.url));
+  }
+
   // Enforce HTTPS in production
   if (
     process.env.NODE_ENV === "production" &&

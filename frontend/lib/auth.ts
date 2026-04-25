@@ -25,7 +25,7 @@ export async function getServerToken(): Promise<string | null> {
  */
 export async function apiFetch(path: string, init?: RequestInit): Promise<Response> {
   const token = await getServerToken();
-  const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+  const BACKEND_URL = process.env.INTERNAL_API_URL ?? process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
   return fetch(`${BACKEND_URL}${path}`, {
     ...init,
     headers: {
