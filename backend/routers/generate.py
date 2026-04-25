@@ -1,20 +1,23 @@
 from __future__ import annotations
 import json
 from urllib.parse import urlparse
+import httpx
 import trafilatura
-from fastapi import APIRouter, Header, HTTPException
+from fastapi import APIRouter, File, Header, HTTPException, UploadFile
 from youtube_transcript_api import NoTranscriptFound, TranscriptsDisabled
-from schemas.generate import GenerateRequest, GenerateResponse
+from schemas.generate import GenerateRequest, GenerateResponse, GenerateTextRequest
 from schemas.ingest import TranscriptSegment
 from services.chunker import Chunk, chunk_text
 from services.exporter import to_csv
 from services.generator import generate_content_pack
 from services.ranker import rank
 from services.transcript import fetch_transcript
-from services.utils import extract_video_id
+from services.transcriber import transcribe
 from core.ssrf import assert_safe_url
 
 router = APIRouter(prefix="/generate", tags=["generate"])
+
+_MAX_AUDIO_BYTES = 25 * 1024 * 1024  # 25 MB
 
 
 def _is_youtube(url: str) -> bool:
@@ -23,6 +26,7 @@ def _is_youtube(url: str) -> bool:
 
 
 def _extract_video_id(url: str) -> str:
+    from services.utils import extract_video_id
     vid = extract_video_id(url)
     if vid is None:
         raise ValueError(f"Cannot extract video ID from: {url}")
@@ -56,6 +60,22 @@ def _ingest_blog(url: str) -> str:
     return text
 
 
+def _ingest_text(text: str) -> list[Chunk]:
+    return chunk_text(text)
+
+
+def _build_response(chunks: list[Chunk], errors: list[str], groq_key: str | None, openai_key: str | None) -> GenerateResponse:
+    ranked = rank(chunks)
+    pack = generate_content_pack(ranked, groq_api_key=groq_key, openai_api_key=openai_key)
+    csv_str = to_csv(pack)
+    return GenerateResponse(
+        content_pack=pack,
+        errors=errors,
+        export_json=json.loads(pack.model_dump_json()),
+        export_csv=csv_str,
+    )
+
+
 @router.post("", response_model=GenerateResponse)
 def generate(
     body: GenerateRequest,
@@ -85,13 +105,38 @@ def generate(
                    + " | ".join(errors),
         )
 
-    ranked = rank(all_chunks)
-    pack = generate_content_pack(ranked, groq_api_key=x_groq_api_key, openai_api_key=x_openai_api_key)
-    csv_str = to_csv(pack)
+    return _build_response(all_chunks, errors, x_groq_api_key, x_openai_api_key)
 
-    return GenerateResponse(
-        content_pack=pack,
-        errors=errors,
-        export_json=json.loads(pack.model_dump_json()),
-        export_csv=csv_str,
-    )
+
+@router.post("/text", response_model=GenerateResponse)
+def generate_from_text(
+    body: GenerateTextRequest,
+    x_groq_api_key: str | None = Header(None),
+    x_openai_api_key: str | None = Header(None),
+) -> GenerateResponse:
+    chunks = _ingest_text(body.text)
+    if not chunks:
+        raise HTTPException(status_code=422, detail="No content could be extracted from the provided text")
+    return _build_response(chunks, [], x_groq_api_key, x_openai_api_key)
+
+
+@router.post("/audio", response_model=GenerateResponse)
+async def generate_from_audio(
+    file: UploadFile = File(...),
+    x_groq_api_key: str | None = Header(None),
+    x_openai_api_key: str | None = Header(None),
+) -> GenerateResponse:
+    audio_bytes = await file.read(_MAX_AUDIO_BYTES + 1)
+    if len(audio_bytes) > _MAX_AUDIO_BYTES:
+        raise HTTPException(status_code=413, detail="Audio file exceeds 25 MB limit")
+
+    try:
+        text, segments = transcribe(audio_bytes, openai_api_key=x_openai_api_key)
+    except Exception as e:
+        raise HTTPException(status_code=422, detail=f"Transcription failed: {e}")
+
+    chunks = chunk_text(text, segments)
+    if not chunks:
+        raise HTTPException(status_code=422, detail="No content could be transcribed from the audio")
+
+    return _build_response(chunks, [], x_groq_api_key, x_openai_api_key)

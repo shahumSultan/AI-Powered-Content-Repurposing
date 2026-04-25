@@ -14,6 +14,17 @@ class GenerateRequest(BaseModel):
         return v
 
 
+class GenerateTextRequest(BaseModel):
+    text: str
+
+    @field_validator("text")
+    @classmethod
+    def not_empty(cls, v: str) -> str:
+        if len(v.strip()) < 50:
+            raise ValueError("Text must be at least 50 characters")
+        return v.strip()
+
+
 class Hook(BaseModel):
     text: str
 
