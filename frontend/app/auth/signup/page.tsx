@@ -24,7 +24,7 @@ function SignUpContent() {
               />
             </svg>
           </div>
-          <span className="text-sm font-semibold text-zinc-100">ContentFlow</span>
+          <span className="text-sm font-semibold text-zinc-100">ContentCube</span>
         </div>
 
         {success ? (
@@ -40,7 +40,7 @@ function SignUpContent() {
               href="/"
               className="mt-6 block text-center text-sm text-cf-violet hover:text-cf-violet/80"
             >
-              Back to ContentFlow →
+              Back to ContentCube →
             </Link>
           </>
         ) : (

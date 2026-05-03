@@ -21,7 +21,7 @@ export default function LoginPage() {
               />
             </svg>
           </div>
-          <span className="text-sm font-semibold text-zinc-100">ContentFlow</span>
+          <span className="text-sm font-semibold text-zinc-100">ContentCube</span>
         </div>
 
         <h1 className="mb-1 text-xl font-bold text-zinc-100">Welcome back</h1>

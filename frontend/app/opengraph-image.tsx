@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
 
 export const runtime = "edge";
-export const alt = "ContentFlow — Turn Any Content Into a Full Content Pack";
+export const alt = "ContentCube — Turn Any Content Into a Full Content Pack";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -19,7 +19,7 @@ export default async function Image() {
           overflow: "hidden",
         }}
       >
-        {/* Orange radial glow — top left */}
+        {/* Dark red radial glow — top left */}
         <div
           style={{
             position: "absolute",
@@ -29,12 +29,12 @@ export default async function Image() {
             height: 580,
             borderRadius: "50%",
             background:
-              "radial-gradient(circle, rgba(249,115,22,0.14) 0%, transparent 68%)",
+              "radial-gradient(circle, rgba(169,46,46,0.18) 0%, transparent 68%)",
             display: "flex",
           }}
         />
 
-        {/* Amber glow — bottom right */}
+        {/* Light red glow — bottom right */}
         <div
           style={{
             position: "absolute",
@@ -44,7 +44,7 @@ export default async function Image() {
             height: 420,
             borderRadius: "50%",
             background:
-              "radial-gradient(circle, rgba(251,191,36,0.1) 0%, transparent 70%)",
+              "radial-gradient(circle, rgba(255,179,179,0.1) 0%, transparent 70%)",
             display: "flex",
           }}
         />
@@ -57,7 +57,7 @@ export default async function Image() {
             left: 0,
             right: 0,
             height: 3,
-            background: "linear-gradient(to right, #f97316, #fbbf24, rgba(251,191,36,0.1))",
+            background: "linear-gradient(to right, #A92E2E, #FFB3B3, rgba(255,179,179,0.1))",
             display: "flex",
           }}
         />
@@ -87,7 +87,7 @@ export default async function Image() {
                 width: 56,
                 height: 56,
                 borderRadius: 14,
-                background: "linear-gradient(135deg, #f97316, #fbbf24)",
+                background: "linear-gradient(135deg, #A92E2E, #FFB3B3)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -106,7 +106,7 @@ export default async function Image() {
                 display: "flex",
               }}
             >
-              ContentFlow
+              ContentCube
             </span>
           </div>
 
@@ -127,7 +127,7 @@ export default async function Image() {
             </span>
             <span style={{ display: "flex", color: "#ffffff" }}>
               Into a{" "}
-              <span style={{ color: "#f97316", marginLeft: 18, display: "flex" }}>
+              <span style={{ color: "#A92E2E", marginLeft: 18, display: "flex" }}>
                 Full Content Pack
               </span>
             </span>
@@ -161,10 +161,10 @@ export default async function Image() {
           }}
         >
           {[
-            { label: "LinkedIn Post", color: "#0ea5e9" },
-            { label: "Twitter Hook", color: "#f97316" },
-            { label: "IG Caption", color: "#a855f7" },
-            { label: "Shorts Idea", color: "#fbbf24" },
+            { label: "LinkedIn Post", color: "#A92E2E" },
+            { label: "Twitter Hook", color: "#FFB3B3" },
+            { label: "IG Caption", color: "#d44f4f" },
+            { label: "Shorts Idea", color: "#ff8080" },
           ].map((item) => (
             <div
               key={item.label}

@@ -23,19 +23,19 @@ const syne = Syne({
 });
 
 export const metadata: Metadata = {
-  title: "ContentFlow — Turn Content Into a Full Content Pack",
+  title: "ContentCube — Turn Content Into a Full Content Pack",
   description:
     "Paste a YouTube video or blog URL and get hooks, LinkedIn posts, Instagram captions, and Shorts ideas in seconds. Runs locally, no API key required.",
   openGraph: {
-    title: "ContentFlow — Turn Content Into a Full Content Pack",
+    title: "ContentCube — Turn Content Into a Full Content Pack",
     description:
       "Paste a YouTube video or blog URL → hooks, LinkedIn posts, Instagram captions, and Shorts ideas in seconds.",
     type: "website",
-    siteName: "ContentFlow",
+    siteName: "ContentCube",
   },
   twitter: {
     card: "summary_large_image",
-    title: "ContentFlow — Turn Content Into a Full Content Pack",
+    title: "ContentCube — Turn Content Into a Full Content Pack",
     description:
       "Paste a YouTube video or blog URL → hooks, LinkedIn posts, Instagram captions, and Shorts ideas in seconds.",
   },

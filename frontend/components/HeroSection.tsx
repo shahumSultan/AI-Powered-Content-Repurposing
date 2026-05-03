@@ -14,7 +14,7 @@ export default function HeroSection() {
         aria-hidden="true"
         className="pointer-events-none absolute -top-32 -right-32 h-[600px] w-[600px] rounded-full opacity-20"
         style={{
-          background: "radial-gradient(circle, rgba(124,92,252,0.35) 0%, transparent 70%)",
+          background: "radial-gradient(circle, rgba(169,46,46,0.35) 0%, transparent 70%)",
           filter: "blur(60px)",
         }}
       />

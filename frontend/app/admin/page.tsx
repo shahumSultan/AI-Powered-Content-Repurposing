@@ -7,7 +7,7 @@ export default function AdminPage() {
       {/* Header */}
       <div className="mb-8 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-[#8500FA] to-[#DD578B]">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-[#A92E2E] to-[#FFB3B3]">
             <svg viewBox="0 0 20 20" fill="white" className="h-4 w-4">
               <path
                 fillRule="evenodd"
@@ -18,7 +18,7 @@ export default function AdminPage() {
           </div>
           <div>
             <h1 className="text-lg font-bold text-zinc-100">Admin Dashboard</h1>
-            <p className="text-xs text-zinc-500">ContentFlow</p>
+            <p className="text-xs text-zinc-500">ContentCube</p>
           </div>
         </div>
 

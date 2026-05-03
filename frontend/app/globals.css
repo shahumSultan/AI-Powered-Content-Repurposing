@@ -1,21 +1,21 @@
 @import "tailwindcss";
 
 :root {
-  --background: #0d0b14;
+  --background: #0f0808;
   --foreground: #f2f0fa;
-  --accent: #7C5CFC;
-  --accent-secondary: #F050A8;
+  --accent: #A92E2E;
+  --accent-secondary: #FFB3B3;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --color-cf-bg:        #0d0b14;
-  --color-cf-panel:     #14111f;
-  --color-cf-panel-alt: #1a1628;
-  --color-cf-violet:    #7C5CFC;
-  --color-cf-pink:      #F050A8;
-  --color-cf-cyan:      #00D4C8;
+  --color-cf-bg:        #0f0808;
+  --color-cf-panel:     #150d0d;
+  --color-cf-panel-alt: #1c1010;
+  --color-cf-violet:    #A92E2E;
+  --color-cf-pink:      #FFB3B3;
+  --color-cf-cyan:      #FF6B6B;
   --font-sans: var(--font-dm-sans);
   --font-mono: var(--font-dm-mono);
   --font-display: var(--font-syne);
@@ -56,7 +56,7 @@ body {
 /* ─── Hero gradient text ─── */
 
 .hero-gradient-text {
-  background: linear-gradient(135deg, #7C5CFC 0%, #F050A8 50%, #7C5CFC 100%);
+  background: linear-gradient(135deg, #A92E2E 0%, #FFB3B3 50%, #A92E2E 100%);
   background-size: 200% auto;
   -webkit-background-clip: text;
   background-clip: text;
@@ -77,8 +77,8 @@ body {
   position: absolute;
   inset: 0;
   background-image:
-    linear-gradient(rgba(124,92,252,0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(124,92,252,0.04) 1px, transparent 1px);
+    linear-gradient(rgba(169,46,46,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(169,46,46,0.04) 1px, transparent 1px);
   background-size: 64px 64px;
   mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, black 30%, transparent 100%);
 }
@@ -101,40 +101,40 @@ body {
 
 .card-glow:hover {
   transform: translateY(-3px);
-  box-shadow: 0 8px 32px 0 rgba(124, 92, 252, 0.15);
-  border-color: rgba(124, 92, 252, 0.3);
+  box-shadow: 0 8px 32px 0 rgba(169, 46, 46, 0.15);
+  border-color: rgba(169, 46, 46, 0.3);
 }
 
 /* ─── Popular pricing card ─── */
 
 .pricing-popular {
-  border-color: rgba(124, 92, 252, 0.35);
-  box-shadow: 0 0 40px 0 rgba(124, 92, 252, 0.12);
+  border-color: rgba(169, 46, 46, 0.35);
+  box-shadow: 0 0 40px 0 rgba(169, 46, 46, 0.12);
 }
 
 /* ─── CTA button ─── */
 
 .btn-primary {
-  background: linear-gradient(135deg, #7C5CFC 0%, #F050A8 100%);
+  background: linear-gradient(135deg, #A92E2E 0%, #FFB3B3 100%);
   color: #fff;
   transition: opacity 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
 }
 
 .btn-primary:hover {
   opacity: 0.88;
-  box-shadow: 0 0 28px 0 rgba(124, 92, 252, 0.5);
+  box-shadow: 0 0 28px 0 rgba(169, 46, 46, 0.5);
   transform: translateY(-1px);
 }
 
 /* Keep btn-gradient as alias for any remaining usages */
 .btn-gradient {
-  background: linear-gradient(135deg, #7C5CFC 0%, #F050A8 100%);
+  background: linear-gradient(135deg, #A92E2E 0%, #FFB3B3 100%);
   transition: opacity 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
 }
 
 .btn-gradient:hover {
   opacity: 0.88;
-  box-shadow: 0 0 28px 0 rgba(124, 92, 252, 0.5);
+  box-shadow: 0 0 28px 0 rgba(169, 46, 46, 0.5);
   transform: translateY(-1px);
 }
 
@@ -143,7 +143,7 @@ body {
 .section-divider {
   border: none;
   height: 1px;
-  background: linear-gradient(to right, transparent, rgba(124, 92, 252, 0.12), transparent);
+  background: linear-gradient(to right, transparent, rgba(169, 46, 46, 0.12), transparent);
 }
 
 /* ─── Smooth scroll ─── */

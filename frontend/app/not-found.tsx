@@ -9,7 +9,7 @@ export default function NotFound() {
         className="pointer-events-none absolute inset-0"
         style={{
           background:
-            "radial-gradient(ellipse 60% 40% at 50% 40%, rgba(124,92,252,0.07) 0%, transparent 70%)",
+            "radial-gradient(ellipse 60% 40% at 50% 40%, rgba(169,46,46,0.07) 0%, transparent 70%)",
         }}
       />
 
@@ -21,7 +21,7 @@ export default function NotFound() {
               <path d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" />
             </svg>
           </div>
-          <span className="text-sm font-bold text-zinc-100">ContentFlow</span>
+          <span className="text-sm font-bold text-zinc-100">ContentCube</span>
         </Link>
 
         {/* 404 */}

@@ -10,7 +10,7 @@ export default function TryItSection() {
         className="pointer-events-none absolute inset-0 z-0"
         style={{
           background:
-            "radial-gradient(ellipse 80% 60% at 50% 40%, rgba(124,92,252,0.07) 0%, transparent 70%)",
+            "radial-gradient(ellipse 80% 60% at 50% 40%, rgba(169,46,46,0.07) 0%, transparent 70%)",
         }}
       />
 
@@ -37,7 +37,7 @@ export default function TryItSection() {
         <AnimateOnScroll delay="200ms">
           <div
             className="rounded-2xl border border-cf-violet/14 bg-cf-panel/80 p-2 backdrop-blur-sm"
-            style={{ boxShadow: "0 25px 80px rgba(124,92,252,0.1)" }}
+            style={{ boxShadow: "0 25px 80px rgba(169,46,46,0.1)" }}
           >
             {/* Fake browser chrome */}
             <div className="mb-2 flex items-center gap-2 rounded-xl bg-cf-panel-alt/60 px-4 py-3">
@@ -45,7 +45,7 @@ export default function TryItSection() {
               <div className="h-3 w-3 rounded-full bg-cf-pink/60" />
               <div className="h-3 w-3 rounded-full bg-cf-cyan/60" />
               <div className="ml-4 flex-1 rounded-md bg-cf-panel/80 px-3 py-1 font-mono text-xs text-zinc-600">
-                contentflow.ai/generate
+                contentcube.ai/generate
               </div>
             </div>
 

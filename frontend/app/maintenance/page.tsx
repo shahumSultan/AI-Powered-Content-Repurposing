@@ -1,5 +1,5 @@
 export const metadata = {
-  title: "Under Maintenance — ContentFlow",
+  title: "Under Maintenance — ContentCube",
   description: "We're working on something. Back shortly.",
 };
 
@@ -12,7 +12,7 @@ export default function MaintenancePage() {
         className="pointer-events-none absolute -top-40 left-1/2 h-[600px] w-[600px] -translate-x-1/2 rounded-full opacity-20"
         style={{
           background:
-            "radial-gradient(circle, rgba(124,92,252,0.4) 0%, transparent 70%)",
+            "radial-gradient(circle, rgba(169,46,46,0.4) 0%, transparent 70%)",
           filter: "blur(80px)",
         }}
       />
@@ -21,7 +21,7 @@ export default function MaintenancePage() {
         className="pointer-events-none absolute bottom-0 left-1/2 h-[400px] w-[400px] -translate-x-1/2 rounded-full opacity-10"
         style={{
           background:
-            "radial-gradient(circle, rgba(240,80,168,0.35) 0%, transparent 70%)",
+            "radial-gradient(circle, rgba(255,179,179,0.35) 0%, transparent 70%)",
           filter: "blur(80px)",
         }}
       />
@@ -35,7 +35,7 @@ export default function MaintenancePage() {
               <path d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" />
             </svg>
           </div>
-          <span className="text-lg font-bold text-zinc-100">ContentFlow</span>
+          <span className="text-lg font-bold text-zinc-100">ContentCube</span>
         </div>
 
         {/* Icon */}
@@ -61,7 +61,7 @@ export default function MaintenancePage() {
             Under Maintenance
           </h1>
           <p className="text-base leading-relaxed text-zinc-400">
-            We&apos;re making improvements to ContentFlow. We&apos;ll be back up
+            We&apos;re making improvements to ContentCube. We&apos;ll be back up
             shortly — thanks for your patience.
           </p>
         </div>
@@ -83,7 +83,7 @@ export default function MaintenancePage() {
 
       {/* Footer note */}
       <p className="relative z-10 mt-8 text-sm text-zinc-600">
-        © 2026 ContentFlow — Product of Enigma-Cube
+        © 2026 ContentCube — Product of Enigma-Cube
       </p>
     </div>
   );
