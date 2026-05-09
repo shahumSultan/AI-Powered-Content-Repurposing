@@ -167,12 +167,20 @@ def _stub_pack(chunks: list[Chunk]) -> ContentPack:
 # LLM call helpers
 # ---------------------------------------------------------------------------
 
-def _call_groq(client: Groq, source: str) -> str:
+def _build_user_message(source: str, custom_prompt: str | None) -> str:
+    if custom_prompt:
+        if "{source}" in custom_prompt:
+            return custom_prompt.format(source=source)
+        return custom_prompt + "\n\nSOURCE MATERIAL:\n" + source
+    return _USER_TEMPLATE.format(source=source)
+
+
+def _call_groq(client: Groq, source: str, custom_prompt: str | None = None) -> str:
     response = client.chat.completions.create(
         model=_GROQ_MODEL,
         messages=[
             {"role": "system", "content": _SYSTEM_PROMPT},
-            {"role": "user", "content": _USER_TEMPLATE.format(source=source)},
+            {"role": "user", "content": _build_user_message(source, custom_prompt)},
         ],
         max_tokens=2048,
         temperature=0.7,
@@ -180,12 +188,12 @@ def _call_groq(client: Groq, source: str) -> str:
     return response.choices[0].message.content
 
 
-def _call_openai(client: OpenAI, source: str) -> str:
+def _call_openai(client: OpenAI, source: str, custom_prompt: str | None = None) -> str:
     response = client.chat.completions.create(
         model=_OPENAI_MODEL,
         messages=[
             {"role": "system", "content": _SYSTEM_PROMPT},
-            {"role": "user", "content": _USER_TEMPLATE.format(source=source)},
+            {"role": "user", "content": _build_user_message(source, custom_prompt)},
         ],
         max_tokens=2048,
         temperature=0.7,
@@ -200,6 +208,7 @@ def _call_openai(client: OpenAI, source: str) -> str:
 def generate_content_pack(
     chunks: list[Chunk],
     *,
+    custom_prompt: str | None = None,
     groq_api_key: str | None = None,
     openai_api_key: str | None = None,
 ) -> ContentPack:
@@ -211,16 +220,16 @@ def generate_content_pack(
             source = " ".join(words[:_MAX_PROMPT_WORDS])
 
         if openai_api_key:
-            raw_output = _call_openai(OpenAI(api_key=openai_api_key), source)
+            raw_output = _call_openai(OpenAI(api_key=openai_api_key), source, custom_prompt)
             logger.info("Generated with user-supplied OpenAI key.")
         elif groq_api_key:
-            raw_output = _call_groq(Groq(api_key=groq_api_key), source)
+            raw_output = _call_groq(Groq(api_key=groq_api_key), source, custom_prompt)
             logger.info("Generated with user-supplied Groq key.")
         else:
             client = _get_env_groq_client()
             if client is None:
                 raise ValueError("No API key available")
-            raw_output = _call_groq(client, source)
+            raw_output = _call_groq(client, source, custom_prompt)
 
         data = _extract_json(raw_output)
         pack = _pack_from_dict(data, chunks)

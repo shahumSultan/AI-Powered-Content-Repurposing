@@ -79,6 +79,7 @@ class UserSettings(Base):
     groq_api_key: Mapped[str | None] = mapped_column(Text, nullable=True)
     openai_api_key: Mapped[str | None] = mapped_column(Text, nullable=True)
     preferred_provider: Mapped[str] = mapped_column(String(20), default="groq")
+    custom_prompt: Mapped[str | None] = mapped_column(Text, nullable=True)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now, onupdate=_now)
 
     user: Mapped["User"] = relationship("User", back_populates="settings")

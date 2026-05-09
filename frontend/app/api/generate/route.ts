@@ -48,6 +48,9 @@ export async function POST(req: NextRequest) {
   } else if (settings?.groq_api_key) {
     backendHeaders["X-Groq-Api-Key"] = settings.groq_api_key;
   }
+  if (settings?.custom_prompt) {
+    backendHeaders["X-Custom-Prompt"] = settings.custom_prompt;
+  }
 
   // Proxy to FastAPI generate
   let upstream: Response;

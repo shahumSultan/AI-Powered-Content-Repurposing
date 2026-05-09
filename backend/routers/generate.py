@@ -64,9 +64,15 @@ def _ingest_text(text: str) -> list[Chunk]:
     return chunk_text(text)
 
 
-def _build_response(chunks: list[Chunk], errors: list[str], groq_key: str | None, openai_key: str | None) -> GenerateResponse:
+def _build_response(
+    chunks: list[Chunk],
+    errors: list[str],
+    groq_key: str | None,
+    openai_key: str | None,
+    custom_prompt: str | None = None,
+) -> GenerateResponse:
     ranked = rank(chunks)
-    pack = generate_content_pack(ranked, groq_api_key=groq_key, openai_api_key=openai_key)
+    pack = generate_content_pack(ranked, custom_prompt=custom_prompt, groq_api_key=groq_key, openai_api_key=openai_key)
     csv_str = to_csv(pack)
     return GenerateResponse(
         content_pack=pack,
@@ -81,6 +87,7 @@ def generate(
     body: GenerateRequest,
     x_groq_api_key: str | None = Header(None),
     x_openai_api_key: str | None = Header(None),
+    x_custom_prompt: str | None = Header(None),
 ) -> GenerateResponse:
     all_chunks: list[Chunk] = []
     errors: list[str] = []
@@ -105,7 +112,7 @@ def generate(
                    + " | ".join(errors),
         )
 
-    return _build_response(all_chunks, errors, x_groq_api_key, x_openai_api_key)
+    return _build_response(all_chunks, errors, x_groq_api_key, x_openai_api_key, x_custom_prompt)
 
 
 @router.post("/text", response_model=GenerateResponse)
@@ -113,11 +120,12 @@ def generate_from_text(
     body: GenerateTextRequest,
     x_groq_api_key: str | None = Header(None),
     x_openai_api_key: str | None = Header(None),
+    x_custom_prompt: str | None = Header(None),
 ) -> GenerateResponse:
     chunks = _ingest_text(body.text)
     if not chunks:
         raise HTTPException(status_code=422, detail="No content could be extracted from the provided text")
-    return _build_response(chunks, [], x_groq_api_key, x_openai_api_key)
+    return _build_response(chunks, [], x_groq_api_key, x_openai_api_key, x_custom_prompt)
 
 
 @router.post("/audio", response_model=GenerateResponse)
@@ -125,6 +133,7 @@ async def generate_from_audio(
     file: UploadFile = File(...),
     x_groq_api_key: str | None = Header(None),
     x_openai_api_key: str | None = Header(None),
+    x_custom_prompt: str | None = Header(None),
 ) -> GenerateResponse:
     audio_bytes = await file.read(_MAX_AUDIO_BYTES + 1)
     if len(audio_bytes) > _MAX_AUDIO_BYTES:
@@ -139,4 +148,4 @@ async def generate_from_audio(
     if not chunks:
         raise HTTPException(status_code=422, detail="No content could be transcribed from the audio")
 
-    return _build_response(chunks, [], x_groq_api_key, x_openai_api_key)
+    return _build_response(chunks, [], x_groq_api_key, x_openai_api_key, x_custom_prompt)

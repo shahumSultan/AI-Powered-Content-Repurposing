@@ -171,6 +171,7 @@ class SaveSettingsRequest(BaseModel):
     groq_api_key: str | None = None
     openai_api_key: str | None = None
     preferred_provider: str = "groq"
+    custom_prompt: str | None = None
 
 
 @router.get("/settings")
@@ -181,11 +182,12 @@ async def get_settings(
     result = await db.execute(select(UserSettings).where(UserSettings.user_id == current_user.id))
     s = result.scalar_one_or_none()
     if not s:
-        return {"groq_api_key": None, "openai_api_key": None, "preferred_provider": "groq"}
+        return {"groq_api_key": None, "openai_api_key": None, "preferred_provider": "groq", "custom_prompt": None}
     return {
         "groq_api_key": decrypt(s.groq_api_key),
         "openai_api_key": decrypt(s.openai_api_key),
         "preferred_provider": s.preferred_provider,
+        "custom_prompt": s.custom_prompt,
     }
 
 
@@ -203,12 +205,14 @@ async def save_settings(
         s.groq_api_key = encrypted_groq
         s.openai_api_key = encrypted_openai
         s.preferred_provider = body.preferred_provider
+        s.custom_prompt = body.custom_prompt
     else:
         s = UserSettings(
             user_id=current_user.id,
             groq_api_key=encrypted_groq,
             openai_api_key=encrypted_openai,
             preferred_provider=body.preferred_provider,
+            custom_prompt=body.custom_prompt,
         )
         db.add(s)
     await db.commit()

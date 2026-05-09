@@ -8,6 +8,7 @@ interface Settings {
   groq_api_key: string | null;
   openai_api_key: string | null;
   preferred_provider: Provider;
+  custom_prompt: string | null;
 }
 
 function EyeIcon({ open }: { open: boolean }) {
@@ -67,6 +68,7 @@ export default function SettingsPage() {
   const [groqKey, setGroqKey] = useState("");
   const [openaiKey, setOpenaiKey] = useState("");
   const [provider, setProvider] = useState<Provider>("groq");
+  const [customPrompt, setCustomPrompt] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [status, setStatus] = useState<"idle" | "saved" | "error">("idle");
@@ -78,6 +80,7 @@ export default function SettingsPage() {
         setGroqKey(d.groq_api_key ?? "");
         setOpenaiKey(d.openai_api_key ?? "");
         setProvider((d.preferred_provider as Provider) ?? "groq");
+        setCustomPrompt(d.custom_prompt ?? "");
       })
       .finally(() => setLoading(false));
   }, []);
@@ -94,6 +97,7 @@ export default function SettingsPage() {
           groq_api_key: groqKey.trim() || null,
           openai_api_key: openaiKey.trim() || null,
           preferred_provider: provider,
+          custom_prompt: customPrompt.trim() || null,
         }),
       });
       setStatus(res.ok ? "saved" : "error");
@@ -170,6 +174,31 @@ export default function SettingsPage() {
             onChange={setOpenaiKey}
             hint="Get a key at platform.openai.com. Required if OpenAI is your preferred provider."
           />
+        </div>
+
+        {/* Custom prompt */}
+        <div className="rounded-xl border border-cf-violet/14 bg-cf-panel p-5 space-y-3">
+          <div>
+            <p className="text-sm font-semibold text-zinc-100">Custom generation prompt</p>
+            <p className="mt-1 text-xs text-zinc-500">
+              Override the default prompt used to generate your content pack. Use{" "}
+              <code className="rounded bg-cf-panel-alt px-1 py-0.5 font-mono text-zinc-300">{"{source}"}</code>{" "}
+              where the extracted content should be injected. Leave blank to use the platform default.
+            </p>
+          </div>
+          <textarea
+            value={customPrompt}
+            onChange={(e) => setCustomPrompt(e.target.value)}
+            rows={10}
+            placeholder={`SOURCE MATERIAL:\n{source}\n\nGenerate exactly this JSON structure:\n{\n  "hooks": [{"text": "..."}, ...],\n  "linkedin_posts": [{"text": "..."}, ...],\n  "ig_captions": [{"text": "..."}, ...],\n  "shorts_ideas": [\n    {"title": "...", "what_to_say": "...", "timestamp_start": null, "timestamp_end": null},\n    ...\n  ]\n}\n\nRules:\n- hooks: exactly 5 items, max 140 chars each\n- linkedin_posts: exactly 2 items, 90-140 words, professional tone, end with a CTA\n- ig_captions: exactly 5 items, 30-60 words, include 3 hashtags\n- shorts_ideas: exactly 3 items; title ≤60 chars, what_to_say is 2-3 punchy sentences`}
+            spellCheck={false}
+            className="w-full rounded-lg border border-cf-violet/25 bg-cf-panel-alt px-3 py-2.5 font-mono text-xs text-zinc-100 placeholder-zinc-600 outline-none focus:border-cf-violet/60 focus:ring-1 focus:ring-cf-violet/20 resize-y"
+          />
+          {customPrompt.trim() && !customPrompt.includes("{source}") && (
+            <p className="text-xs text-amber-400">
+              Your prompt doesn&apos;t include <code className="font-mono">{"{source}"}</code> — the source content will be appended automatically.
+            </p>
+          )}
         </div>
 
         {/* Save */}
