@@ -34,7 +34,7 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 _raw_origins = os.getenv(
     "ALLOWED_ORIGINS",
-    "http://localhost:3000,https://ai-powered-content-repurposing.vercel.app",
+    "http://localhost:3000,https://content-cube-enigma-cube.vercel.app",
 )
 origins = [o.strip() for o in _raw_origins.split(",") if o.strip()]
 

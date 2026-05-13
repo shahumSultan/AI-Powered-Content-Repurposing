@@ -40,8 +40,17 @@ export async function POST(req: NextRequest) {
   });
   const settings = settingsRes.ok ? await settingsRes.json() : null;
 
+  const usingOpenai = settings?.preferred_provider === "openai";
+  const hasKey = usingOpenai ? !!settings?.openai_api_key : !!settings?.groq_api_key;
+  if (!hasKey) {
+    return NextResponse.json(
+      { detail: "No AI API key found. Please add your API key in Settings before generating content." },
+      { status: 400 }
+    );
+  }
+
   const backendHeaders: Record<string, string> = { "Content-Type": "application/json" };
-  if (settings?.preferred_provider === "openai" && settings.openai_api_key) {
+  if (usingOpenai && settings.openai_api_key) {
     backendHeaders["X-Openai-Api-Key"] = settings.openai_api_key;
   } else if (settings?.groq_api_key) {
     backendHeaders["X-Groq-Api-Key"] = settings.groq_api_key;

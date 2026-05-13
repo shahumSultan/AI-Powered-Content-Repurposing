@@ -9,7 +9,7 @@ from schemas.generate import GenerateRequest, GenerateResponse, GenerateTextRequ
 from schemas.ingest import TranscriptSegment
 from services.chunker import Chunk, chunk_text
 from services.exporter import to_csv
-from services.generator import generate_content_pack
+from services.generator import NoApiKeyError, generate_content_pack
 from services.ranker import rank
 from services.transcript import fetch_transcript
 from services.transcriber import transcribe
@@ -72,7 +72,10 @@ def _build_response(
     custom_prompt: str | None = None,
 ) -> GenerateResponse:
     ranked = rank(chunks)
-    pack = generate_content_pack(ranked, custom_prompt=custom_prompt, groq_api_key=groq_key, openai_api_key=openai_key)
+    try:
+        pack = generate_content_pack(ranked, custom_prompt=custom_prompt, groq_api_key=groq_key, openai_api_key=openai_key)
+    except NoApiKeyError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
     csv_str = to_csv(pack)
     return GenerateResponse(
         content_pack=pack,

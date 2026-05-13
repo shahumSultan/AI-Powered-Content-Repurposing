@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import type { GenerateResponse } from "@/lib/api";
 import { GENERATE_PLACEHOLDER } from "@/lib/config";
 import ContentPackView from "./ContentPackView";
@@ -27,17 +28,15 @@ export default function GenerateForm() {
   const [isDragging, setIsDragging] = useState(false);
 
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<GenerateResponse | null>(null);
 
   function handleFileSelect(file: File | null) {
     if (!file) return;
     const sizeLimit = 25 * 1024 * 1024;
     if (file.size > sizeLimit) {
-      setError("File exceeds 25 MB limit");
+      toast.error("File exceeds 25 MB limit");
       return;
     }
-    setError(null);
     setAudioFile(file);
   }
 
@@ -50,7 +49,6 @@ export default function GenerateForm() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
-    setError(null);
     setResult(null);
 
     try {
@@ -93,15 +91,18 @@ export default function GenerateForm() {
 
       if (!res.ok) {
         const err = await res.json().catch(() => ({ detail: "Unknown error" }));
-        setError(err.detail ?? `Request failed: ${res.status}`);
+        toast.error(err.detail ?? `Request failed: ${res.status}`);
         return;
       }
 
       const data: GenerateResponse = await res.json();
+      if (data.errors.length > 0) {
+        data.errors.forEach((e) => toast.warning(e));
+      }
       setResult(data);
       router.refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong");
+      toast.error(err instanceof Error ? err.message : "Something went wrong");
     } finally {
       setLoading(false);
     }
@@ -120,7 +121,7 @@ export default function GenerateForm() {
           <button
             key={id}
             type="button"
-            onClick={() => { setTab(id); setError(null); setResult(null); }}
+            onClick={() => { setTab(id); setResult(null); }}
             className={`flex-1 rounded-md py-1.5 text-sm font-medium transition-colors ${
               tab === id
                 ? "bg-cf-violet text-white"
@@ -219,30 +220,12 @@ export default function GenerateForm() {
         </button>
       </form>
 
-      {error && (
-        <div className="rounded-lg border border-red-800 bg-red-950/50 px-4 py-3 text-sm text-red-400">
-          {error}
-        </div>
-      )}
-
       {result && (
-        <div className="space-y-3">
-          {result.errors.length > 0 && (
-            <div className="rounded-lg border border-yellow-800 bg-yellow-950/40 px-4 py-3 space-y-1">
-              <p className="text-xs font-medium text-yellow-400">
-                Some URLs could not be processed:
-              </p>
-              {result.errors.map((err, i) => (
-                <p key={i} className="text-xs text-yellow-500">{err}</p>
-              ))}
-            </div>
-          )}
-          <ContentPackView
-            pack={result.content_pack}
-            csv={result.export_csv}
-            json={result.export_json}
-          />
-        </div>
+        <ContentPackView
+          pack={result.content_pack}
+          csv={result.export_csv}
+          json={result.export_json}
+        />
       )}
     </div>
   );

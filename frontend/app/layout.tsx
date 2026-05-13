@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { DM_Sans, DM_Mono, Syne } from "next/font/google";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Analytics } from "@vercel/analytics/next";
+import { Toaster } from "sonner";
 import "./globals.css";
 
 const dmSans = DM_Sans({
@@ -52,6 +53,7 @@ export default function RootLayout({
         className={`${dmSans.variable} ${dmMono.variable} ${syne.variable} antialiased`}
       >
         {children}
+        <Toaster position="top-right" richColors />
         <SpeedInsights />
         <Analytics />
       </body>

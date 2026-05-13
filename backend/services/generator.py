@@ -4,8 +4,8 @@ Content pack generator — Groq (default) or OpenAI.
 Priority for API keys:
   1. openai_api_key passed per-request  → use OpenAI
   2. groq_api_key passed per-request    → use Groq with that key
-  3. GROQ_API_KEY env var               → use Groq with env key
-  4. None of the above                  → stub fallback
+  3. GROQ_API_KEY env var               → use Groq with env key (trial/unauthenticated only)
+  4. None of the above                  → raises NoApiKeyError
 """
 
 from __future__ import annotations
@@ -25,6 +25,11 @@ from schemas.generate import (
 from services.chunker import Chunk
 
 logger = logging.getLogger(__name__)
+
+
+class NoApiKeyError(Exception):
+    pass
+
 
 _GROQ_MODEL   = "llama-3.3-70b-versatile"
 _OPENAI_MODEL = "gpt-4o-mini"
@@ -167,11 +172,34 @@ def _stub_pack(chunks: list[Chunk]) -> ContentPack:
 # LLM call helpers
 # ---------------------------------------------------------------------------
 
+_JSON_STRUCTURE_REQUIREMENT = """\
+Generate exactly this JSON structure:
+{
+  "hooks": [{"text": "..."}, ...],
+  "linkedin_posts": [{"text": "..."}, ...],
+  "ig_captions": [{"text": "..."}, ...],
+  "shorts_ideas": [
+    {"title": "...", "what_to_say": "...", "timestamp_start": null, "timestamp_end": null},
+    ...
+  ]
+}
+Rules:
+- hooks: exactly 5 items, max 140 chars each, attention-grabbing opening lines
+- linkedin_posts: exactly 2 items, 90-140 words each, professional tone, end with a CTA
+- ig_captions: exactly 5 items, 30-60 words each, include 3 relevant hashtags
+- shorts_ideas: exactly 3 items; title ≤60 chars, what_to_say is 2-3 punchy sentences"""
+
+
 def _build_user_message(source: str, custom_prompt: str | None) -> str:
     if custom_prompt:
         if "{source}" in custom_prompt:
-            return custom_prompt.format(source=source)
-        return custom_prompt + "\n\nSOURCE MATERIAL:\n" + source
+            base = custom_prompt.format(source=source)
+        else:
+            base = custom_prompt + "\n\nSOURCE MATERIAL:\n" + source
+        # Append JSON structure requirement when the user hasn't included it
+        if '"hooks"' not in base:
+            base += "\n\n" + _JSON_STRUCTURE_REQUIREMENT
+        return base
     return _USER_TEMPLATE.format(source=source)
 
 
@@ -212,6 +240,22 @@ def generate_content_pack(
     groq_api_key: str | None = None,
     openai_api_key: str | None = None,
 ) -> ContentPack:
+    # Resolve which client to use — raises NoApiKeyError before any LLM call
+    if openai_api_key:
+        client_type = "openai"
+        llm_client = OpenAI(api_key=openai_api_key)
+    elif groq_api_key:
+        client_type = "groq"
+        llm_client = Groq(api_key=groq_api_key)
+    else:
+        env_client = _get_env_groq_client()
+        if env_client is None:
+            raise NoApiKeyError(
+                "No AI API key configured. Please add your API key in Settings."
+            )
+        client_type = "groq_env"
+        llm_client = env_client
+
     try:
         selected = chunks[:_TOP_CHUNKS]
         source = "\n\n".join(c.text for c in selected)
@@ -219,17 +263,13 @@ def generate_content_pack(
         if len(words) > _MAX_PROMPT_WORDS:
             source = " ".join(words[:_MAX_PROMPT_WORDS])
 
-        if openai_api_key:
-            raw_output = _call_openai(OpenAI(api_key=openai_api_key), source, custom_prompt)
+        if client_type == "openai":
+            raw_output = _call_openai(llm_client, source, custom_prompt)
             logger.info("Generated with user-supplied OpenAI key.")
-        elif groq_api_key:
-            raw_output = _call_groq(Groq(api_key=groq_api_key), source, custom_prompt)
-            logger.info("Generated with user-supplied Groq key.")
         else:
-            client = _get_env_groq_client()
-            if client is None:
-                raise ValueError("No API key available")
-            raw_output = _call_groq(client, source, custom_prompt)
+            raw_output = _call_groq(llm_client, source, custom_prompt)
+            if client_type == "groq":
+                logger.info("Generated with user-supplied Groq key.")
 
         data = _extract_json(raw_output)
         pack = _pack_from_dict(data, chunks)

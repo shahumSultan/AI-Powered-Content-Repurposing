@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 type Provider = "groq" | "openai";
 
@@ -71,7 +72,6 @@ export default function SettingsPage() {
   const [customPrompt, setCustomPrompt] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [status, setStatus] = useState<"idle" | "saved" | "error">("idle");
 
   useEffect(() => {
     fetch("/api/settings")
@@ -88,7 +88,6 @@ export default function SettingsPage() {
   async function handleSave(e: React.FormEvent) {
     e.preventDefault();
     setSaving(true);
-    setStatus("idle");
     try {
       const res = await fetch("/api/settings", {
         method: "POST",
@@ -100,9 +99,13 @@ export default function SettingsPage() {
           custom_prompt: customPrompt.trim() || null,
         }),
       });
-      setStatus(res.ok ? "saved" : "error");
+      if (res.ok) {
+        toast.success("Settings saved");
+      } else {
+        toast.error("Failed to save settings. Please try again.");
+      }
     } catch {
-      setStatus("error");
+      toast.error("Failed to save settings. Please try again.");
     } finally {
       setSaving(false);
     }
@@ -125,7 +128,7 @@ export default function SettingsPage() {
     <div className="max-w-xl">
       <h1 className="mb-1 text-2xl font-bold text-zinc-100">Settings</h1>
       <p className="mb-8 text-sm text-zinc-500">
-        Save your own API key to use for content generation. Your key is stored securely and never shared.
+        Add your own API key to enable content generation. Your key is stored securely and never shared.
       </p>
 
       <form onSubmit={handleSave} className="space-y-6">
@@ -164,7 +167,7 @@ export default function SettingsPage() {
             placeholder="gsk_..."
             value={groqKey}
             onChange={setGroqKey}
-            hint="Get a free key at console.groq.com. Leave blank to use the platform default."
+            hint="Get a free key at console.groq.com. Required when Groq is your preferred provider."
           />
 
           <ApiKeyInput
@@ -202,7 +205,7 @@ export default function SettingsPage() {
         </div>
 
         {/* Save */}
-        <div className="flex items-center gap-4">
+        <div>
           <button
             type="submit"
             disabled={saving}
@@ -210,18 +213,6 @@ export default function SettingsPage() {
           >
             {saving ? "Saving…" : "Save settings"}
           </button>
-
-          {status === "saved" && (
-            <span className="flex items-center gap-1.5 text-sm text-emerald-400">
-              <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
-              </svg>
-              Saved
-            </span>
-          )}
-          {status === "error" && (
-            <span className="text-sm text-red-400">Failed to save. Please try again.</span>
-          )}
         </div>
       </form>
     </div>
