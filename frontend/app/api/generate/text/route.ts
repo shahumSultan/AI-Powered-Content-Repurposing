@@ -87,7 +87,9 @@ export async function POST(req: NextRequest) {
     body: JSON.stringify({
       urls: [],
       title: `Text input — ${String(bodyObj.text).slice(0, 60)}…`,
-      content_pack: data.export_json,
+      content_pack: data.raw_output
+        ? { __raw_output__: data.raw_output }
+        : data.export_json,
     }),
   }).catch(() => {});
 

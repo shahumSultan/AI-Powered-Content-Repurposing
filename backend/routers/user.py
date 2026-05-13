@@ -136,7 +136,7 @@ async def get_history(
             "title": r.title,
             "urls": r.urls,
             "created_at": r.created_at.isoformat(),
-            "has_content": r.content_pack is not None,
+            "has_content": bool(r.content_pack),
         }
         for r in rows
     ]

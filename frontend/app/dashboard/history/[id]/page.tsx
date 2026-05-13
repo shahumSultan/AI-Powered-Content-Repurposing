@@ -3,12 +3,13 @@ import Link from "next/link";
 import { apiFetch } from "@/lib/auth";
 import type { ContentPack } from "@/lib/api";
 import ContentPackView from "@/components/ContentPackView";
+import FreeFormView from "@/components/FreeFormView";
 
 interface HistoryDetail {
   id: string;
   title: string | null;
   urls: string[];
-  content_pack: ContentPack | null;
+  content_pack: (ContentPack & { __raw_output__?: string }) | null;
   created_at: string;
 }
 
@@ -52,7 +53,9 @@ export default async function HistoryDetailPage({ params }: { params: Promise<{ 
         </div>
       </div>
 
-      {record.content_pack ? (
+      {record.content_pack?.__raw_output__ ? (
+        <FreeFormView text={record.content_pack.__raw_output__} />
+      ) : record.content_pack ? (
         <ContentPackView
           pack={record.content_pack}
           csv={null}
