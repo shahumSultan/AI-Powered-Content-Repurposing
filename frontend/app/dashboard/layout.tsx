@@ -4,6 +4,7 @@ import { apiFetch } from "@/lib/auth";
 import { signOut } from "@/app/auth/actions";
 import DashboardNav from "@/components/dashboard/DashboardNav";
 import MobileBottomNav from "@/components/dashboard/MobileBottomNav";
+import WelcomeModal from "@/components/WelcomeModal";
 import type { AuthUser } from "@/lib/auth";
 
 interface PlanData {
@@ -157,6 +158,8 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
       {/* Bottom nav on mobile */}
       <MobileBottomNav />
+
+      <WelcomeModal />
     </div>
   );
 }

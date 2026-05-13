@@ -70,6 +70,11 @@ const navItems = [
   },
 ];
 
+function reopenTutorial() {
+  localStorage.removeItem("cc_welcome_seen");
+  window.location.reload();
+}
+
 export default function DashboardNav() {
   const pathname = usePathname();
 
@@ -92,6 +97,18 @@ export default function DashboardNav() {
           </Link>
         );
       })}
+
+      <div className="mt-2 border-t border-cf-violet/10 pt-2">
+        <button
+          onClick={reopenTutorial}
+          className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-zinc-400 transition-colors hover:bg-cf-panel-alt/60 hover:text-zinc-100"
+        >
+          <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={1.75} viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 5.25h.008v.008H12v-.008Z" />
+          </svg>
+          How to use
+        </button>
+      </div>
     </nav>
   );
 }
