@@ -10,7 +10,7 @@ from schemas.generate import GenerateRequest, GenerateResponse, GenerateTextRequ
 from schemas.ingest import TranscriptSegment
 from services.chunker import Chunk, chunk_text
 from services.exporter import to_csv
-from services.generator import NoApiKeyError, generate_content_pack
+from services.generator import NoApiKeyError, generate_content_pack, generate_free_form
 from services.ranker import rank
 from services.transcript import fetch_transcript
 from services.transcriber import transcribe
@@ -75,15 +75,31 @@ def _ingest_text(text: str) -> list[Chunk]:
     return chunk_text(text)
 
 
+def _empty_pack():
+    from schemas.generate import ContentPack
+    return ContentPack(hooks=[], linkedin_posts=[], ig_captions=[], shorts_ideas=[])
+
+
 def _build_response(
     chunks: list[Chunk],
     errors: list[str],
     groq_key: str | None,
     openai_key: str | None,
     custom_prompt: str | None = None,
+    free_form: bool = False,
 ) -> GenerateResponse:
     ranked = rank(chunks)
     try:
+        if free_form and custom_prompt:
+            raw = generate_free_form(ranked, custom_prompt=custom_prompt, groq_api_key=groq_key, openai_api_key=openai_key)
+            pack = _empty_pack()
+            return GenerateResponse(
+                content_pack=pack,
+                errors=errors,
+                export_json={},
+                export_csv="",
+                raw_output=raw,
+            )
         pack = generate_content_pack(ranked, custom_prompt=custom_prompt, groq_api_key=groq_key, openai_api_key=openai_key)
     except NoApiKeyError as exc:
         raise HTTPException(status_code=400, detail=str(exc))
@@ -102,6 +118,7 @@ def generate(
     x_groq_api_key: str | None = Header(None),
     x_openai_api_key: str | None = Header(None),
     x_custom_prompt: str | None = Header(None),
+    x_free_form: str | None = Header(None),
 ) -> GenerateResponse:
     all_chunks: list[Chunk] = []
     errors: list[str] = []
@@ -126,7 +143,7 @@ def generate(
                    + " | ".join(errors),
         )
 
-    return _build_response(all_chunks, errors, x_groq_api_key, x_openai_api_key, _decode_prompt(x_custom_prompt))
+    return _build_response(all_chunks, errors, x_groq_api_key, x_openai_api_key, _decode_prompt(x_custom_prompt), free_form=x_free_form == "true")
 
 
 @router.post("/text", response_model=GenerateResponse)
@@ -135,11 +152,12 @@ def generate_from_text(
     x_groq_api_key: str | None = Header(None),
     x_openai_api_key: str | None = Header(None),
     x_custom_prompt: str | None = Header(None),
+    x_free_form: str | None = Header(None),
 ) -> GenerateResponse:
     chunks = _ingest_text(body.text)
     if not chunks:
         raise HTTPException(status_code=422, detail="No content could be extracted from the provided text")
-    return _build_response(chunks, [], x_groq_api_key, x_openai_api_key, _decode_prompt(x_custom_prompt))
+    return _build_response(chunks, [], x_groq_api_key, x_openai_api_key, _decode_prompt(x_custom_prompt), free_form=x_free_form == "true")
 
 
 @router.post("/audio", response_model=GenerateResponse)
@@ -148,6 +166,7 @@ async def generate_from_audio(
     x_groq_api_key: str | None = Header(None),
     x_openai_api_key: str | None = Header(None),
     x_custom_prompt: str | None = Header(None),
+    x_free_form: str | None = Header(None),
 ) -> GenerateResponse:
     audio_bytes = await file.read(_MAX_AUDIO_BYTES + 1)
     if len(audio_bytes) > _MAX_AUDIO_BYTES:
@@ -162,4 +181,4 @@ async def generate_from_audio(
     if not chunks:
         raise HTTPException(status_code=422, detail="No content could be transcribed from the audio")
 
-    return _build_response(chunks, [], x_groq_api_key, x_openai_api_key, _decode_prompt(x_custom_prompt))
+    return _build_response(chunks, [], x_groq_api_key, x_openai_api_key, _decode_prompt(x_custom_prompt), free_form=x_free_form == "true")

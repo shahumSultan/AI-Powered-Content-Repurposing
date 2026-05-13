@@ -37,6 +37,7 @@ export interface GenerateResponse {
   errors: string[];
   export_json: Record<string, unknown>;
   export_csv: string;
+  raw_output: string | null;
 }
 
 async function post<T>(path: string, body: Record<string, unknown>): Promise<T> {

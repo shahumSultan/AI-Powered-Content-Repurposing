@@ -80,6 +80,7 @@ class UserSettings(Base):
     openai_api_key: Mapped[str | None] = mapped_column(Text, nullable=True)
     preferred_provider: Mapped[str] = mapped_column(String(20), default="groq")
     custom_prompt: Mapped[str | None] = mapped_column(Text, nullable=True)
+    free_form_output: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False, server_default="false")
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now, onupdate=_now)
 
     user: Mapped["User"] = relationship("User", back_populates="settings")

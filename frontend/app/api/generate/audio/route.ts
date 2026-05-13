@@ -69,6 +69,9 @@ export async function POST(req: NextRequest) {
   if (settings?.custom_prompt) {
     backendHeaders["X-Custom-Prompt"] = Buffer.from(settings.custom_prompt, "utf-8").toString("base64");
   }
+  if (settings?.free_form_output) {
+    backendHeaders["X-Free-Form"] = "true";
+  }
 
   // Re-stream as multipart to the FastAPI backend
   const upstream_form = new FormData();

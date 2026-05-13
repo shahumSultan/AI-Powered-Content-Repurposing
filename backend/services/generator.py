@@ -230,6 +230,62 @@ def _call_openai(client: OpenAI, source: str, custom_prompt: str | None = None) 
 
 
 # ---------------------------------------------------------------------------
+# Free-form output (custom prompt, no JSON enforcement)
+# ---------------------------------------------------------------------------
+
+_FREE_FORM_SYSTEM_PROMPT = (
+    "You are a helpful content assistant. "
+    "Follow the user's instructions exactly. "
+    "Output only the content requested — no extra commentary, no JSON, no code fences."
+)
+
+
+def generate_free_form(
+    chunks: list[Chunk],
+    *,
+    custom_prompt: str,
+    groq_api_key: str | None = None,
+    openai_api_key: str | None = None,
+) -> str:
+    if openai_api_key:
+        llm_client: OpenAI | Groq = OpenAI(api_key=openai_api_key)
+        use_openai = True
+    elif groq_api_key:
+        llm_client = Groq(api_key=groq_api_key)
+        use_openai = False
+    else:
+        env_client = _get_env_groq_client()
+        if env_client is None:
+            raise NoApiKeyError("No AI API key configured. Please add your API key in Settings.")
+        llm_client = env_client
+        use_openai = False
+
+    selected = chunks[:_TOP_CHUNKS]
+    source = "\n\n".join(c.text for c in selected)
+    words = source.split()
+    if len(words) > _MAX_PROMPT_WORDS:
+        source = " ".join(words[:_MAX_PROMPT_WORDS])
+
+    if "{source}" in custom_prompt:
+        user_message = custom_prompt.format(source=source)
+    else:
+        user_message = custom_prompt + "\n\nSOURCE MATERIAL:\n" + source
+
+    model = _OPENAI_MODEL if use_openai else _GROQ_MODEL
+    client_obj = llm_client  # type: ignore[assignment]
+    response = client_obj.chat.completions.create(
+        model=model,
+        messages=[
+            {"role": "system", "content": _FREE_FORM_SYSTEM_PROMPT},
+            {"role": "user", "content": user_message},
+        ],
+        max_tokens=2048,
+        temperature=0.7,
+    )
+    return response.choices[0].message.content or ""
+
+
+# ---------------------------------------------------------------------------
 # Public entry point
 # ---------------------------------------------------------------------------
 

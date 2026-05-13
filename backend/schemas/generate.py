@@ -56,3 +56,4 @@ class GenerateResponse(BaseModel):
     errors: list[str]
     export_json: dict
     export_csv: str
+    raw_output: str | None = None

@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import type { GenerateResponse } from "@/lib/api";
 import { GENERATE_PLACEHOLDER } from "@/lib/config";
 import ContentPackView from "./ContentPackView";
+import FreeFormView from "./FreeFormView";
 
 type Tab = "urls" | "text" | "audio";
 
@@ -221,11 +222,13 @@ export default function GenerateForm() {
       </form>
 
       {result && (
-        <ContentPackView
-          pack={result.content_pack}
-          csv={result.export_csv}
-          json={result.export_json}
-        />
+        result.raw_output
+          ? <FreeFormView text={result.raw_output} />
+          : <ContentPackView
+              pack={result.content_pack}
+              csv={result.export_csv}
+              json={result.export_json}
+            />
       )}
     </div>
   );

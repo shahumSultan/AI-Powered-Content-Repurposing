@@ -10,6 +10,7 @@ interface Settings {
   openai_api_key: string | null;
   preferred_provider: Provider;
   custom_prompt: string | null;
+  free_form_output: boolean;
 }
 
 function EyeIcon({ open }: { open: boolean }) {
@@ -70,6 +71,7 @@ export default function SettingsPage() {
   const [openaiKey, setOpenaiKey] = useState("");
   const [provider, setProvider] = useState<Provider>("groq");
   const [customPrompt, setCustomPrompt] = useState("");
+  const [freeFormOutput, setFreeFormOutput] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -81,6 +83,7 @@ export default function SettingsPage() {
         setOpenaiKey(d.openai_api_key ?? "");
         setProvider((d.preferred_provider as Provider) ?? "groq");
         setCustomPrompt(d.custom_prompt ?? "");
+        setFreeFormOutput(d.free_form_output ?? false);
       })
       .finally(() => setLoading(false));
   }, []);
@@ -97,6 +100,7 @@ export default function SettingsPage() {
           openai_api_key: openaiKey.trim() || null,
           preferred_provider: provider,
           custom_prompt: customPrompt.trim() || null,
+          free_form_output: freeFormOutput,
         }),
       });
       if (res.ok) {
@@ -180,15 +184,44 @@ export default function SettingsPage() {
         </div>
 
         {/* Custom prompt */}
-        <div className="rounded-xl border border-cf-violet/14 bg-cf-panel p-5 space-y-3">
+        <div className="rounded-xl border border-cf-violet/14 bg-cf-panel p-5 space-y-4">
           <div>
             <p className="text-sm font-semibold text-zinc-100">Custom generation prompt</p>
             <p className="mt-1 text-xs text-zinc-500">
-              Override the default prompt used to generate your content pack. Use{" "}
+              Override the default prompt used to generate your content. Use{" "}
               <code className="rounded bg-cf-panel-alt px-1 py-0.5 font-mono text-zinc-300">{"{source}"}</code>{" "}
               where the extracted content should be injected. Leave blank to use the platform default.
             </p>
           </div>
+
+          {/* Output mode toggle — only shown when a custom prompt is entered */}
+          {customPrompt.trim() && (
+            <div>
+              <p className="mb-2 text-xs font-medium text-zinc-400">Output mode</p>
+              <div className="flex gap-2">
+                {([false, true] as const).map((val) => (
+                  <button
+                    key={String(val)}
+                    type="button"
+                    onClick={() => setFreeFormOutput(val)}
+                    className={`flex-1 rounded-lg border px-3 py-2 text-xs font-medium transition ${
+                      freeFormOutput === val
+                        ? "border-cf-violet/60 bg-cf-violet/10 text-cf-violet"
+                        : "border-cf-violet/25 bg-cf-panel-alt text-zinc-400 hover:border-cf-violet/40 hover:text-zinc-200"
+                    }`}
+                  >
+                    {val ? "Free-form" : "Structured"}
+                  </button>
+                ))}
+              </div>
+              <p className="mt-1.5 text-xs text-zinc-500">
+                {freeFormOutput
+                  ? "AI follows your prompt exactly — output is shown as plain text. Perfect for custom formats like podcast reels."
+                  : "AI uses your prompt for style but still outputs the standard hooks / LinkedIn / IG / Shorts pack."}
+              </p>
+            </div>
+          )}
+
           <textarea
             value={customPrompt}
             onChange={(e) => setCustomPrompt(e.target.value)}
