@@ -61,7 +61,7 @@ export async function POST(req: NextRequest) {
     backendHeaders["X-Groq-Api-Key"] = settings.groq_api_key;
   }
   if (settings?.custom_prompt) {
-    backendHeaders["X-Custom-Prompt"] = settings.custom_prompt;
+    backendHeaders["X-Custom-Prompt"] = Buffer.from(settings.custom_prompt, "utf-8").toString("base64");
   }
 
   let upstream: Response;

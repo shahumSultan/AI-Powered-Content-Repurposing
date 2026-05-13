@@ -1,4 +1,5 @@
 from __future__ import annotations
+import base64
 import json
 from urllib.parse import urlparse
 import httpx
@@ -18,6 +19,16 @@ from core.ssrf import assert_safe_url
 router = APIRouter(prefix="/generate", tags=["generate"])
 
 _MAX_AUDIO_BYTES = 25 * 1024 * 1024  # 25 MB
+
+
+def _decode_prompt(raw: str | None) -> str | None:
+    """Decode a base64-encoded custom prompt header sent by the frontend."""
+    if not raw:
+        return None
+    try:
+        return base64.b64decode(raw).decode("utf-8")
+    except Exception:
+        return raw  # fall back to raw value for any non-base64 clients
 
 
 def _is_youtube(url: str) -> bool:
@@ -115,7 +126,7 @@ def generate(
                    + " | ".join(errors),
         )
 
-    return _build_response(all_chunks, errors, x_groq_api_key, x_openai_api_key, x_custom_prompt)
+    return _build_response(all_chunks, errors, x_groq_api_key, x_openai_api_key, _decode_prompt(x_custom_prompt))
 
 
 @router.post("/text", response_model=GenerateResponse)
@@ -128,7 +139,7 @@ def generate_from_text(
     chunks = _ingest_text(body.text)
     if not chunks:
         raise HTTPException(status_code=422, detail="No content could be extracted from the provided text")
-    return _build_response(chunks, [], x_groq_api_key, x_openai_api_key, x_custom_prompt)
+    return _build_response(chunks, [], x_groq_api_key, x_openai_api_key, _decode_prompt(x_custom_prompt))
 
 
 @router.post("/audio", response_model=GenerateResponse)
@@ -151,4 +162,4 @@ async def generate_from_audio(
     if not chunks:
         raise HTTPException(status_code=422, detail="No content could be transcribed from the audio")
 
-    return _build_response(chunks, [], x_groq_api_key, x_openai_api_key, x_custom_prompt)
+    return _build_response(chunks, [], x_groq_api_key, x_openai_api_key, _decode_prompt(x_custom_prompt))
