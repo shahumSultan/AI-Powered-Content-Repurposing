@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { AUTH_COOKIE } from "@/lib/auth";
 import { BACKEND_URL } from "@/lib/config";
 
+export const maxDuration = 60;
+
 export async function POST(req: NextRequest) {
   let body: unknown;
   try {
@@ -18,11 +20,16 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ detail: "Invalid request: urls must be an array" }, { status: 400 });
   }
 
-  // Check and consume generation quota
-  const quotaRes = await fetch(`${BACKEND_URL}/user/consume-generation`, {
-    method: "POST",
-    headers: { Authorization: `Bearer ${token}` },
-  });
+  // Fetch quota and settings in parallel
+  const [quotaRes, settingsRes] = await Promise.all([
+    fetch(`${BACKEND_URL}/user/consume-generation`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+    fetch(`${BACKEND_URL}/user/settings`, {
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+  ]);
 
   if (!quotaRes.ok) {
     return NextResponse.json({ detail: "Could not verify generation quota" }, { status: 500 });
@@ -36,10 +43,6 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // Fetch user's API key settings
-  const settingsRes = await fetch(`${BACKEND_URL}/user/settings`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
   const settings = settingsRes.ok ? await settingsRes.json() : null;
 
   const usingOpenai = settings?.preferred_provider === "openai";
@@ -82,7 +85,7 @@ export async function POST(req: NextRequest) {
     ? `YouTube — ${firstUrl}`
     : firstUrl;
 
-  // Record generation history with full content pack (best-effort)
+  // Record generation history (best-effort)
   fetch(`${BACKEND_URL}/user/record-generation`, {
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },

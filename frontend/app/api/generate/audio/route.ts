@@ -4,6 +4,8 @@ import { BACKEND_URL } from "@/lib/config";
 
 const MAX_BYTES = 25 * 1024 * 1024; // 25 MB
 
+export const maxDuration = 60;
+
 export async function POST(req: NextRequest) {
   const token = req.cookies.get(AUTH_COOKIE)?.value;
   if (!token) return NextResponse.json({ detail: "Unauthorized" }, { status: 401 });
@@ -24,10 +26,16 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ detail: "Audio file exceeds 25 MB limit" }, { status: 413 });
   }
 
-  const quotaRes = await fetch(`${BACKEND_URL}/user/consume-generation`, {
-    method: "POST",
-    headers: { Authorization: `Bearer ${token}` },
-  });
+  // Fetch quota and settings in parallel
+  const [quotaRes, settingsRes] = await Promise.all([
+    fetch(`${BACKEND_URL}/user/consume-generation`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+    fetch(`${BACKEND_URL}/user/settings`, {
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+  ]);
 
   if (!quotaRes.ok) {
     return NextResponse.json({ detail: "Could not verify generation quota" }, { status: 500 });
@@ -41,9 +49,6 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const settingsRes = await fetch(`${BACKEND_URL}/user/settings`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
   const settings = settingsRes.ok ? await settingsRes.json() : null;
 
   const usingOpenai = settings?.preferred_provider === "openai";
