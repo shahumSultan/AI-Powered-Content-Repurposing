@@ -101,11 +101,11 @@ async def stripe_webhook(request: Request, db: AsyncSession = Depends(get_db)):
     obj = event["data"]["object"]
 
     if event_type == "checkout.session.completed":
-        user_id = obj.get("client_reference_id")
-        sub_id = obj.get("subscription")
+        user_id = getattr(obj, "client_reference_id", None)
+        sub_id = getattr(obj, "subscription", None)
         if user_id and sub_id:
             sub = stripe.Subscription.retrieve(sub_id)
-            plan = sub.metadata.get("plan", "beginner")
+            plan = getattr(sub.metadata, "plan", None) or "beginner"
             await _upsert_plan(db, user_id,
                 plan=plan,
                 gens_limit=999999 if plan == "pro" else 5,
@@ -114,19 +114,21 @@ async def stripe_webhook(request: Request, db: AsyncSession = Depends(get_db)):
             )
 
     elif event_type == "customer.subscription.updated":
-        user_id = obj.get("metadata", {}).get("user_id")
+        metadata = getattr(obj, "metadata", None)
+        user_id = getattr(metadata, "user_id", None) if metadata else None
         if user_id:
-            is_active = obj["status"] == "active"
-            plan = obj.get("metadata", {}).get("plan", "beginner")
+            is_active = getattr(obj, "status", None) == "active"
+            plan = (getattr(metadata, "plan", None) or "beginner") if metadata else "beginner"
             await _upsert_plan(db, user_id,
                 plan=plan if is_active else "free",
                 gens_limit=(999999 if plan == "pro" else 5) if is_active else 3,
-                stripe_subscription_id=obj["id"],
-                subscription_status=obj["status"],
+                stripe_subscription_id=getattr(obj, "id", None),
+                subscription_status=getattr(obj, "status", None),
             )
 
     elif event_type == "customer.subscription.deleted":
-        user_id = obj.get("metadata", {}).get("user_id")
+        metadata = getattr(obj, "metadata", None)
+        user_id = getattr(metadata, "user_id", None) if metadata else None
         if user_id:
             await _upsert_plan(db, user_id,
                 plan="free",
