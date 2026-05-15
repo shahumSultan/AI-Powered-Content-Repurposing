@@ -72,18 +72,24 @@ export default function SettingsPage() {
   const [provider, setProvider] = useState<Provider>("groq");
   const [customPrompt, setCustomPrompt] = useState("");
   const [freeFormOutput, setFreeFormOutput] = useState(false);
+  const [isPro, setIsPro] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    fetch("/api/settings")
-      .then((r) => r.json())
-      .then((d: Settings) => {
+    Promise.all([fetch("/api/settings"), fetch("/api/plan")])
+      .then(async ([settingsRes, planRes]) => {
+        const d: Settings = await settingsRes.json();
         setGroqKey(d.groq_api_key ?? "");
         setOpenaiKey(d.openai_api_key ?? "");
         setProvider((d.preferred_provider as Provider) ?? "groq");
         setCustomPrompt(d.custom_prompt ?? "");
         setFreeFormOutput(d.free_form_output ?? false);
+
+        if (planRes.ok) {
+          const p = await planRes.json();
+          setIsPro(p.is_admin || p.plan === "pro");
+        }
       })
       .finally(() => setLoading(false));
   }, []);
@@ -184,58 +190,82 @@ export default function SettingsPage() {
         </div>
 
         {/* Custom prompt */}
-        <div className="rounded-xl border border-cf-violet/14 bg-cf-panel p-5 space-y-4">
-          <div>
-            <p className="text-sm font-semibold text-zinc-100">Custom generation prompt</p>
-            <p className="mt-1 text-xs text-zinc-500">
-              Override the default prompt used to generate your content. Use{" "}
-              <code className="rounded bg-cf-panel-alt px-1 py-0.5 font-mono text-zinc-300">{"{source}"}</code>{" "}
-              where the extracted content should be injected. Leave blank to use the platform default.
-            </p>
-          </div>
-
-          {/* Output mode toggle — only shown when a custom prompt is entered */}
-          {customPrompt.trim() && (
+        {isPro ? (
+          <div className="rounded-xl border border-cf-violet/14 bg-cf-panel p-5 space-y-4">
             <div>
-              <p className="mb-2 text-xs font-medium text-zinc-400">Output mode</p>
-              <div className="flex gap-2">
-                {([false, true] as const).map((val) => (
-                  <button
-                    key={String(val)}
-                    type="button"
-                    onClick={() => setFreeFormOutput(val)}
-                    className={`flex-1 rounded-lg border px-3 py-2 text-xs font-medium transition ${
-                      freeFormOutput === val
-                        ? "border-cf-violet/60 bg-cf-violet/10 text-cf-violet"
-                        : "border-cf-violet/25 bg-cf-panel-alt text-zinc-400 hover:border-cf-violet/40 hover:text-zinc-200"
-                    }`}
-                  >
-                    {val ? "Free-form" : "Structured"}
-                  </button>
-                ))}
-              </div>
-              <p className="mt-1.5 text-xs text-zinc-500">
-                {freeFormOutput
-                  ? "AI follows your prompt exactly — output is shown as plain text. Perfect for custom formats like podcast reels."
-                  : "AI uses your prompt for style but still outputs the standard hooks / LinkedIn / IG / Shorts pack."}
+              <p className="text-sm font-semibold text-zinc-100">Custom generation prompt</p>
+              <p className="mt-1 text-xs text-zinc-500">
+                Override the default prompt used to generate your content. Use{" "}
+                <code className="rounded bg-cf-panel-alt px-1 py-0.5 font-mono text-zinc-300">{"{source}"}</code>{" "}
+                where the extracted content should be injected. Leave blank to use the platform default.
               </p>
             </div>
-          )}
 
-          <textarea
-            value={customPrompt}
-            onChange={(e) => setCustomPrompt(e.target.value)}
-            rows={10}
-            placeholder={`SOURCE MATERIAL:\n{source}\n\nGenerate exactly this JSON structure:\n{\n  "hooks": [{"text": "..."}, ...],\n  "linkedin_posts": [{"text": "..."}, ...],\n  "ig_captions": [{"text": "..."}, ...],\n  "shorts_ideas": [\n    {"title": "...", "what_to_say": "...", "timestamp_start": null, "timestamp_end": null},\n    ...\n  ]\n}\n\nRules:\n- hooks: exactly 5 items, max 140 chars each\n- linkedin_posts: exactly 2 items, 90-140 words, professional tone, end with a CTA\n- ig_captions: exactly 5 items, 30-60 words, include 3 hashtags\n- shorts_ideas: exactly 3 items; title ≤60 chars, what_to_say is 2-3 punchy sentences`}
-            spellCheck={false}
-            className="w-full rounded-lg border border-cf-violet/25 bg-cf-panel-alt px-3 py-2.5 font-mono text-xs text-zinc-100 placeholder-zinc-600 outline-none focus:border-cf-violet/60 focus:ring-1 focus:ring-cf-violet/20 resize-y"
-          />
-          {customPrompt.trim() && !customPrompt.includes("{source}") && (
-            <p className="text-xs text-amber-400">
-              Your prompt doesn&apos;t include <code className="font-mono">{"{source}"}</code> — the source content will be appended automatically.
-            </p>
-          )}
-        </div>
+            {/* Output mode toggle — only shown when a custom prompt is entered */}
+            {customPrompt.trim() && (
+              <div>
+                <p className="mb-2 text-xs font-medium text-zinc-400">Output mode</p>
+                <div className="flex gap-2">
+                  {([false, true] as const).map((val) => (
+                    <button
+                      key={String(val)}
+                      type="button"
+                      onClick={() => setFreeFormOutput(val)}
+                      className={`flex-1 rounded-lg border px-3 py-2 text-xs font-medium transition ${
+                        freeFormOutput === val
+                          ? "border-cf-violet/60 bg-cf-violet/10 text-cf-violet"
+                          : "border-cf-violet/25 bg-cf-panel-alt text-zinc-400 hover:border-cf-violet/40 hover:text-zinc-200"
+                      }`}
+                    >
+                      {val ? "Free-form" : "Structured"}
+                    </button>
+                  ))}
+                </div>
+                <p className="mt-1.5 text-xs text-zinc-500">
+                  {freeFormOutput
+                    ? "AI follows your prompt exactly — output is shown as plain text. Perfect for custom formats like podcast reels."
+                    : "AI uses your prompt for style but still outputs the standard hooks / LinkedIn / IG / Shorts pack."}
+                </p>
+              </div>
+            )}
+
+            <textarea
+              value={customPrompt}
+              onChange={(e) => setCustomPrompt(e.target.value)}
+              rows={10}
+              placeholder={`SOURCE MATERIAL:\n{source}\n\nGenerate exactly this JSON structure:\n{\n  "hooks": [{"text": "..."}, ...],\n  "linkedin_posts": [{"text": "..."}, ...],\n  "ig_captions": [{"text": "..."}, ...],\n  "shorts_ideas": [\n    {"title": "...", "what_to_say": "...", "timestamp_start": null, "timestamp_end": null},\n    ...\n  ]\n}\n\nRules:\n- hooks: exactly 5 items, max 140 chars each\n- linkedin_posts: exactly 2 items, 90-140 words, professional tone, end with a CTA\n- ig_captions: exactly 5 items, 30-60 words, include 3 hashtags\n- shorts_ideas: exactly 3 items; title ≤60 chars, what_to_say is 2-3 punchy sentences`}
+              spellCheck={false}
+              className="w-full rounded-lg border border-cf-violet/25 bg-cf-panel-alt px-3 py-2.5 font-mono text-xs text-zinc-100 placeholder-zinc-600 outline-none focus:border-cf-violet/60 focus:ring-1 focus:ring-cf-violet/20 resize-y"
+            />
+            {customPrompt.trim() && !customPrompt.includes("{source}") && (
+              <p className="text-xs text-amber-400">
+                Your prompt doesn&apos;t include <code className="font-mono">{"{source}"}</code> — the source content will be appended automatically.
+              </p>
+            )}
+          </div>
+        ) : (
+          <div className="rounded-xl border border-cf-violet/14 bg-cf-panel p-5">
+            <div className="flex items-start gap-4">
+              <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-cf-violet/10 text-cf-violet">
+                <svg className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={1.75} viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
+                </svg>
+              </div>
+              <div className="flex-1">
+                <p className="text-sm font-semibold text-zinc-100">Custom generation prompt</p>
+                <p className="mt-1 text-xs text-zinc-500">
+                  Override the AI prompt with your own instructions and use free-form output mode. Available on the Pro plan.
+                </p>
+                <a
+                  href="/dashboard/billing"
+                  className="mt-3 inline-flex items-center gap-1.5 rounded-lg bg-cf-violet px-4 py-2 text-xs font-semibold text-white transition hover:bg-cf-violet/80"
+                >
+                  Upgrade to Pro
+                </a>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Save */}
         <div>

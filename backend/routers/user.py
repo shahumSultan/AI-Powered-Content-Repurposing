@@ -199,6 +199,11 @@ async def save_settings(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
+    if (body.custom_prompt or body.free_form_output) and not current_user.is_admin:
+        plan = await _get_or_create_plan(current_user, db)
+        if plan.plan != "pro":
+            raise HTTPException(status_code=403, detail="Custom prompts require a Pro plan")
+
     result = await db.execute(select(UserSettings).where(UserSettings.user_id == current_user.id))
     s = result.scalar_one_or_none()
     encrypted_groq = encrypt(body.groq_api_key)
