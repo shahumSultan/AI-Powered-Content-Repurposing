@@ -26,13 +26,16 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ detail: "Audio file exceeds 25 MB limit" }, { status: 413 });
   }
 
-  // Fetch quota and settings in parallel
-  const [quotaRes, settingsRes] = await Promise.all([
+  // Fetch quota, settings, and plan in parallel
+  const [quotaRes, settingsRes, planRes] = await Promise.all([
     fetch(`${BACKEND_URL}/user/consume-generation`, {
       method: "POST",
       headers: { Authorization: `Bearer ${token}` },
     }),
     fetch(`${BACKEND_URL}/user/settings`, {
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+    fetch(`${BACKEND_URL}/user/plan`, {
       headers: { Authorization: `Bearer ${token}` },
     }),
   ]);
@@ -50,6 +53,8 @@ export async function POST(req: NextRequest) {
   }
 
   const settings = settingsRes.ok ? await settingsRes.json() : null;
+  const planData = planRes.ok ? await planRes.json() : null;
+  const isPro = planData?.is_admin || planData?.plan === "pro";
 
   const usingOpenai = settings?.preferred_provider === "openai";
   const hasKey = usingOpenai ? !!settings?.openai_api_key : !!settings?.groq_api_key;
@@ -66,10 +71,10 @@ export async function POST(req: NextRequest) {
   } else if (settings?.groq_api_key) {
     backendHeaders["X-Groq-Api-Key"] = settings.groq_api_key;
   }
-  if (settings?.custom_prompt) {
+  if (isPro && settings?.custom_prompt) {
     backendHeaders["X-Custom-Prompt"] = Buffer.from(settings.custom_prompt, "utf-8").toString("base64");
   }
-  if (settings?.free_form_output) {
+  if (isPro && settings?.free_form_output) {
     backendHeaders["X-Free-Form"] = "true";
   }
 
