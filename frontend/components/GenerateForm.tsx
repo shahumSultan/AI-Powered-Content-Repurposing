@@ -228,6 +228,7 @@ export default function GenerateForm() {
               pack={result.content_pack}
               csv={result.export_csv}
               json={result.export_json}
+              allowRegenerate
             />
       )}
     </div>

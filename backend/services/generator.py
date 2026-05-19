@@ -286,6 +286,73 @@ def generate_free_form(
 
 
 # ---------------------------------------------------------------------------
+# Single-item regeneration
+# ---------------------------------------------------------------------------
+
+_SINGLE_ITEM_PROMPTS: dict[str, str] = {
+    "hook": (
+        "Write exactly 1 new attention-grabbing hook (max 140 characters) inspired by this content. "
+        'Output raw JSON only: {"text": "..."}'
+    ),
+    "linkedin": (
+        "Write exactly 1 new LinkedIn post (90-140 words, professional tone, end with a CTA) inspired by this content. "
+        'Output raw JSON only: {"text": "..."}'
+    ),
+    "ig_caption": (
+        "Write exactly 1 new Instagram caption (30-60 words, include 3 relevant hashtags) inspired by this content. "
+        'Output raw JSON only: {"text": "..."}'
+    ),
+    "shorts_idea": (
+        "Write exactly 1 new YouTube Shorts idea inspired by this content. "
+        'Output raw JSON only: {"title": "...", "what_to_say": "..."} '
+        "where title is ≤60 chars and what_to_say is 2-3 punchy sentences for the creator to say on camera."
+    ),
+}
+
+_SINGLE_ITEM_SYSTEM = (
+    "You are a professional social-media content strategist. "
+    "Output raw JSON only — no markdown, no code fences, no commentary."
+)
+
+
+def generate_single_item(
+    item_type: str,
+    context: str,
+    *,
+    groq_api_key: str | None = None,
+    openai_api_key: str | None = None,
+) -> dict:
+    if openai_api_key:
+        llm_client: OpenAI | Groq = OpenAI(api_key=openai_api_key)
+        use_openai = True
+    elif groq_api_key:
+        llm_client = Groq(api_key=groq_api_key)
+        use_openai = False
+    else:
+        env_client = _get_env_groq_client()
+        if env_client is None:
+            raise NoApiKeyError("No AI API key configured. Please add your API key in Settings.")
+        llm_client = env_client
+        use_openai = False
+
+    prompt = _SINGLE_ITEM_PROMPTS.get(item_type, "")
+    user_message = f"{prompt}\n\nSOURCE CONTENT:\n{context[:1200]}"
+    model = _OPENAI_MODEL if use_openai else _GROQ_MODEL
+
+    response = llm_client.chat.completions.create(  # type: ignore[union-attr]
+        model=model,
+        messages=[
+            {"role": "system", "content": _SINGLE_ITEM_SYSTEM},
+            {"role": "user", "content": user_message},
+        ],
+        max_tokens=512,
+        temperature=0.85,
+    )
+    raw = response.choices[0].message.content or "{}"
+    return _extract_json(raw)
+
+
+# ---------------------------------------------------------------------------
 # Public entry point
 # ---------------------------------------------------------------------------
 

@@ -1,20 +1,27 @@
 from __future__ import annotations
 import base64
 import json
+import logging
+from typing import Literal
 from urllib.parse import urlparse
 import httpx
 import trafilatura
-from fastapi import APIRouter, File, Header, HTTPException, UploadFile
+from fastapi import APIRouter, Depends, File, Header, HTTPException, UploadFile
+from pydantic import BaseModel
 from youtube_transcript_api import NoTranscriptFound, TranscriptsDisabled
 from schemas.generate import GenerateRequest, GenerateResponse, GenerateTextRequest
 from schemas.ingest import TranscriptSegment
 from services.chunker import Chunk, chunk_text
 from services.exporter import to_csv
-from services.generator import NoApiKeyError, generate_content_pack, generate_free_form
+from services.generator import NoApiKeyError, generate_content_pack, generate_free_form, generate_single_item
 from services.ranker import rank
 from services.transcript import fetch_transcript
 from services.transcriber import transcribe
 from core.ssrf import assert_safe_url
+from core.deps import get_current_user
+from models import User
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/generate", tags=["generate"])
 
@@ -182,3 +189,34 @@ async def generate_from_audio(
         raise HTTPException(status_code=422, detail="No content could be transcribed from the audio")
 
     return _build_response(chunks, [], x_groq_api_key, x_openai_api_key, _decode_prompt(x_custom_prompt), free_form=x_free_form == "true")
+
+
+# ---------------------------------------------------------------------------
+# Single-item regeneration (no quota consumed)
+# ---------------------------------------------------------------------------
+
+class SingleItemRequest(BaseModel):
+    item_type: Literal["hook", "linkedin", "ig_caption", "shorts_idea"]
+    context: str
+
+
+@router.post("/item")
+def regenerate_item(
+    body: SingleItemRequest,
+    x_groq_api_key: str | None = Header(None),
+    x_openai_api_key: str | None = Header(None),
+    current_user: User = Depends(get_current_user),
+) -> dict:
+    try:
+        item = generate_single_item(
+            body.item_type,
+            body.context,
+            groq_api_key=x_groq_api_key,
+            openai_api_key=x_openai_api_key,
+        )
+        return {"item": item}
+    except NoApiKeyError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+    except Exception as exc:
+        logger.warning("Single item regeneration failed: %s", exc)
+        raise HTTPException(status_code=500, detail="Regeneration failed")
