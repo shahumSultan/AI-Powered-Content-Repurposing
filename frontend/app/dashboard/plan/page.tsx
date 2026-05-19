@@ -9,12 +9,14 @@ const beginnerFeatures = [
   { label: "CSV & JSON export", included: true },
   { label: "Unlimited content packs", included: false },
   { label: "Multiple URLs per generation", included: false },
+  { label: "Custom prompt template", included: false },
   { label: "Priority processing", included: false },
 ];
 
 const proFeatures = [
   { label: "Unlimited content packs", included: true },
   { label: "Multiple URLs per generation", included: true },
+  { label: "Custom prompt template", included: true },
   { label: "YouTube & blog URL support", included: true },
   { label: "LinkedIn, Instagram captions & Shorts ideas", included: true },
   { label: "CSV & JSON export", included: true },

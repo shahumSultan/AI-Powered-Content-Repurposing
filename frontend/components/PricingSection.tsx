@@ -37,6 +37,7 @@ const TIERS: PricingTier[] = [
       "Unlimited content packs",
       "Process multiple links at once",
       "All formats: hooks, LinkedIn, Instagram & Shorts",
+      "Custom prompt template",
       "Download as CSV or JSON",
       "Priority support",
     ],
