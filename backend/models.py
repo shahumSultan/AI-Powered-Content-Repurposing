@@ -26,6 +26,7 @@ class User(Base):
     stripe_customer: Mapped["StripeCustomer | None"] = relationship("StripeCustomer", back_populates="user", uselist=False)
     settings: Mapped["UserSettings | None"] = relationship("UserSettings", back_populates="user", uselist=False)
     history: Mapped[list["GenerationHistory"]] = relationship("GenerationHistory", back_populates="user")
+    prompt_templates: Mapped[list["PromptTemplate"]] = relationship("PromptTemplate", back_populates="user", cascade="all, delete-orphan")
 
 
 class UserPlan(Base):
@@ -84,3 +85,17 @@ class UserSettings(Base):
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now, onupdate=_now)
 
     user: Mapped["User"] = relationship("User", back_populates="settings")
+
+
+class PromptTemplate(Base):
+    __tablename__ = "prompt_templates"
+
+    id: Mapped[str] = mapped_column(UUID(as_uuid=False), primary_key=True, default=lambda: str(uuid.uuid4()))
+    user_id: Mapped[str] = mapped_column(UUID(as_uuid=False), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    name: Mapped[str] = mapped_column(String(60), nullable=False)
+    prompt: Mapped[str] = mapped_column(Text, nullable=False)
+    free_form: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default="false")
+    is_default: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default="false")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+
+    user: Mapped["User"] = relationship("User", back_populates="prompt_templates")

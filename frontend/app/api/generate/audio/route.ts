@@ -26,7 +26,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ detail: "Audio file exceeds 25 MB limit" }, { status: 413 });
   }
 
-  const result = await buildGenerateContext(token);
+  const templateId = (formData.get("template_id") as string | null) || null;
+  const result = await buildGenerateContext(token, templateId);
   if (!result.ok) return result.response;
   const { backendHeaders } = result.ctx;
 
