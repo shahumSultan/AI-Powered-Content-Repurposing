@@ -52,6 +52,17 @@ const SAMPLE_RESPONSE: GenerateResponse = {
         timestamp_end: null,
       },
     ],
+    x_threads: [
+      {
+        tweets: [
+          "Most creators spend 80% of their time repurposing content. That's backwards.",
+          "Record or write once → ContentFlow turns it into hooks, LinkedIn posts, IG captions, and Shorts ideas in seconds.",
+          "Your YouTube audience and LinkedIn audience are different people. Both want your content.",
+          "The creators who grow consistently aren't working harder — they have better systems.",
+          "Stop copy-pasting between platforms. Try ContentFlow free →",
+        ],
+      },
+    ],
   },
 };
 

@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import type { ContentPack, ShortsIdea } from "@/lib/api";
+import type { ContentPack, ShortsIdea, XThread } from "@/lib/api";
 
-type SectionKey = "hooks" | "linkedin" | "ig" | "shorts";
+type SectionKey = "hooks" | "linkedin" | "ig" | "shorts" | "x";
 
 const SECTION_META: Record<
   SectionKey,
@@ -17,9 +17,10 @@ const SECTION_META: Record<
   linkedin:{ label: "LinkedIn",  icon: "in", accent: { tab: "bg-cf-violet",   border: "border-cf-violet/40",  badge: "bg-cf-violet/10 text-cf-violet", number: "text-cf-violet"  } },
   ig:      { label: "Instagram", icon: "IG", accent: { tab: "bg-cf-pink",     border: "border-cf-pink/40",    badge: "bg-cf-pink/10 text-cf-pink",     number: "text-cf-pink"    } },
   shorts:  { label: "Shorts",    icon: "▶",  accent: { tab: "bg-red-600",      border: "border-red-800/40",    badge: "bg-red-900/50 text-red-400",     number: "text-red-500"    } },
+  x:       { label: "X Thread",  icon: "𝕏",  accent: { tab: "bg-zinc-700",     border: "border-zinc-600/40",   badge: "bg-zinc-800/60 text-zinc-300",   number: "text-zinc-400"   } },
 };
 
-const SECTION_ORDER: SectionKey[] = ["hooks", "linkedin", "ig", "shorts"];
+const SECTION_ORDER: SectionKey[] = ["hooks", "linkedin", "ig", "shorts", "x"];
 
 function formatTime(seconds: number): string {
   const m = Math.floor(seconds / 60);
@@ -38,6 +39,11 @@ function packToCsv(pack: ContentPack): string {
   pack.ig_captions.forEach((c, i) => rows.push(`ig_caption,${i + 1},${csvCell(c.text)},,`));
   pack.shorts_ideas.forEach((s, i) =>
     rows.push(`shorts_idea,${i + 1},${csvCell(s.title + " | " + s.what_to_say)},${s.timestamp_start ?? ""},${s.timestamp_end ?? ""}`)
+  );
+  (pack.x_threads ?? []).forEach((thread, ti) =>
+    thread.tweets.forEach((tweet, i) =>
+      rows.push(`x_thread,${ti + 1}.${i + 1},${csvCell(tweet)},,`)
+    )
   );
   return rows.join("\n");
 }
@@ -235,6 +241,122 @@ function ShortsCard({
   );
 }
 
+function XTweetCard({
+  tweetNumber,
+  totalTweets,
+  text,
+  onEdit,
+}: {
+  tweetNumber: number;
+  totalTweets: number;
+  text: string;
+  onEdit: (text: string) => void;
+}) {
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState(text);
+  const overLimit = draft.length > 280;
+
+  useEffect(() => {
+    if (!editing) setDraft(text);
+  }, [text, editing]);
+
+  function handleBlur() {
+    setEditing(false);
+    if (draft !== text) onEdit(draft);
+  }
+
+  return (
+    <div className="rounded-lg border border-zinc-600/40 bg-cf-panel p-4">
+      <div className="flex items-start gap-3">
+        <span className="mt-0.5 shrink-0 font-mono text-xs text-zinc-400">
+          {tweetNumber}/{totalTweets}
+        </span>
+        {editing ? (
+          <textarea
+            autoFocus
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            onBlur={handleBlur}
+            rows={3}
+            className="flex-1 resize-none rounded bg-cf-panel-alt px-2 py-1 text-sm leading-relaxed text-zinc-300 outline-none focus:ring-1 focus:ring-cf-violet/40"
+          />
+        ) : (
+          <p
+            className="flex-1 text-sm leading-relaxed text-zinc-300 whitespace-pre-wrap cursor-text"
+            onClick={() => { setDraft(text); setEditing(true); }}
+            title="Click to edit"
+          >
+            {text}
+          </p>
+        )}
+        <CopyButton text={editing ? draft : text} />
+      </div>
+      <div className="mt-2 flex justify-end">
+        <span className={`font-mono text-xs ${overLimit ? "text-red-400" : "text-zinc-600"}`}>
+          {(editing ? draft : text).length}/280
+        </span>
+      </div>
+    </div>
+  );
+}
+
+function XThreadSection({
+  threads,
+  allowRegenerate,
+  regenLoading,
+  onRegenerateThread,
+  onEditTweet,
+}: {
+  threads: XThread[];
+  allowRegenerate: boolean;
+  regenLoading: boolean;
+  onRegenerateThread: () => void;
+  onEditTweet: (tweetIdx: number, text: string) => void;
+}) {
+  if (!threads?.length || threads[0].tweets.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-12 text-center">
+        <p className="text-sm text-zinc-500">No X thread generated.</p>
+      </div>
+    );
+  }
+
+  const thread = threads[0];
+
+  return (
+    <div className="space-y-2">
+      {allowRegenerate && (
+        <div className="flex justify-end pb-1">
+          <button
+            onClick={onRegenerateThread}
+            disabled={regenLoading}
+            className="flex items-center gap-1.5 rounded-lg border border-zinc-600/40 bg-cf-panel-alt px-3 py-1.5 text-xs font-medium text-zinc-400 transition hover:text-zinc-200 disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            <svg
+              className={`h-3 w-3 ${regenLoading ? "animate-spin" : ""}`}
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+            Regenerate thread
+          </button>
+        </div>
+      )}
+      {thread.tweets.map((tweet, i) => (
+        <XTweetCard
+          key={i}
+          tweetNumber={i + 1}
+          totalTweets={thread.tweets.length}
+          text={tweet}
+          onEdit={(text) => onEditTweet(i, text)}
+        />
+      ))}
+    </div>
+  );
+}
+
 function EmptyState() {
   return (
     <div className="flex flex-col items-center justify-center py-12 text-center">
@@ -265,7 +387,6 @@ export default function ContentPackView({ pack, csv, json, allowRegenerate = fal
   const [editedPack, setEditedPack] = useState<ContentPack>(() => JSON.parse(JSON.stringify(pack)));
   const [regeneratingKey, setRegeneratingKey] = useState<string | null>(null);
 
-  // Reset when a new pack is passed in (new generation)
   useEffect(() => {
     setEditedPack(JSON.parse(JSON.stringify(pack)));
   }, [pack]);
@@ -275,6 +396,15 @@ export default function ContentPackView({ pack, csv, json, allowRegenerate = fal
     linkedin: editedPack.linkedin_posts.map((h, i) => ({ ...h, _idx: i })).filter((h) => h.text !== ""),
     ig:       editedPack.ig_captions.map((h, i) => ({ ...h, _idx: i })).filter((h) => h.text !== ""),
     shorts:   editedPack.shorts_ideas.map((h, i) => ({ ...h, _idx: i })).filter((h) => h.title !== "" || h.what_to_say !== ""),
+    x:        (editedPack.x_threads ?? []).filter((t) => t.tweets.length > 0),
+  };
+
+  const tabCount: Record<SectionKey, number> = {
+    hooks:    visibleItems.hooks.length,
+    linkedin: visibleItems.linkedin.length,
+    ig:       visibleItems.ig.length,
+    shorts:   visibleItems.shorts.length,
+    x:        visibleItems.x.length > 0 ? visibleItems.x[0].tweets.length : 0,
   };
 
   function updateItem(sectionKey: SectionKey, originalIdx: number, text: string) {
@@ -287,6 +417,16 @@ export default function ContentPackView({ pack, csv, json, allowRegenerate = fal
       }
       if (sectionKey === "ig") {
         return { ...prev, ig_captions: prev.ig_captions.map((h, i) => i === originalIdx ? { ...h, text } : h) };
+      }
+      if (sectionKey === "x") {
+        // originalIdx = threadIdx * 100 + tweetIdx (threadIdx always 0 since max 1 thread)
+        const threadIdx = Math.floor(originalIdx / 100);
+        const tweetIdx = originalIdx % 100;
+        const updated = JSON.parse(JSON.stringify(prev)) as ContentPack;
+        if (updated.x_threads?.[threadIdx]) {
+          updated.x_threads[threadIdx].tweets[tweetIdx] = text;
+        }
+        return updated;
       }
       return prev;
     });
@@ -307,6 +447,7 @@ export default function ContentPackView({ pack, csv, json, allowRegenerate = fal
       linkedin: "linkedin",
       ig: "ig_caption",
       shorts: "shorts_idea",
+      x: "x_thread",
     };
     try {
       const res = await fetch("/api/generate/item", {
@@ -330,6 +471,14 @@ export default function ContentPackView({ pack, csv, json, allowRegenerate = fal
               : s
           ),
         }));
+      } else if (sectionKey === "x" && Array.isArray(data.item?.tweets)) {
+        setEditedPack((prev) => {
+          const updated = JSON.parse(JSON.stringify(prev)) as ContentPack;
+          if (updated.x_threads?.[originalIdx]) {
+            updated.x_threads[originalIdx] = data.item;
+          }
+          return updated;
+        });
       } else {
         updateItem(sectionKey, originalIdx, data.item.text ?? context);
       }
@@ -369,7 +518,7 @@ export default function ContentPackView({ pack, csv, json, allowRegenerate = fal
       <div className="flex gap-1 overflow-x-auto rounded-lg bg-cf-panel-alt/60 p-1">
         {SECTION_ORDER.map((key) => {
           const meta = SECTION_META[key];
-          const count = visibleItems[key].length;
+          const count = tabCount[key];
           return (
             <button
               key={key}
@@ -408,6 +557,16 @@ export default function ContentPackView({ pack, csv, json, allowRegenerate = fal
               />
             ))
           )
+        ) : active === "x" ? (
+          <XThreadSection
+            threads={editedPack.x_threads ?? []}
+            allowRegenerate={allowRegenerate}
+            regenLoading={regeneratingKey === "x-0"}
+            onRegenerateThread={() =>
+              regenerateItem("x", 0, (editedPack.x_threads?.[0]?.tweets ?? []).join("\n"))
+            }
+            onEditTweet={(tweetIdx, text) => updateItem("x", tweetIdx, text)}
+          />
         ) : visibleItems[active].length === 0 ? (
           <EmptyState />
         ) : (
