@@ -10,7 +10,7 @@ from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from core.limiter import limiter
 
-from routers import billing, blog, generate, youtube
+from routers import billing, generate
 from routers import auth, user, trial
 from services import generator
 
@@ -64,8 +64,6 @@ app.include_router(auth.router)
 app.include_router(user.router)
 app.include_router(trial.router)
 app.include_router(billing.router)
-app.include_router(youtube.router)
-app.include_router(blog.router)
 app.include_router(generate.router)
 
 

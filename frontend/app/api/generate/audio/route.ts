@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { AUTH_COOKIE } from "@/lib/auth";
 import { BACKEND_URL } from "@/lib/config";
+import { buildGenerateContext, recordGeneration } from "@/lib/generate-proxy";
 
-const MAX_BYTES = 25 * 1024 * 1024; // 25 MB
+const MAX_BYTES = 25 * 1024 * 1024;
 
 export const maxDuration = 60;
 
@@ -21,73 +22,23 @@ export async function POST(req: NextRequest) {
   if (!(file instanceof File)) {
     return NextResponse.json({ detail: "No audio file provided" }, { status: 400 });
   }
-
   if (file.size > MAX_BYTES) {
     return NextResponse.json({ detail: "Audio file exceeds 25 MB limit" }, { status: 413 });
   }
 
-  // Fetch quota, settings, and plan in parallel
-  const [quotaRes, settingsRes, planRes] = await Promise.all([
-    fetch(`${BACKEND_URL}/user/consume-generation`, {
-      method: "POST",
-      headers: { Authorization: `Bearer ${token}` },
-    }),
-    fetch(`${BACKEND_URL}/user/settings`, {
-      headers: { Authorization: `Bearer ${token}` },
-    }),
-    fetch(`${BACKEND_URL}/user/plan`, {
-      headers: { Authorization: `Bearer ${token}` },
-    }),
-  ]);
+  const result = await buildGenerateContext(token);
+  if (!result.ok) return result.response;
+  const { backendHeaders } = result.ctx;
 
-  if (!quotaRes.ok) {
-    return NextResponse.json({ detail: "Could not verify generation quota" }, { status: 500 });
-  }
-
-  const { status: quotaStatus } = await quotaRes.json();
-  if (quotaStatus === "limit_reached") {
-    return NextResponse.json(
-      { detail: "Monthly generation limit reached. Upgrade to Pro for unlimited generations." },
-      { status: 429 }
-    );
-  }
-
-  const settings = settingsRes.ok ? await settingsRes.json() : null;
-  const planData = planRes.ok ? await planRes.json() : null;
-  const isPro = planData?.is_admin || planData?.plan === "pro";
-
-  const usingOpenai = settings?.preferred_provider === "openai";
-  const hasKey = usingOpenai ? !!settings?.openai_api_key : !!settings?.groq_api_key;
-  if (!hasKey) {
-    return NextResponse.json(
-      { detail: "No AI API key found. Please add your API key in Settings before generating content." },
-      { status: 400 }
-    );
-  }
-
-  const backendHeaders: Record<string, string> = {};
-  if (usingOpenai && settings.openai_api_key) {
-    backendHeaders["X-Openai-Api-Key"] = settings.openai_api_key;
-  } else if (settings?.groq_api_key) {
-    backendHeaders["X-Groq-Api-Key"] = settings.groq_api_key;
-  }
-  if (isPro && settings?.custom_prompt) {
-    backendHeaders["X-Custom-Prompt"] = Buffer.from(settings.custom_prompt, "utf-8").toString("base64");
-  }
-  if (isPro && settings?.free_form_output) {
-    backendHeaders["X-Free-Form"] = "true";
-  }
-
-  // Re-stream as multipart to the FastAPI backend
-  const upstream_form = new FormData();
-  upstream_form.append("file", file, file.name);
+  const upstreamForm = new FormData();
+  upstreamForm.append("file", file, file.name);
 
   let upstream: Response;
   try {
     upstream = await fetch(`${BACKEND_URL}/generate/audio`, {
       method: "POST",
       headers: backendHeaders,
-      body: upstream_form,
+      body: upstreamForm,
     });
   } catch {
     return NextResponse.json({ detail: "Backend unreachable" }, { status: 502 });
@@ -96,17 +47,11 @@ export async function POST(req: NextRequest) {
   const data = await upstream.json();
   if (!upstream.ok) return NextResponse.json(data, { status: upstream.status });
 
-  fetch(`${BACKEND_URL}/user/record-generation`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-    body: JSON.stringify({
-      urls: [],
-      title: `Audio — ${file.name}`,
-      content_pack: data.raw_output
-        ? { __raw_output__: data.raw_output }
-        : data.export_json,
-    }),
-  }).catch(() => {});
+  recordGeneration(token, {
+    urls: [],
+    title: `Audio — ${file.name}`,
+    content_pack: data.raw_output ? { __raw_output__: data.raw_output } : data.export_json,
+  });
 
   return NextResponse.json(data);
 }

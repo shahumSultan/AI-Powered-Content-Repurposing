@@ -226,3 +226,42 @@ async def save_settings(
         db.add(s)
     await db.commit()
     return {"ok": True}
+
+
+# ── Generation context (quota + settings + plan in one round-trip) ────────────
+
+@router.post("/prepare-generation")
+async def prepare_generation(
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Atomically consume one generation quota slot and return settings + plan."""
+    plan = await _get_or_create_plan(current_user, db)
+
+    now = datetime.now(timezone.utc)
+    if (now - plan.period_start.replace(tzinfo=timezone.utc)).days >= 30:
+        plan.gens_used = 0
+        plan.period_start = now
+
+    is_unlimited = current_user.is_admin or plan.plan == "pro"
+    if not is_unlimited and plan.gens_used >= plan.gens_limit:
+        return {"quota_status": "limit_reached"}
+
+    plan.gens_used += 1
+    await db.commit()
+
+    result = await db.execute(select(UserSettings).where(UserSettings.user_id == current_user.id))
+    s = result.scalar_one_or_none()
+
+    return {
+        "quota_status": "ok",
+        "is_admin": current_user.is_admin,
+        "plan": plan.plan,
+        "settings": {
+            "groq_api_key": decrypt(s.groq_api_key) if s else None,
+            "openai_api_key": decrypt(s.openai_api_key) if s else None,
+            "preferred_provider": s.preferred_provider if s else "groq",
+            "custom_prompt": s.custom_prompt if s else None,
+            "free_form_output": s.free_form_output if s else False,
+        },
+    }
