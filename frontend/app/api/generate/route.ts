@@ -21,7 +21,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ detail: "Invalid request: urls must be an array" }, { status: 400 });
   }
 
-  const result = await buildGenerateContext(token);
+  const templateId = (bodyObj.template_id as string | undefined) ?? null;
+  const result = await buildGenerateContext(token, templateId);
   if (!result.ok) return result.response;
   const { backendHeaders } = result.ctx;
 

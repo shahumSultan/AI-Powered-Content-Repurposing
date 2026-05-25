@@ -21,6 +21,7 @@ from schemas.generate import (
     IGCaption,
     LinkedInPost,
     ShortsIdea,
+    XThread,
 )
 from services.chunker import Chunk
 
@@ -87,7 +88,8 @@ Generate exactly this JSON structure:
   "shorts_ideas": [
     {{"title": "...", "what_to_say": "...", "timestamp_start": null, "timestamp_end": null}},
     ...
-  ]
+  ],
+  "x_threads": [{{"tweets": ["tweet 1", "tweet 2", ...]}}]
 }}
 
 Rules:
@@ -95,6 +97,7 @@ Rules:
 - linkedin_posts: exactly 2 items, 90-140 words each, professional tone, end with a call-to-action
 - ig_captions: exactly 5 items, 30-60 words each, include 3 relevant hashtags
 - shorts_ideas: exactly 3 items; title <=60 chars, what_to_say is 2-3 punchy sentences for the creator to speak on camera
+- x_threads: exactly 1 item; 3-5 tweets each ≤280 chars, conversational tone, last tweet ends with a CTA
 """
 
 
@@ -130,11 +133,18 @@ def _pack_from_dict(data: dict, chunks: list[Chunk]) -> ContentPack:
             )
         )
 
+    x_threads_raw: list[dict] = data.get("x_threads", [])[:1]
+    x_threads = [
+        XThread(tweets=[t for t in x.get("tweets", [])[:5] if isinstance(t, str)])
+        for x in x_threads_raw
+    ]
+
     return ContentPack(
         hooks=[Hook(text=h["text"]) for h in data.get("hooks", [])[:5]],
         linkedin_posts=[LinkedInPost(text=p["text"]) for p in data.get("linkedin_posts", [])[:2]],
         ig_captions=[IGCaption(text=c["text"]) for c in data.get("ig_captions", [])[:5]],
         shorts_ideas=shorts_ideas,
+        x_threads=x_threads,
     )
 
 
@@ -165,6 +175,7 @@ def _stub_pack(chunks: list[Chunk]) -> ContentPack:
             )
             for i in range(3)
         ],
+        x_threads=[XThread(tweets=[f"[STUB X TWEET {i+1}] {_excerpt(pool[0], 10)}" for i in range(3)])],
     )
 
 
@@ -181,13 +192,15 @@ Generate exactly this JSON structure:
   "shorts_ideas": [
     {"title": "...", "what_to_say": "...", "timestamp_start": null, "timestamp_end": null},
     ...
-  ]
+  ],
+  "x_threads": [{"tweets": ["tweet 1", "tweet 2", ...]}]
 }
 Rules:
 - hooks: exactly 5 items, max 140 chars each, attention-grabbing opening lines
 - linkedin_posts: exactly 2 items, 90-140 words each, professional tone, end with a CTA
 - ig_captions: exactly 5 items, 30-60 words each, include 3 relevant hashtags
-- shorts_ideas: exactly 3 items; title ≤60 chars, what_to_say is 2-3 punchy sentences"""
+- shorts_ideas: exactly 3 items; title ≤60 chars, what_to_say is 2-3 punchy sentences
+- x_threads: exactly 1 item; 3-5 tweets each ≤280 chars, conversational tone, last tweet ends with a CTA"""
 
 
 def _build_user_message(source: str, custom_prompt: str | None) -> str:
@@ -307,6 +320,11 @@ _SINGLE_ITEM_PROMPTS: dict[str, str] = {
         'Output raw JSON only: {"title": "...", "what_to_say": "..."} '
         "where title is ≤60 chars and what_to_say is 2-3 punchy sentences for the creator to say on camera."
     ),
+    "x_thread": (
+        "Write exactly 1 new Twitter/X thread (3-5 tweets, each ≤280 chars) inspired by this content. "
+        "Conversational tone. Last tweet ends with a CTA. "
+        'Output raw JSON only: {"tweets": ["tweet 1", "tweet 2", ...]}'
+    ),
 }
 
 _SINGLE_ITEM_SYSTEM = (
@@ -408,6 +426,7 @@ def generate_content_pack(
         pack.linkedin_posts = _pad(pack.linkedin_posts, 2, stub.linkedin_posts)
         pack.ig_captions    = _pad(pack.ig_captions,    5, stub.ig_captions)
         pack.shorts_ideas   = _pad(pack.shorts_ideas,   3, stub.shorts_ideas)
+        pack.x_threads      = _pad(pack.x_threads,      1, stub.x_threads)
 
         return pack
 

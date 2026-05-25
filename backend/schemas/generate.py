@@ -44,11 +44,16 @@ class ShortsIdea(BaseModel):
     timestamp_end: float | None = None
 
 
+class XThread(BaseModel):
+    tweets: list[str]   # 3–5 tweets, each ≤280 chars
+
+
 class ContentPack(BaseModel):
     hooks: list[Hook]
     linkedin_posts: list[LinkedInPost]
     ig_captions: list[IGCaption]
     shorts_ideas: list[ShortsIdea]
+    x_threads: list[XThread] = []
 
 
 class GenerateResponse(BaseModel):

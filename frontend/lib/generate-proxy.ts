@@ -1,9 +1,19 @@
 import { NextResponse } from "next/server";
 import { BACKEND_URL } from "@/lib/config";
 
+export interface PromptTemplate {
+  id: string;
+  name: string;
+  prompt: string;
+  free_form: boolean;
+  is_default: boolean;
+  created_at: string;
+}
+
 export interface GenerateContext {
   isPro: boolean;
   backendHeaders: Record<string, string>;
+  templates: PromptTemplate[];
 }
 
 type GenerateContextResult =
@@ -11,7 +21,8 @@ type GenerateContextResult =
   | { ok: false; response: NextResponse };
 
 export async function buildGenerateContext(
-  token: string
+  token: string,
+  selectedTemplateId?: string | null
 ): Promise<GenerateContextResult> {
   let res: Response;
   try {
@@ -47,6 +58,7 @@ export async function buildGenerateContext(
 
   const settings = data.settings;
   const isPro: boolean = data.is_admin || data.plan === "pro";
+  const templates: PromptTemplate[] = data.templates ?? [];
 
   const usingOpenai = settings?.preferred_provider === "openai";
   const hasKey = usingOpenai ? !!settings?.openai_api_key : !!settings?.groq_api_key;
@@ -66,14 +78,36 @@ export async function buildGenerateContext(
   } else if (settings?.groq_api_key) {
     backendHeaders["X-Groq-Api-Key"] = settings.groq_api_key;
   }
-  if (isPro && settings?.custom_prompt) {
-    backendHeaders["X-Custom-Prompt"] = Buffer.from(settings.custom_prompt, "utf-8").toString("base64");
+
+  // Resolve prompt: selected template > default template > legacy custom_prompt
+  let activePrompt: string | null = null;
+  let activeFreeForm = false;
+
+  if (selectedTemplateId) {
+    const tpl = templates.find((t) => t.id === selectedTemplateId) ?? null;
+    if (tpl) {
+      activePrompt = tpl.prompt;
+      activeFreeForm = tpl.free_form;
+    }
+  } else {
+    const def = templates.find((t) => t.is_default) ?? null;
+    if (def) {
+      activePrompt = def.prompt;
+      activeFreeForm = def.free_form;
+    } else if (isPro && settings?.custom_prompt) {
+      activePrompt = settings.custom_prompt;
+      activeFreeForm = settings.free_form_output ?? false;
+    }
   }
-  if (isPro && settings?.free_form_output) {
+
+  if (isPro && activePrompt) {
+    backendHeaders["X-Custom-Prompt"] = Buffer.from(activePrompt, "utf-8").toString("base64");
+  }
+  if (isPro && activeFreeForm) {
     backendHeaders["X-Free-Form"] = "true";
   }
 
-  return { ok: true, ctx: { isPro, backendHeaders } };
+  return { ok: true, ctx: { isPro, backendHeaders, templates } };
 }
 
 export function recordGeneration(

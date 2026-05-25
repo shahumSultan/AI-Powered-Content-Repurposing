@@ -48,7 +48,7 @@ export default async function GeneratePage() {
           </Link>
         </div>
       ) : (
-        <GenerateForm />
+        <GenerateForm isPro={isPro || plan.is_admin} />
       )}
     </div>
   );

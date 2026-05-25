@@ -25,11 +25,16 @@ export interface ShortsIdea {
   timestamp_end: number | null;
 }
 
+export interface XThread {
+  tweets: string[];
+}
+
 export interface ContentPack {
   hooks: { text: string }[];
   linkedin_posts: { text: string }[];
   ig_captions: { text: string }[];
   shorts_ideas: ShortsIdea[];
+  x_threads: XThread[];
 }
 
 export interface GenerateResponse {

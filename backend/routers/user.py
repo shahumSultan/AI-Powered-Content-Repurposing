@@ -6,13 +6,13 @@ from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, field_validator
-from sqlalchemy import select
+from sqlalchemy import func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.crypto import decrypt, encrypt
 from core.database import get_db
 from core.deps import get_current_user
-from models import GenerationHistory, User, UserPlan, UserSettings
+from models import GenerationHistory, PromptTemplate, User, UserPlan, UserSettings
 
 router = APIRouter(prefix="/user", tags=["user"])
 
@@ -228,6 +228,162 @@ async def save_settings(
     return {"ok": True}
 
 
+# ── Prompt Templates ──────────────────────────────────────────────────────────
+
+class TemplateCreate(BaseModel):
+    name: str
+    prompt: str
+    free_form: bool = False
+    is_default: bool = False
+
+    @field_validator("name")
+    @classmethod
+    def name_length(cls, v: str) -> str:
+        v = v.strip()
+        if not v or len(v) > 60:
+            raise ValueError("Name must be 1–60 characters")
+        return v
+
+    @field_validator("prompt")
+    @classmethod
+    def prompt_not_empty(cls, v: str) -> str:
+        if not v.strip():
+            raise ValueError("Prompt cannot be empty")
+        return v
+
+
+class TemplateUpdate(BaseModel):
+    name: str | None = None
+    prompt: str | None = None
+    free_form: bool | None = None
+    is_default: bool | None = None
+
+
+def _serialize_template(t: PromptTemplate) -> dict:
+    return {
+        "id": t.id,
+        "name": t.name,
+        "prompt": t.prompt,
+        "free_form": t.free_form,
+        "is_default": t.is_default,
+        "created_at": t.created_at.isoformat(),
+    }
+
+
+async def _require_pro(user: User, db: AsyncSession) -> None:
+    if not user.is_admin:
+        plan = await _get_or_create_plan(user, db)
+        if plan.plan != "pro":
+            raise HTTPException(status_code=403, detail="Prompt templates require a Pro plan")
+
+
+@router.get("/templates")
+async def list_templates(
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    result = await db.execute(
+        select(PromptTemplate)
+        .where(PromptTemplate.user_id == current_user.id)
+        .order_by(PromptTemplate.created_at.asc())
+    )
+    return [_serialize_template(t) for t in result.scalars().all()]
+
+
+@router.post("/templates")
+async def create_template(
+    body: TemplateCreate,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    await _require_pro(current_user, db)
+
+    count = await db.scalar(
+        select(func.count()).select_from(PromptTemplate).where(PromptTemplate.user_id == current_user.id)
+    )
+    if count >= 10:
+        raise HTTPException(status_code=400, detail="Maximum 10 templates allowed")
+
+    if body.is_default:
+        await db.execute(
+            update(PromptTemplate)
+            .where(PromptTemplate.user_id == current_user.id)
+            .where(PromptTemplate.is_default == True)  # noqa: E712
+            .values(is_default=False)
+        )
+
+    t = PromptTemplate(
+        user_id=current_user.id,
+        name=body.name,
+        prompt=body.prompt,
+        free_form=body.free_form,
+        is_default=body.is_default,
+    )
+    db.add(t)
+    await db.commit()
+    await db.refresh(t)
+    return _serialize_template(t)
+
+
+@router.patch("/templates/{template_id}")
+async def update_template(
+    template_id: str,
+    body: TemplateUpdate,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    await _require_pro(current_user, db)
+
+    result = await db.execute(
+        select(PromptTemplate)
+        .where(PromptTemplate.id == template_id)
+        .where(PromptTemplate.user_id == current_user.id)
+    )
+    t = result.scalar_one_or_none()
+    if not t:
+        raise HTTPException(status_code=404, detail="Template not found")
+
+    if body.is_default is True:
+        await db.execute(
+            update(PromptTemplate)
+            .where(PromptTemplate.user_id == current_user.id)
+            .where(PromptTemplate.is_default == True)  # noqa: E712
+            .values(is_default=False)
+        )
+
+    if body.name is not None:
+        t.name = body.name.strip()
+    if body.prompt is not None:
+        t.prompt = body.prompt
+    if body.free_form is not None:
+        t.free_form = body.free_form
+    if body.is_default is not None:
+        t.is_default = body.is_default
+
+    await db.commit()
+    await db.refresh(t)
+    return _serialize_template(t)
+
+
+@router.delete("/templates/{template_id}")
+async def delete_template(
+    template_id: str,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    result = await db.execute(
+        select(PromptTemplate)
+        .where(PromptTemplate.id == template_id)
+        .where(PromptTemplate.user_id == current_user.id)
+    )
+    t = result.scalar_one_or_none()
+    if not t:
+        raise HTTPException(status_code=404, detail="Template not found")
+    await db.delete(t)
+    await db.commit()
+    return {"ok": True}
+
+
 # ── Generation context (quota + settings + plan in one round-trip) ────────────
 
 @router.post("/prepare-generation")
@@ -253,6 +409,13 @@ async def prepare_generation(
     result = await db.execute(select(UserSettings).where(UserSettings.user_id == current_user.id))
     s = result.scalar_one_or_none()
 
+    tpl_result = await db.execute(
+        select(PromptTemplate)
+        .where(PromptTemplate.user_id == current_user.id)
+        .order_by(PromptTemplate.created_at.asc())
+    )
+    templates = tpl_result.scalars().all()
+
     return {
         "quota_status": "ok",
         "is_admin": current_user.is_admin,
@@ -264,4 +427,5 @@ async def prepare_generation(
             "custom_prompt": s.custom_prompt if s else None,
             "free_form_output": s.free_form_output if s else False,
         },
+        "templates": [_serialize_template(t) for t in templates],
     }

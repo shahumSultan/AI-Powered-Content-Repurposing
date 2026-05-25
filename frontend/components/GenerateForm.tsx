@@ -1,9 +1,10 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import type { GenerateResponse } from "@/lib/api";
+import type { PromptTemplate } from "@/lib/generate-proxy";
 import { GENERATE_PLACEHOLDER } from "@/lib/config";
 import ContentPackView from "./ContentPackView";
 import FreeFormView from "./FreeFormView";
@@ -18,7 +19,7 @@ const TAB_LABELS: { id: Tab; label: string }[] = [
 
 const ACCEPTED_AUDIO = ".mp3,.mp4,.m4a,.wav,.ogg,.webm";
 
-export default function GenerateForm() {
+export default function GenerateForm({ isPro = false }: { isPro?: boolean }) {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -30,6 +31,21 @@ export default function GenerateForm() {
 
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<GenerateResponse | null>(null);
+
+  const [templates, setTemplates] = useState<PromptTemplate[]>([]);
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!isPro) return;
+    fetch("/api/templates")
+      .then((r) => (r.ok ? r.json() : []))
+      .then((list: PromptTemplate[]) => {
+        setTemplates(list);
+        const def = list.find((t) => t.is_default);
+        if (def) setSelectedTemplateId(def.id);
+      })
+      .catch(() => {});
+  }, [isPro]);
 
   function handleFileSelect(file: File | null) {
     if (!file) return;
@@ -64,7 +80,7 @@ export default function GenerateForm() {
         res = await fetch("/api/generate", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ urls }),
+          body: JSON.stringify({ urls, template_id: selectedTemplateId }),
         });
 
       } else if (tab === "text") {
@@ -72,13 +88,14 @@ export default function GenerateForm() {
         res = await fetch("/api/generate/text", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ text: rawText }),
+          body: JSON.stringify({ text: rawText, template_id: selectedTemplateId }),
         });
 
       } else {
         if (!audioFile) { setLoading(false); return; }
         const formData = new FormData();
         formData.append("file", audioFile);
+        formData.append("template_id", selectedTemplateId ?? "");
         res = await fetch("/api/generate/audio", {
           method: "POST",
           body: formData,
@@ -199,6 +216,25 @@ export default function GenerateForm() {
             <p className="text-xs text-zinc-500">
               If you have an OpenAI key saved in Settings, it&apos;s used for transcription. Otherwise a free local model is used.
             </p>
+          </div>
+        )}
+
+        {/* Template picker — Pro users with saved templates */}
+        {isPro && templates.length > 0 && (
+          <div className="flex items-center gap-3">
+            <span className="shrink-0 text-xs text-zinc-400">Template</span>
+            <select
+              value={selectedTemplateId ?? ""}
+              onChange={(e) => setSelectedTemplateId(e.target.value || null)}
+              className="flex-1 rounded-lg border border-cf-violet/25 bg-cf-panel-alt px-3 py-2 text-sm text-zinc-100 outline-none focus:border-cf-violet/60"
+            >
+              <option value="">No template (platform default)</option>
+              {templates.map((t) => (
+                <option key={t.id} value={t.id}>
+                  {t.name}
+                </option>
+              ))}
+            </select>
           </div>
         )}
 
