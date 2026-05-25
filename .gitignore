@@ -49,3 +49,4 @@ models/*.bin
 models/*.safetensors
 .env.local
 frontend/.env.local
+graphify-out/

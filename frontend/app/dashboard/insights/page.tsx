@@ -21,13 +21,12 @@ export default async function InsightsPage() {
   const allUrls = rows.flatMap((r) => r.urls);
   const youtubeCount = allUrls.filter((u) => u.includes("youtube.com") || u.includes("youtu.be")).length;
   const blogCount = allUrls.length - youtubeCount;
-  const totalPosts = totalPacks * 15;
 
   const metricCards = [
     { label: "Content Packs Generated", value: String(totalPacks), unit: "packs" },
     { label: "YouTube Links Processed", value: String(youtubeCount), unit: "videos" },
     { label: "Blog Links Processed", value: String(blogCount), unit: "articles" },
-    { label: "Total Posts Created", value: String(totalPosts), unit: "posts" },
+    { label: "URLs Processed", value: String(allUrls.length), unit: "total" },
   ];
 
   return (

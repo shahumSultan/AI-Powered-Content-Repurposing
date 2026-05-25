@@ -1,0 +1,88 @@
+import { NextResponse } from "next/server";
+import { BACKEND_URL } from "@/lib/config";
+
+export interface GenerateContext {
+  isPro: boolean;
+  backendHeaders: Record<string, string>;
+}
+
+type GenerateContextResult =
+  | { ok: true; ctx: GenerateContext }
+  | { ok: false; response: NextResponse };
+
+export async function buildGenerateContext(
+  token: string
+): Promise<GenerateContextResult> {
+  let res: Response;
+  try {
+    res = await fetch(`${BACKEND_URL}/user/prepare-generation`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}` },
+    });
+  } catch {
+    return {
+      ok: false,
+      response: NextResponse.json({ detail: "Backend unreachable" }, { status: 502 }),
+    };
+  }
+
+  if (!res.ok) {
+    return {
+      ok: false,
+      response: NextResponse.json({ detail: "Could not verify generation quota" }, { status: 500 }),
+    };
+  }
+
+  const data = await res.json();
+
+  if (data.quota_status === "limit_reached") {
+    return {
+      ok: false,
+      response: NextResponse.json(
+        { detail: "Monthly generation limit reached. Upgrade to Pro for unlimited generations." },
+        { status: 429 }
+      ),
+    };
+  }
+
+  const settings = data.settings;
+  const isPro: boolean = data.is_admin || data.plan === "pro";
+
+  const usingOpenai = settings?.preferred_provider === "openai";
+  const hasKey = usingOpenai ? !!settings?.openai_api_key : !!settings?.groq_api_key;
+  if (!hasKey) {
+    return {
+      ok: false,
+      response: NextResponse.json(
+        { detail: "No AI API key found. Please add your API key in Settings before generating content." },
+        { status: 400 }
+      ),
+    };
+  }
+
+  const backendHeaders: Record<string, string> = {};
+  if (usingOpenai && settings.openai_api_key) {
+    backendHeaders["X-Openai-Api-Key"] = settings.openai_api_key;
+  } else if (settings?.groq_api_key) {
+    backendHeaders["X-Groq-Api-Key"] = settings.groq_api_key;
+  }
+  if (isPro && settings?.custom_prompt) {
+    backendHeaders["X-Custom-Prompt"] = Buffer.from(settings.custom_prompt, "utf-8").toString("base64");
+  }
+  if (isPro && settings?.free_form_output) {
+    backendHeaders["X-Free-Form"] = "true";
+  }
+
+  return { ok: true, ctx: { isPro, backendHeaders } };
+}
+
+export function recordGeneration(
+  token: string,
+  payload: { urls: string[]; title: string; content_pack: object | null }
+) {
+  fetch(`${BACKEND_URL}/user/record-generation`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+    body: JSON.stringify(payload),
+  }).catch(() => {});
+}
