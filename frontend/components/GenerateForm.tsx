@@ -34,6 +34,8 @@ export default function GenerateForm({ isPro = false }: { isPro?: boolean }) {
 
   const [templates, setTemplates] = useState<PromptTemplate[]>([]);
   const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null);
+  const [useBrandKit, setUseBrandKit] = useState(false);
+  const [hasBrandKit, setHasBrandKit] = useState(false);
 
   useEffect(() => {
     if (!isPro) return;
@@ -43,6 +45,15 @@ export default function GenerateForm({ isPro = false }: { isPro?: boolean }) {
         setTemplates(list);
         const def = list.find((t) => t.is_default);
         if (def) setSelectedTemplateId(def.id);
+      })
+      .catch(() => {});
+    fetch("/api/brand-kit")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((kit) => {
+        if (kit) {
+          const filled = Object.values(kit).some((v) => v && String(v).trim());
+          setHasBrandKit(filled);
+        }
       })
       .catch(() => {});
   }, [isPro]);
@@ -80,7 +91,7 @@ export default function GenerateForm({ isPro = false }: { isPro?: boolean }) {
         res = await fetch("/api/generate", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ urls, template_id: selectedTemplateId }),
+          body: JSON.stringify({ urls, template_id: selectedTemplateId, use_brand_kit: useBrandKit }),
         });
 
       } else if (tab === "text") {
@@ -88,7 +99,7 @@ export default function GenerateForm({ isPro = false }: { isPro?: boolean }) {
         res = await fetch("/api/generate/text", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ text: rawText, template_id: selectedTemplateId }),
+          body: JSON.stringify({ text: rawText, template_id: selectedTemplateId, use_brand_kit: useBrandKit }),
         });
 
       } else {
@@ -96,6 +107,7 @@ export default function GenerateForm({ isPro = false }: { isPro?: boolean }) {
         const formData = new FormData();
         formData.append("file", audioFile);
         formData.append("template_id", selectedTemplateId ?? "");
+        formData.append("use_brand_kit", String(useBrandKit));
         res = await fetch("/api/generate/audio", {
           method: "POST",
           body: formData,
@@ -235,6 +247,31 @@ export default function GenerateForm({ isPro = false }: { isPro?: boolean }) {
                 </option>
               ))}
             </select>
+          </div>
+        )}
+
+        {/* Brand Kit toggle — Pro users who have a kit set up */}
+        {isPro && hasBrandKit && (
+          <div className="flex items-center justify-between rounded-lg border border-cf-violet/20 bg-cf-panel-alt px-4 py-2.5">
+            <div>
+              <p className="text-xs font-medium text-zinc-300">Brand Kit</p>
+              <p className="text-xs text-zinc-500">Apply your brand voice and identity</p>
+            </div>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={useBrandKit}
+              onClick={() => setUseBrandKit((v) => !v)}
+              className={`relative inline-flex h-5 w-9 shrink-0 rounded-full border-2 border-transparent transition-colors focus:outline-none ${
+                useBrandKit ? "bg-cf-violet" : "bg-zinc-600"
+              }`}
+            >
+              <span
+                className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${
+                  useBrandKit ? "translate-x-4" : "translate-x-0"
+                }`}
+              />
+            </button>
           </div>
         )}
 

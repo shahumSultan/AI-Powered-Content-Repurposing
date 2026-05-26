@@ -22,6 +22,24 @@ interface PromptTemplate {
   created_at: string;
 }
 
+interface BrandKit {
+  brand_name: string | null;
+  brand_voice: string | null;
+  target_audience: string | null;
+  niche: string | null;
+  preferred_cta: string | null;
+  default_hashtags: string | null;
+}
+
+const BLANK_BRAND_KIT: BrandKit = {
+  brand_name: null,
+  brand_voice: null,
+  target_audience: null,
+  niche: null,
+  preferred_cta: null,
+  default_hashtags: null,
+};
+
 interface TemplateFormValues {
   name: string;
   prompt: string;
@@ -389,12 +407,14 @@ export default function SettingsPage() {
   const [freeFormOutput, setFreeFormOutput] = useState(false);
   const [isPro, setIsPro] = useState(false);
   const [templates, setTemplates] = useState<PromptTemplate[]>([]);
+  const [brandKit, setBrandKit] = useState<BrandKit>(BLANK_BRAND_KIT);
+  const [savingBrandKit, setSavingBrandKit] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    Promise.all([fetch("/api/settings"), fetch("/api/plan"), fetch("/api/templates")])
-      .then(async ([settingsRes, planRes, tplRes]) => {
+    Promise.all([fetch("/api/settings"), fetch("/api/plan"), fetch("/api/templates"), fetch("/api/brand-kit")])
+      .then(async ([settingsRes, planRes, tplRes, bkRes]) => {
         const d: Settings = await settingsRes.json();
         setGroqKey(d.groq_api_key ?? "");
         setOpenaiKey(d.openai_api_key ?? "");
@@ -411,6 +431,11 @@ export default function SettingsPage() {
 
         const list: PromptTemplate[] = tplRes.ok ? await tplRes.json() : [];
         setTemplates(list);
+
+        if (bkRes.ok) {
+          const bk: BrandKit = await bkRes.json();
+          setBrandKit(bk);
+        }
 
         // Auto-migrate legacy custom_prompt to a template on first load
         if (proUser && d.custom_prompt && list.length === 0) {
@@ -458,6 +483,30 @@ export default function SettingsPage() {
       toast.error("Failed to save settings. Please try again.");
     } finally {
       setSaving(false);
+    }
+  }
+
+  async function handleSaveBrandKit() {
+    setSavingBrandKit(true);
+    try {
+      const res = await fetch("/api/brand-kit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          brand_name: brandKit.brand_name?.trim() || null,
+          brand_voice: brandKit.brand_voice?.trim() || null,
+          target_audience: brandKit.target_audience?.trim() || null,
+          niche: brandKit.niche?.trim() || null,
+          preferred_cta: brandKit.preferred_cta?.trim() || null,
+          default_hashtags: brandKit.default_hashtags?.trim() || null,
+        }),
+      });
+      if (res.ok) toast.success("Brand Kit saved");
+      else toast.error("Failed to save Brand Kit");
+    } catch {
+      toast.error("Failed to save Brand Kit");
+    } finally {
+      setSavingBrandKit(false);
     }
   }
 
@@ -578,6 +627,124 @@ export default function SettingsPage() {
                 <p className="text-sm font-semibold text-zinc-100">Prompt templates</p>
                 <p className="mt-1 text-xs text-zinc-500">
                   Save named prompt templates and pick one per generation. Available on the Pro plan.
+                </p>
+                <a
+                  href="/dashboard/billing"
+                  className="mt-3 inline-flex items-center gap-1.5 rounded-lg bg-cf-violet px-4 py-2 text-xs font-semibold text-white transition hover:bg-cf-violet/80"
+                >
+                  Upgrade to Pro
+                </a>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Brand Kit */}
+        {isPro ? (
+          <div className="rounded-xl border border-cf-violet/14 bg-cf-panel p-5 space-y-4">
+            <div>
+              <p className="text-sm font-semibold text-zinc-100">Brand Kit</p>
+              <p className="mt-1 text-xs text-zinc-500">
+                Set once, applied to every generation when you enable it. Defines your brand identity layer — voice, audience, and CTA injected into the AI prompt automatically.
+              </p>
+            </div>
+
+            <div className="space-y-3">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="mb-1.5 block text-xs font-medium text-zinc-300">Brand name</label>
+                  <input
+                    type="text"
+                    value={brandKit.brand_name ?? ""}
+                    onChange={(e) => setBrandKit((b) => ({ ...b, brand_name: e.target.value }))}
+                    maxLength={80}
+                    placeholder="e.g. ContentFlow"
+                    className="w-full rounded-lg border border-cf-violet/25 bg-cf-panel-alt px-3 py-2 text-sm text-zinc-100 placeholder-zinc-600 outline-none focus:border-cf-violet/60"
+                  />
+                </div>
+                <div>
+                  <label className="mb-1.5 block text-xs font-medium text-zinc-300">Niche / Industry</label>
+                  <input
+                    type="text"
+                    value={brandKit.niche ?? ""}
+                    onChange={(e) => setBrandKit((b) => ({ ...b, niche: e.target.value }))}
+                    maxLength={100}
+                    placeholder="e.g. AI productivity, content marketing"
+                    className="w-full rounded-lg border border-cf-violet/25 bg-cf-panel-alt px-3 py-2 text-sm text-zinc-100 placeholder-zinc-600 outline-none focus:border-cf-violet/60"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="mb-1.5 block text-xs font-medium text-zinc-300">Brand voice</label>
+                <textarea
+                  value={brandKit.brand_voice ?? ""}
+                  onChange={(e) => setBrandKit((b) => ({ ...b, brand_voice: e.target.value }))}
+                  maxLength={300}
+                  rows={2}
+                  placeholder="e.g. Professional but approachable, data-driven, motivating for creators"
+                  className="w-full resize-none rounded-lg border border-cf-violet/25 bg-cf-panel-alt px-3 py-2.5 text-sm text-zinc-100 placeholder-zinc-600 outline-none focus:border-cf-violet/60"
+                />
+              </div>
+
+              <div>
+                <label className="mb-1.5 block text-xs font-medium text-zinc-300">Target audience</label>
+                <textarea
+                  value={brandKit.target_audience ?? ""}
+                  onChange={(e) => setBrandKit((b) => ({ ...b, target_audience: e.target.value }))}
+                  maxLength={200}
+                  rows={2}
+                  placeholder="e.g. Solopreneurs, content creators, marketers"
+                  className="w-full resize-none rounded-lg border border-cf-violet/25 bg-cf-panel-alt px-3 py-2.5 text-sm text-zinc-100 placeholder-zinc-600 outline-none focus:border-cf-violet/60"
+                />
+              </div>
+
+              <div>
+                <label className="mb-1.5 block text-xs font-medium text-zinc-300">Preferred CTA</label>
+                <input
+                  type="text"
+                  value={brandKit.preferred_cta ?? ""}
+                  onChange={(e) => setBrandKit((b) => ({ ...b, preferred_cta: e.target.value }))}
+                  maxLength={150}
+                  placeholder="e.g. Try ContentFlow free →"
+                  className="w-full rounded-lg border border-cf-violet/25 bg-cf-panel-alt px-3 py-2 text-sm text-zinc-100 placeholder-zinc-600 outline-none focus:border-cf-violet/60"
+                />
+              </div>
+
+              <div>
+                <label className="mb-1.5 block text-xs font-medium text-zinc-300">Default hashtags</label>
+                <input
+                  type="text"
+                  value={brandKit.default_hashtags ?? ""}
+                  onChange={(e) => setBrandKit((b) => ({ ...b, default_hashtags: e.target.value }))}
+                  maxLength={300}
+                  placeholder="#contentcreation #aitools #productivity"
+                  className="w-full rounded-lg border border-cf-violet/25 bg-cf-panel-alt px-3 py-2 text-sm text-zinc-100 placeholder-zinc-600 outline-none focus:border-cf-violet/60"
+                />
+              </div>
+            </div>
+
+            <button
+              type="button"
+              disabled={savingBrandKit}
+              onClick={handleSaveBrandKit}
+              className="btn-primary rounded-lg px-4 py-2 text-xs font-semibold text-white disabled:opacity-50"
+            >
+              {savingBrandKit ? "Saving…" : "Save Brand Kit"}
+            </button>
+          </div>
+        ) : (
+          <div className="rounded-xl border border-cf-violet/14 bg-cf-panel p-5">
+            <div className="flex items-start gap-4">
+              <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-cf-violet/10 text-cf-violet">
+                <svg className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={1.75} viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
+                </svg>
+              </div>
+              <div className="flex-1">
+                <p className="text-sm font-semibold text-zinc-100">Brand Kit</p>
+                <p className="mt-1 text-xs text-zinc-500">
+                  Set your brand voice, audience, and CTA once — applied to every generation automatically. Available on the Pro plan.
                 </p>
                 <a
                   href="/dashboard/billing"

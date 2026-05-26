@@ -10,10 +10,20 @@ export interface PromptTemplate {
   created_at: string;
 }
 
+export interface BrandKit {
+  brand_name: string | null;
+  brand_voice: string | null;
+  target_audience: string | null;
+  niche: string | null;
+  preferred_cta: string | null;
+  default_hashtags: string | null;
+}
+
 export interface GenerateContext {
   isPro: boolean;
   backendHeaders: Record<string, string>;
   templates: PromptTemplate[];
+  brandKit: BrandKit | null;
 }
 
 type GenerateContextResult =
@@ -22,7 +32,8 @@ type GenerateContextResult =
 
 export async function buildGenerateContext(
   token: string,
-  selectedTemplateId?: string | null
+  selectedTemplateId?: string | null,
+  useBrandKit: boolean = false,
 ): Promise<GenerateContextResult> {
   let res: Response;
   try {
@@ -59,6 +70,7 @@ export async function buildGenerateContext(
   const settings = data.settings;
   const isPro: boolean = data.is_admin || data.plan === "pro";
   const templates: PromptTemplate[] = data.templates ?? [];
+  const brandKit: BrandKit | null = (isPro && data.brand_kit) ? data.brand_kit : null;
 
   const usingOpenai = settings?.preferred_provider === "openai";
   const hasKey = usingOpenai ? !!settings?.openai_api_key : !!settings?.groq_api_key;
@@ -107,7 +119,14 @@ export async function buildGenerateContext(
     backendHeaders["X-Free-Form"] = "true";
   }
 
-  return { ok: true, ctx: { isPro, backendHeaders, templates } };
+  if (isPro && useBrandKit && brandKit) {
+    const hasAnyField = Object.values(brandKit).some((v) => v && String(v).trim());
+    if (hasAnyField) {
+      backendHeaders["X-Brand-Kit"] = Buffer.from(JSON.stringify(brandKit), "utf-8").toString("base64");
+    }
+  }
+
+  return { ok: true, ctx: { isPro, backendHeaders, templates, brandKit } };
 }
 
 export function recordGeneration(

@@ -12,7 +12,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from core.crypto import decrypt, encrypt
 from core.database import get_db
 from core.deps import get_current_user
-from models import GenerationHistory, PromptTemplate, User, UserPlan, UserSettings
+from models import BrandKit, GenerationHistory, PromptTemplate, User, UserPlan, UserSettings
 
 router = APIRouter(prefix="/user", tags=["user"])
 
@@ -228,6 +228,65 @@ async def save_settings(
     return {"ok": True}
 
 
+# ── Brand Kit ─────────────────────────────────────────────────────────────────
+
+class BrandKitSave(BaseModel):
+    brand_name: str | None = None
+    brand_voice: str | None = None
+    target_audience: str | None = None
+    niche: str | None = None
+    preferred_cta: str | None = None
+    default_hashtags: str | None = None
+
+
+def _serialize_brand_kit(bk: BrandKit | None) -> dict:
+    fields = ["brand_name", "brand_voice", "target_audience", "niche", "preferred_cta", "default_hashtags"]
+    if not bk:
+        return {f: None for f in fields}
+    return {f: getattr(bk, f) for f in fields}
+
+
+@router.get("/brand-kit")
+async def get_brand_kit(
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    result = await db.execute(select(BrandKit).where(BrandKit.user_id == current_user.id))
+    return _serialize_brand_kit(result.scalar_one_or_none())
+
+
+@router.post("/brand-kit")
+async def save_brand_kit(
+    body: BrandKitSave,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    await _require_pro(current_user, db)
+
+    result = await db.execute(select(BrandKit).where(BrandKit.user_id == current_user.id))
+    bk = result.scalar_one_or_none()
+    if bk:
+        bk.brand_name = body.brand_name
+        bk.brand_voice = body.brand_voice
+        bk.target_audience = body.target_audience
+        bk.niche = body.niche
+        bk.preferred_cta = body.preferred_cta
+        bk.default_hashtags = body.default_hashtags
+    else:
+        bk = BrandKit(
+            user_id=current_user.id,
+            brand_name=body.brand_name,
+            brand_voice=body.brand_voice,
+            target_audience=body.target_audience,
+            niche=body.niche,
+            preferred_cta=body.preferred_cta,
+            default_hashtags=body.default_hashtags,
+        )
+        db.add(bk)
+    await db.commit()
+    return {"ok": True}
+
+
 # ── Prompt Templates ──────────────────────────────────────────────────────────
 
 class TemplateCreate(BaseModel):
@@ -416,6 +475,11 @@ async def prepare_generation(
     )
     templates = tpl_result.scalars().all()
 
+    bk_result = await db.execute(select(BrandKit).where(BrandKit.user_id == current_user.id))
+    bk = bk_result.scalar_one_or_none()
+
+    is_pro = current_user.is_admin or plan.plan == "pro"
+
     return {
         "quota_status": "ok",
         "is_admin": current_user.is_admin,
@@ -428,4 +492,5 @@ async def prepare_generation(
             "free_form_output": s.free_form_output if s else False,
         },
         "templates": [_serialize_template(t) for t in templates],
+        "brand_kit": _serialize_brand_kit(bk) if is_pro else None,
     }

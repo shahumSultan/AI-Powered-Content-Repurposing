@@ -27,6 +27,7 @@ class User(Base):
     settings: Mapped["UserSettings | None"] = relationship("UserSettings", back_populates="user", uselist=False)
     history: Mapped[list["GenerationHistory"]] = relationship("GenerationHistory", back_populates="user")
     prompt_templates: Mapped[list["PromptTemplate"]] = relationship("PromptTemplate", back_populates="user", cascade="all, delete-orphan")
+    brand_kit: Mapped["BrandKit | None"] = relationship("BrandKit", back_populates="user", uselist=False)
 
 
 class UserPlan(Base):
@@ -85,6 +86,21 @@ class UserSettings(Base):
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now, onupdate=_now)
 
     user: Mapped["User"] = relationship("User", back_populates="settings")
+
+
+class BrandKit(Base):
+    __tablename__ = "brand_kits"
+
+    user_id: Mapped[str] = mapped_column(UUID(as_uuid=False), ForeignKey("users.id", ondelete="CASCADE"), primary_key=True)
+    brand_name: Mapped[str | None] = mapped_column(String(80), nullable=True)
+    brand_voice: Mapped[str | None] = mapped_column(Text, nullable=True)
+    target_audience: Mapped[str | None] = mapped_column(Text, nullable=True)
+    niche: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    preferred_cta: Mapped[str | None] = mapped_column(String(150), nullable=True)
+    default_hashtags: Mapped[str | None] = mapped_column(Text, nullable=True)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now, onupdate=_now)
+
+    user: Mapped["User"] = relationship("User", back_populates="brand_kit")
 
 
 class PromptTemplate(Base):

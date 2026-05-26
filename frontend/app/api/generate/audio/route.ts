@@ -27,7 +27,8 @@ export async function POST(req: NextRequest) {
   }
 
   const templateId = (formData.get("template_id") as string | null) || null;
-  const result = await buildGenerateContext(token, templateId);
+  const useBrandKit = formData.get("use_brand_kit") === "true";
+  const result = await buildGenerateContext(token, templateId, useBrandKit);
   if (!result.ok) return result.response;
   const { backendHeaders } = result.ctx;
 

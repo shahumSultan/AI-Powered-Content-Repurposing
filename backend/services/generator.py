@@ -203,25 +203,29 @@ Rules:
 - x_threads: exactly 1 item; 3-5 tweets each ≤280 chars, conversational tone, last tweet ends with a CTA"""
 
 
-def _build_user_message(source: str, custom_prompt: str | None) -> str:
+def _build_user_message(
+    source: str,
+    custom_prompt: str | None,
+    brand_kit_context: str | None = None,
+) -> str:
+    prefix = (brand_kit_context + "\n\n") if brand_kit_context else ""
     if custom_prompt:
         if "{source}" in custom_prompt:
             base = custom_prompt.format(source=source)
         else:
             base = custom_prompt + "\n\nSOURCE MATERIAL:\n" + source
-        # Append JSON structure requirement when the user hasn't included it
         if '"hooks"' not in base:
             base += "\n\n" + _JSON_STRUCTURE_REQUIREMENT
-        return base
-    return _USER_TEMPLATE.format(source=source)
+        return prefix + base
+    return prefix + _USER_TEMPLATE.format(source=source)
 
 
-def _call_groq(client: Groq, source: str, custom_prompt: str | None = None) -> str:
+def _call_groq(client: Groq, source: str, custom_prompt: str | None = None, brand_kit_context: str | None = None) -> str:
     response = client.chat.completions.create(
         model=_GROQ_MODEL,
         messages=[
             {"role": "system", "content": _SYSTEM_PROMPT},
-            {"role": "user", "content": _build_user_message(source, custom_prompt)},
+            {"role": "user", "content": _build_user_message(source, custom_prompt, brand_kit_context)},
         ],
         max_tokens=2048,
         temperature=0.7,
@@ -229,12 +233,12 @@ def _call_groq(client: Groq, source: str, custom_prompt: str | None = None) -> s
     return response.choices[0].message.content
 
 
-def _call_openai(client: OpenAI, source: str, custom_prompt: str | None = None) -> str:
+def _call_openai(client: OpenAI, source: str, custom_prompt: str | None = None, brand_kit_context: str | None = None) -> str:
     response = client.chat.completions.create(
         model=_OPENAI_MODEL,
         messages=[
             {"role": "system", "content": _SYSTEM_PROMPT},
-            {"role": "user", "content": _build_user_message(source, custom_prompt)},
+            {"role": "user", "content": _build_user_message(source, custom_prompt, brand_kit_context)},
         ],
         max_tokens=2048,
         temperature=0.7,
@@ -259,6 +263,7 @@ def generate_free_form(
     custom_prompt: str,
     groq_api_key: str | None = None,
     openai_api_key: str | None = None,
+    brand_kit_context: str | None = None,
 ) -> str:
     if openai_api_key:
         llm_client: OpenAI | Groq = OpenAI(api_key=openai_api_key)
@@ -279,10 +284,11 @@ def generate_free_form(
     if len(words) > _MAX_PROMPT_WORDS:
         source = " ".join(words[:_MAX_PROMPT_WORDS])
 
+    prefix = (brand_kit_context + "\n\n") if brand_kit_context else ""
     if "{source}" in custom_prompt:
-        user_message = custom_prompt.format(source=source)
+        user_message = prefix + custom_prompt.format(source=source)
     else:
-        user_message = custom_prompt + "\n\nSOURCE MATERIAL:\n" + source
+        user_message = prefix + custom_prompt + "\n\nSOURCE MATERIAL:\n" + source
 
     model = _OPENAI_MODEL if use_openai else _GROQ_MODEL
     client_obj = llm_client  # type: ignore[assignment]
@@ -380,6 +386,7 @@ def generate_content_pack(
     custom_prompt: str | None = None,
     groq_api_key: str | None = None,
     openai_api_key: str | None = None,
+    brand_kit_context: str | None = None,
 ) -> ContentPack:
     # Resolve which client to use — raises NoApiKeyError before any LLM call
     if openai_api_key:
@@ -405,10 +412,10 @@ def generate_content_pack(
             source = " ".join(words[:_MAX_PROMPT_WORDS])
 
         if client_type == "openai":
-            raw_output = _call_openai(llm_client, source, custom_prompt)
+            raw_output = _call_openai(llm_client, source, custom_prompt, brand_kit_context)
             logger.info("Generated with user-supplied OpenAI key.")
         else:
-            raw_output = _call_groq(llm_client, source, custom_prompt)
+            raw_output = _call_groq(llm_client, source, custom_prompt, brand_kit_context)
             if client_type == "groq":
                 logger.info("Generated with user-supplied Groq key.")
 

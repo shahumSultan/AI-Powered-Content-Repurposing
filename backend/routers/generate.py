@@ -38,6 +38,30 @@ def _decode_prompt(raw: str | None) -> str | None:
         return raw  # fall back to raw value for any non-base64 clients
 
 
+def _decode_brand_kit(raw: str | None) -> str | None:
+    """Decode a base64-encoded JSON brand kit header and build the BRAND CONTEXT block."""
+    if not raw:
+        return None
+    try:
+        data: dict = json.loads(base64.b64decode(raw).decode("utf-8"))
+    except Exception:
+        return None
+    labels = [
+        ("brand_name", "Brand"),
+        ("brand_voice", "Voice"),
+        ("target_audience", "Audience"),
+        ("niche", "Niche"),
+        ("preferred_cta", "CTA"),
+        ("default_hashtags", "Hashtags"),
+    ]
+    lines = ["BRAND CONTEXT:"] + [
+        f"{lbl}: {(data.get(k) or '').strip()}"
+        for k, lbl in labels
+        if (data.get(k) or "").strip()
+    ]
+    return "\n".join(lines) if len(lines) > 1 else None
+
+
 def _is_youtube(url: str) -> bool:
     host = urlparse(url).hostname or ""
     return host in ("youtu.be", "youtube.com", "www.youtube.com")
@@ -94,11 +118,18 @@ def _build_response(
     openai_key: str | None,
     custom_prompt: str | None = None,
     free_form: bool = False,
+    brand_kit_context: str | None = None,
 ) -> GenerateResponse:
     ranked = rank(chunks)
     try:
         if free_form and custom_prompt:
-            raw = generate_free_form(ranked, custom_prompt=custom_prompt, groq_api_key=groq_key, openai_api_key=openai_key)
+            raw = generate_free_form(
+                ranked,
+                custom_prompt=custom_prompt,
+                groq_api_key=groq_key,
+                openai_api_key=openai_key,
+                brand_kit_context=brand_kit_context,
+            )
             pack = _empty_pack()
             return GenerateResponse(
                 content_pack=pack,
@@ -107,7 +138,13 @@ def _build_response(
                 export_csv="",
                 raw_output=raw,
             )
-        pack = generate_content_pack(ranked, custom_prompt=custom_prompt, groq_api_key=groq_key, openai_api_key=openai_key)
+        pack = generate_content_pack(
+            ranked,
+            custom_prompt=custom_prompt,
+            groq_api_key=groq_key,
+            openai_api_key=openai_key,
+            brand_kit_context=brand_kit_context,
+        )
     except NoApiKeyError as exc:
         raise HTTPException(status_code=400, detail=str(exc))
     csv_str = to_csv(pack)
@@ -126,6 +163,7 @@ def generate(
     x_openai_api_key: str | None = Header(None),
     x_custom_prompt: str | None = Header(None),
     x_free_form: str | None = Header(None),
+    x_brand_kit: str | None = Header(None),
 ) -> GenerateResponse:
     all_chunks: list[Chunk] = []
     errors: list[str] = []
@@ -150,7 +188,12 @@ def generate(
                    + " | ".join(errors),
         )
 
-    return _build_response(all_chunks, errors, x_groq_api_key, x_openai_api_key, _decode_prompt(x_custom_prompt), free_form=x_free_form == "true")
+    return _build_response(
+        all_chunks, errors, x_groq_api_key, x_openai_api_key,
+        _decode_prompt(x_custom_prompt),
+        free_form=x_free_form == "true",
+        brand_kit_context=_decode_brand_kit(x_brand_kit),
+    )
 
 
 @router.post("/text", response_model=GenerateResponse)
@@ -160,11 +203,17 @@ def generate_from_text(
     x_openai_api_key: str | None = Header(None),
     x_custom_prompt: str | None = Header(None),
     x_free_form: str | None = Header(None),
+    x_brand_kit: str | None = Header(None),
 ) -> GenerateResponse:
     chunks = _ingest_text(body.text)
     if not chunks:
         raise HTTPException(status_code=422, detail="No content could be extracted from the provided text")
-    return _build_response(chunks, [], x_groq_api_key, x_openai_api_key, _decode_prompt(x_custom_prompt), free_form=x_free_form == "true")
+    return _build_response(
+        chunks, [], x_groq_api_key, x_openai_api_key,
+        _decode_prompt(x_custom_prompt),
+        free_form=x_free_form == "true",
+        brand_kit_context=_decode_brand_kit(x_brand_kit),
+    )
 
 
 @router.post("/audio", response_model=GenerateResponse)
@@ -174,6 +223,7 @@ async def generate_from_audio(
     x_openai_api_key: str | None = Header(None),
     x_custom_prompt: str | None = Header(None),
     x_free_form: str | None = Header(None),
+    x_brand_kit: str | None = Header(None),
 ) -> GenerateResponse:
     audio_bytes = await file.read(_MAX_AUDIO_BYTES + 1)
     if len(audio_bytes) > _MAX_AUDIO_BYTES:
@@ -188,7 +238,12 @@ async def generate_from_audio(
     if not chunks:
         raise HTTPException(status_code=422, detail="No content could be transcribed from the audio")
 
-    return _build_response(chunks, [], x_groq_api_key, x_openai_api_key, _decode_prompt(x_custom_prompt), free_form=x_free_form == "true")
+    return _build_response(
+        chunks, [], x_groq_api_key, x_openai_api_key,
+        _decode_prompt(x_custom_prompt),
+        free_form=x_free_form == "true",
+        brand_kit_context=_decode_brand_kit(x_brand_kit),
+    )
 
 
 # ---------------------------------------------------------------------------

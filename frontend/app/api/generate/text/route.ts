@@ -22,7 +22,8 @@ export async function POST(req: NextRequest) {
   }
 
   const templateId = (bodyObj.template_id as string | undefined) ?? null;
-  const result = await buildGenerateContext(token, templateId);
+  const useBrandKit = (bodyObj.use_brand_kit as boolean | undefined) === true;
+  const result = await buildGenerateContext(token, templateId, useBrandKit);
   if (!result.ok) return result.response;
   const { backendHeaders } = result.ctx;
 
