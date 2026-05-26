@@ -19,3 +19,4 @@
 - [ ] No regressions
 
 🤖 Co-authored with [Claude Code](https://claude.ai/code)
+<!-- template v1.0 -->
