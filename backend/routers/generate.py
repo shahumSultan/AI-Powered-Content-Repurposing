@@ -232,7 +232,8 @@ async def generate_from_audio(
     try:
         text, segments = transcribe(audio_bytes, openai_api_key=x_openai_api_key)
     except Exception as e:
-        raise HTTPException(status_code=422, detail=f"Transcription failed: {e}")
+        logger.warning("Transcription failed: %s", e)
+        raise HTTPException(status_code=422, detail="Transcription failed. Check the audio file and try again.")
 
     chunks = chunk_text(text, segments)
     if not chunks:
