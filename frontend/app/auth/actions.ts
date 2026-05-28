@@ -67,3 +67,47 @@ export async function signOut(): Promise<void> {
   revalidatePath("/", "layout");
   redirect("/");
 }
+
+export async function forgotPassword(
+  _prev: { error?: string; success?: boolean } | null,
+  formData: FormData
+): Promise<{ error?: string; success?: boolean }> {
+  const email = (formData.get("email") as string).trim();
+
+  const res = await fetch(`${BACKEND}/auth/forgot-password`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email }),
+  });
+
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    return { error: data.detail ?? "Something went wrong. Please try again." };
+  }
+
+  return { success: true };
+}
+
+export async function resetPassword(
+  _prev: { error?: string; success?: boolean } | null,
+  formData: FormData
+): Promise<{ error?: string; success?: boolean }> {
+  const token = (formData.get("token") as string).trim();
+  const password = formData.get("password") as string;
+  const confirm = formData.get("confirm") as string;
+
+  if (password !== confirm) {
+    return { error: "Passwords do not match" };
+  }
+
+  const res = await fetch(`${BACKEND}/auth/reset-password`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ token, password }),
+  });
+
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) return { error: data.detail ?? "Reset failed. The link may have expired." };
+
+  return { success: true };
+}

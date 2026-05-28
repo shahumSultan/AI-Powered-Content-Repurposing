@@ -27,3 +27,6 @@ ALLOWED_ORIGINS: str = os.getenv("ALLOWED_ORIGINS", "http://localhost:3000")
 # Encryption key for storing user API keys at rest.
 # Generate with: python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
 API_KEY_ENCRYPTION_KEY: str = os.getenv("API_KEY_ENCRYPTION_KEY", "")
+
+RESEND_API_KEY: str = os.getenv("RESEND_API_KEY", "")
+FROM_EMAIL: str = os.getenv("FROM_EMAIL", "noreply@contentcube.app")
