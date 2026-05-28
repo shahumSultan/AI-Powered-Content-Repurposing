@@ -190,7 +190,7 @@ function TemplateForm({
         <OutputModeToggle value={values.free_form} onChange={(v) => set("free_form", v)} />
       )}
 
-      <label className="flex items-center gap-2.5 cursor-pointer">
+      <label className="flex cursor-pointer items-center gap-2.5">
         <input
           type="checkbox"
           checked={values.is_default}
@@ -212,7 +212,7 @@ function TemplateForm({
         <button
           type="button"
           onClick={onCancel}
-          className="rounded-lg border border-zinc-700 px-4 py-2 text-xs font-medium text-zinc-400 hover:text-zinc-200 transition"
+          className="rounded-lg border border-zinc-700 px-4 py-2 text-xs font-medium text-zinc-400 transition hover:text-zinc-200"
         >
           Cancel
         </button>
@@ -298,7 +298,6 @@ function TemplateManager({
 
   return (
     <div className="space-y-3">
-      {/* Template list */}
       {templates.map((t) => (
         <div key={t.id}>
           {editingId === t.id ? (
@@ -310,8 +309,8 @@ function TemplateManager({
             />
           ) : (
             <div className="flex items-start gap-3 rounded-lg border border-cf-violet/14 bg-cf-panel-alt px-4 py-3">
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 flex-wrap">
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-center gap-2">
                   <span className="text-sm font-medium text-zinc-200">{t.name}</span>
                   {t.is_default && (
                     <span className="rounded bg-cf-violet/20 px-1.5 py-0.5 text-xs font-medium text-cf-violet">Default</span>
@@ -326,7 +325,7 @@ function TemplateManager({
                 <button
                   type="button"
                   onClick={() => { setEditingId(t.id); setShowForm(false); }}
-                  className="rounded p-1.5 text-zinc-500 hover:text-zinc-200 transition"
+                  className="rounded p-1.5 text-zinc-500 transition hover:text-zinc-200"
                   title="Edit"
                 >
                   <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth={1.75} viewBox="0 0 24 24">
@@ -338,14 +337,14 @@ function TemplateManager({
                     <button
                       type="button"
                       onClick={() => handleDelete(t.id)}
-                      className="rounded px-2 py-1 text-xs font-medium text-red-400 hover:text-red-300 transition"
+                      className="rounded px-2 py-1 text-xs font-medium text-red-400 transition hover:text-red-300"
                     >
                       Confirm
                     </button>
                     <button
                       type="button"
                       onClick={() => setConfirmDeleteId(null)}
-                      className="rounded px-2 py-1 text-xs text-zinc-500 hover:text-zinc-300 transition"
+                      className="rounded px-2 py-1 text-xs text-zinc-500 transition hover:text-zinc-300"
                     >
                       Cancel
                     </button>
@@ -354,7 +353,7 @@ function TemplateManager({
                   <button
                     type="button"
                     onClick={() => setConfirmDeleteId(t.id)}
-                    className="rounded p-1.5 text-zinc-500 hover:text-red-400 transition"
+                    className="rounded p-1.5 text-zinc-500 transition hover:text-red-400"
                     title="Delete"
                   >
                     <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth={1.75} viewBox="0 0 24 24">
@@ -368,7 +367,6 @@ function TemplateManager({
         </div>
       ))}
 
-      {/* New template form */}
       {showForm && !editingId && (
         <TemplateForm
           initial={BLANK_FORM}
@@ -378,7 +376,6 @@ function TemplateManager({
         />
       )}
 
-      {/* Add button or limit note */}
       {!showForm && !editingId && (
         templates.length >= 10 ? (
           <p className="text-xs text-zinc-500">Maximum 10 templates reached. Delete one to add another.</p>
@@ -386,7 +383,7 @@ function TemplateManager({
           <button
             type="button"
             onClick={() => setShowForm(true)}
-            className="flex items-center gap-1.5 text-xs font-medium text-cf-violet hover:text-cf-violet/80 transition"
+            className="flex items-center gap-1.5 text-xs font-medium text-cf-violet transition hover:text-cf-violet/80"
           >
             <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -398,6 +395,42 @@ function TemplateManager({
     </div>
   );
 }
+
+// ── Tab definitions ───────────────────────────────────────────────────────────
+
+type TabId = "ai-setup" | "templates" | "brand-kit";
+
+const SETTINGS_TABS: { id: TabId; label: string; icon: React.ReactNode }[] = [
+  {
+    id: "ai-setup",
+    label: "AI Setup",
+    icon: (
+      <svg className="h-4 w-4 shrink-0" fill="none" stroke="currentColor" strokeWidth={1.75} viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 0 0-2.456 2.456Z" />
+      </svg>
+    ),
+  },
+  {
+    id: "templates",
+    label: "Prompt Templates",
+    icon: (
+      <svg className="h-4 w-4 shrink-0" fill="none" stroke="currentColor" strokeWidth={1.75} viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+      </svg>
+    ),
+  },
+  {
+    id: "brand-kit",
+    label: "Brand Kit",
+    icon: (
+      <svg className="h-4 w-4 shrink-0" fill="none" stroke="currentColor" strokeWidth={1.75} viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M9.53 16.122a3 3 0 0 0-5.78 1.128 2.25 2.25 0 0 1-2.4 2.245 4.5 4.5 0 0 0 8.4-2.245c0-.399-.078-.78-.22-1.128Zm0 0a15.998 15.998 0 0 0 3.388-1.62m-5.043-.025a15.994 15.994 0 0 1 1.622-3.395m3.42 3.42a15.995 15.995 0 0 0 4.764-4.648l3.876-5.814a1.151 1.151 0 0 0-1.597-1.597L14.146 6.32a15.996 15.996 0 0 0-4.649 4.763m3.42 3.42a6.776 6.776 0 0 0-3.42-3.42" />
+      </svg>
+    ),
+  },
+];
+
+// ── Main page ─────────────────────────────────────────────────────────────────
 
 export default function SettingsPage() {
   const [groqKey, setGroqKey] = useState("");
@@ -411,6 +444,7 @@ export default function SettingsPage() {
   const [savingBrandKit, setSavingBrandKit] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [activeTab, setActiveTab] = useState<TabId>("ai-setup");
 
   useEffect(() => {
     Promise.all([fetch("/api/settings"), fetch("/api/plan"), fetch("/api/templates"), fetch("/api/brand-kit")])
@@ -437,7 +471,6 @@ export default function SettingsPage() {
           setBrandKit(bk);
         }
 
-        // Auto-migrate legacy custom_prompt to a template on first load
         if (proUser && d.custom_prompt && list.length === 0) {
           fetch("/api/templates", {
             method: "POST",
@@ -512,262 +545,300 @@ export default function SettingsPage() {
 
   if (loading) {
     return (
-      <div className="max-w-xl">
-        <div className="h-6 w-32 animate-pulse rounded bg-cf-panel-alt" />
-        <div className="mt-6 space-y-4">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="h-12 animate-pulse rounded-lg bg-cf-panel-alt" />
-          ))}
+      <div>
+        <div className="mb-8">
+          <div className="h-7 w-28 animate-pulse rounded bg-cf-panel-alt" />
+          <div className="mt-2 h-4 w-72 animate-pulse rounded bg-cf-panel-alt" />
+        </div>
+        <div className="flex flex-col gap-6 lg:flex-row lg:gap-8">
+          <div className="flex gap-2 lg:w-52 lg:flex-col">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="h-10 flex-1 animate-pulse rounded-lg bg-cf-panel-alt lg:flex-none" />
+            ))}
+          </div>
+          <div className="flex-1 space-y-4">
+            {[1, 2].map((i) => (
+              <div key={i} className="h-28 animate-pulse rounded-xl bg-cf-panel-alt" />
+            ))}
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="max-w-xl">
-      <h1 className="mb-1 text-2xl font-bold text-zinc-100">Settings</h1>
-      <p className="mb-8 text-sm text-zinc-500">
-        Add your own API key to enable content generation. Your key is stored securely and never shared.
-      </p>
+    <div>
+      {/* Page header */}
+      <div className="mb-8">
+        <h1 className="text-2xl font-bold text-zinc-100">Settings</h1>
+        <p className="mt-1 text-sm text-zinc-500">
+          Configure your AI provider, prompt templates, and brand identity.
+        </p>
+      </div>
 
-      <form onSubmit={handleSave} className="space-y-6">
-        {/* Provider preference */}
-        <div className="rounded-xl border border-cf-violet/14 bg-cf-panel p-5">
-          <p className="mb-3 text-sm font-semibold text-zinc-100">Preferred provider</p>
-          <div className="flex gap-3">
-            {(["groq", "openai"] as Provider[]).map((p) => (
-              <button
-                key={p}
-                type="button"
-                onClick={() => setProvider(p)}
-                className={`flex-1 rounded-lg border py-2.5 text-sm font-medium capitalize transition ${
-                  provider === p
-                    ? "border-cf-violet/60 bg-cf-violet/10 text-cf-violet"
-                    : "border-cf-violet/25 bg-cf-panel-alt text-zinc-400 hover:border-cf-violet/40 hover:text-zinc-200"
-                }`}
-              >
-                {p === "groq" ? "Groq" : "OpenAI"}
-              </button>
-            ))}
-          </div>
-          <p className="mt-2 text-xs text-zinc-500">
-            {provider === "groq"
-              ? "Uses llama-3.3-70b-versatile via Groq. Fast and free."
-              : "Uses gpt-4o-mini via OpenAI. Requires an OpenAI API key."}
-          </p>
-        </div>
-
-        {/* API Keys */}
-        <div className="rounded-xl border border-cf-violet/14 bg-cf-panel p-5 space-y-5">
-          <p className="text-sm font-semibold text-zinc-100">API keys</p>
-
-          <ApiKeyInput
-            label="Groq API Key"
-            placeholder="gsk_..."
-            value={groqKey}
-            onChange={setGroqKey}
-            hint="Get a free key at console.groq.com. Required when Groq is your preferred provider."
-          />
-
-          <ApiKeyInput
-            label="OpenAI API Key"
-            placeholder="sk-..."
-            value={openaiKey}
-            onChange={setOpenaiKey}
-            hint="Get a key at platform.openai.com. Required if OpenAI is your preferred provider."
-          />
-        </div>
-
-        {/* Prompt templates (Pro) */}
-        {isPro ? (
-          <div className="rounded-xl border border-cf-violet/14 bg-cf-panel p-5 space-y-4">
-            <div>
-              <p className="text-sm font-semibold text-zinc-100">Prompt templates</p>
-              <p className="mt-1 text-xs text-zinc-500">
-                Save named prompt templates and pick one per generation from the generate form. Use{" "}
-                <code className="rounded bg-cf-panel-alt px-1 py-0.5 font-mono text-zinc-300">{"{source}"}</code>{" "}
-                where the extracted content should be injected.
-              </p>
-            </div>
-
-            <TemplateManager templates={templates} onTemplatesChange={setTemplates} />
-
-            {/* Legacy textarea — only shown before migration (no templates yet) */}
-            {templates.length === 0 && (
-              <div className="space-y-4 pt-2 border-t border-cf-violet/10">
-                <p className="text-xs text-zinc-500">Or use the one-off custom prompt below (legacy):</p>
-                {customPrompt.trim() && (
-                  <OutputModeToggle value={freeFormOutput} onChange={setFreeFormOutput} />
-                )}
-                <textarea
-                  value={customPrompt}
-                  onChange={(e) => setCustomPrompt(e.target.value)}
-                  rows={10}
-                  placeholder={PROMPT_PLACEHOLDER}
-                  spellCheck={false}
-                  className="w-full rounded-lg border border-cf-violet/25 bg-cf-panel-alt px-3 py-2.5 font-mono text-xs text-zinc-100 placeholder-zinc-600 outline-none focus:border-cf-violet/60 focus:ring-1 focus:ring-cf-violet/20 resize-y"
-                />
-                {customPrompt.trim() && !customPrompt.includes("{source}") && (
-                  <p className="text-xs text-amber-400">
-                    Your prompt doesn&apos;t include <code className="font-mono">{"{source}"}</code> — the source content will be appended automatically.
-                  </p>
-                )}
-              </div>
-            )}
-          </div>
-        ) : (
-          <div className="rounded-xl border border-cf-violet/14 bg-cf-panel p-5">
-            <div className="flex items-start gap-4">
-              <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-cf-violet/10 text-cf-violet">
-                <svg className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={1.75} viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
-                </svg>
-              </div>
-              <div className="flex-1">
-                <p className="text-sm font-semibold text-zinc-100">Prompt templates</p>
-                <p className="mt-1 text-xs text-zinc-500">
-                  Save named prompt templates and pick one per generation. Available on the Pro plan.
-                </p>
-                <a
-                  href="/dashboard/billing"
-                  className="mt-3 inline-flex items-center gap-1.5 rounded-lg bg-cf-violet px-4 py-2 text-xs font-semibold text-white transition hover:bg-cf-violet/80"
-                >
-                  Upgrade to Pro
-                </a>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Brand Kit */}
-        {isPro ? (
-          <div className="rounded-xl border border-cf-violet/14 bg-cf-panel p-5 space-y-4">
-            <div>
-              <p className="text-sm font-semibold text-zinc-100">Brand Kit</p>
-              <p className="mt-1 text-xs text-zinc-500">
-                Set once, applied to every generation when you enable it. Defines your brand identity layer — voice, audience, and CTA injected into the AI prompt automatically.
-              </p>
-            </div>
-
-            <div className="space-y-3">
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="mb-1.5 block text-xs font-medium text-zinc-300">Brand name</label>
-                  <input
-                    type="text"
-                    value={brandKit.brand_name ?? ""}
-                    onChange={(e) => setBrandKit((b) => ({ ...b, brand_name: e.target.value }))}
-                    maxLength={80}
-                    placeholder="e.g. ContentFlow"
-                    className="w-full rounded-lg border border-cf-violet/25 bg-cf-panel-alt px-3 py-2 text-sm text-zinc-100 placeholder-zinc-600 outline-none focus:border-cf-violet/60"
-                  />
-                </div>
-                <div>
-                  <label className="mb-1.5 block text-xs font-medium text-zinc-300">Niche / Industry</label>
-                  <input
-                    type="text"
-                    value={brandKit.niche ?? ""}
-                    onChange={(e) => setBrandKit((b) => ({ ...b, niche: e.target.value }))}
-                    maxLength={100}
-                    placeholder="e.g. AI productivity, content marketing"
-                    className="w-full rounded-lg border border-cf-violet/25 bg-cf-panel-alt px-3 py-2 text-sm text-zinc-100 placeholder-zinc-600 outline-none focus:border-cf-violet/60"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="mb-1.5 block text-xs font-medium text-zinc-300">Brand voice</label>
-                <textarea
-                  value={brandKit.brand_voice ?? ""}
-                  onChange={(e) => setBrandKit((b) => ({ ...b, brand_voice: e.target.value }))}
-                  maxLength={300}
-                  rows={2}
-                  placeholder="e.g. Professional but approachable, data-driven, motivating for creators"
-                  className="w-full resize-none rounded-lg border border-cf-violet/25 bg-cf-panel-alt px-3 py-2.5 text-sm text-zinc-100 placeholder-zinc-600 outline-none focus:border-cf-violet/60"
-                />
-              </div>
-
-              <div>
-                <label className="mb-1.5 block text-xs font-medium text-zinc-300">Target audience</label>
-                <textarea
-                  value={brandKit.target_audience ?? ""}
-                  onChange={(e) => setBrandKit((b) => ({ ...b, target_audience: e.target.value }))}
-                  maxLength={200}
-                  rows={2}
-                  placeholder="e.g. Solopreneurs, content creators, marketers"
-                  className="w-full resize-none rounded-lg border border-cf-violet/25 bg-cf-panel-alt px-3 py-2.5 text-sm text-zinc-100 placeholder-zinc-600 outline-none focus:border-cf-violet/60"
-                />
-              </div>
-
-              <div>
-                <label className="mb-1.5 block text-xs font-medium text-zinc-300">Preferred CTA</label>
-                <input
-                  type="text"
-                  value={brandKit.preferred_cta ?? ""}
-                  onChange={(e) => setBrandKit((b) => ({ ...b, preferred_cta: e.target.value }))}
-                  maxLength={150}
-                  placeholder="e.g. Try ContentFlow free →"
-                  className="w-full rounded-lg border border-cf-violet/25 bg-cf-panel-alt px-3 py-2 text-sm text-zinc-100 placeholder-zinc-600 outline-none focus:border-cf-violet/60"
-                />
-              </div>
-
-              <div>
-                <label className="mb-1.5 block text-xs font-medium text-zinc-300">Default hashtags</label>
-                <input
-                  type="text"
-                  value={brandKit.default_hashtags ?? ""}
-                  onChange={(e) => setBrandKit((b) => ({ ...b, default_hashtags: e.target.value }))}
-                  maxLength={300}
-                  placeholder="#contentcreation #aitools #productivity"
-                  className="w-full rounded-lg border border-cf-violet/25 bg-cf-panel-alt px-3 py-2 text-sm text-zinc-100 placeholder-zinc-600 outline-none focus:border-cf-violet/60"
-                />
-              </div>
-            </div>
-
+      <div className="flex flex-col gap-6 lg:flex-row lg:gap-8">
+        {/* Left nav — horizontal on mobile, vertical on desktop */}
+        <nav className="flex shrink-0 gap-1 overflow-x-auto pb-1 lg:w-52 lg:flex-col lg:pb-0">
+          {SETTINGS_TABS.map((tab) => (
             <button
+              key={tab.id}
               type="button"
-              disabled={savingBrandKit}
-              onClick={handleSaveBrandKit}
-              className="btn-primary rounded-lg px-4 py-2 text-xs font-semibold text-white disabled:opacity-50"
+              onClick={() => setActiveTab(tab.id)}
+              className={`flex items-center gap-2.5 whitespace-nowrap rounded-lg px-3 py-2.5 text-sm font-medium transition-colors lg:w-full ${
+                activeTab === tab.id
+                  ? "bg-cf-violet/10 text-cf-violet"
+                  : "text-zinc-400 hover:bg-cf-panel-alt hover:text-zinc-200"
+              }`}
             >
-              {savingBrandKit ? "Saving…" : "Save Brand Kit"}
+              {tab.icon}
+              {tab.label}
             </button>
-          </div>
-        ) : (
-          <div className="rounded-xl border border-cf-violet/14 bg-cf-panel p-5">
-            <div className="flex items-start gap-4">
-              <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-cf-violet/10 text-cf-violet">
-                <svg className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={1.75} viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
-                </svg>
-              </div>
-              <div className="flex-1">
-                <p className="text-sm font-semibold text-zinc-100">Brand Kit</p>
-                <p className="mt-1 text-xs text-zinc-500">
-                  Set your brand voice, audience, and CTA once — applied to every generation automatically. Available on the Pro plan.
-                </p>
-                <a
-                  href="/dashboard/billing"
-                  className="mt-3 inline-flex items-center gap-1.5 rounded-lg bg-cf-violet px-4 py-2 text-xs font-semibold text-white transition hover:bg-cf-violet/80"
-                >
-                  Upgrade to Pro
-                </a>
-              </div>
-            </div>
-          </div>
-        )}
+          ))}
+        </nav>
 
-        {/* Save */}
-        <div>
-          <button
-            type="submit"
-            disabled={saving}
-            className="btn-primary rounded-lg px-5 py-2.5 text-sm font-semibold text-white disabled:opacity-50"
-          >
-            {saving ? "Saving…" : "Save settings"}
-          </button>
+        {/* Content panel */}
+        <div className="min-w-0 flex-1">
+
+          {/* ── AI Setup tab ─────────────────────────────────────────────── */}
+          {activeTab === "ai-setup" && (
+            <form onSubmit={handleSave} className="space-y-4">
+              <div className="rounded-xl border border-cf-violet/14 bg-cf-panel p-5">
+                <p className="mb-3 text-sm font-semibold text-zinc-100">Preferred provider</p>
+                <div className="flex gap-3">
+                  {(["groq", "openai"] as Provider[]).map((p) => (
+                    <button
+                      key={p}
+                      type="button"
+                      onClick={() => setProvider(p)}
+                      className={`flex-1 rounded-lg border py-2.5 text-sm font-medium capitalize transition ${
+                        provider === p
+                          ? "border-cf-violet/60 bg-cf-violet/10 text-cf-violet"
+                          : "border-cf-violet/25 bg-cf-panel-alt text-zinc-400 hover:border-cf-violet/40 hover:text-zinc-200"
+                      }`}
+                    >
+                      {p === "groq" ? "Groq" : "OpenAI"}
+                    </button>
+                  ))}
+                </div>
+                <p className="mt-2 text-xs text-zinc-500">
+                  {provider === "groq"
+                    ? "Uses llama-3.3-70b-versatile via Groq. Fast and free."
+                    : "Uses gpt-4o-mini via OpenAI. Requires an OpenAI API key."}
+                </p>
+              </div>
+
+              <div className="space-y-5 rounded-xl border border-cf-violet/14 bg-cf-panel p-5">
+                <p className="text-sm font-semibold text-zinc-100">API keys</p>
+                <ApiKeyInput
+                  label="Groq API Key"
+                  placeholder="gsk_..."
+                  value={groqKey}
+                  onChange={setGroqKey}
+                  hint="Get a free key at console.groq.com. Required when Groq is your preferred provider."
+                />
+                <ApiKeyInput
+                  label="OpenAI API Key"
+                  placeholder="sk-..."
+                  value={openaiKey}
+                  onChange={setOpenaiKey}
+                  hint="Get a key at platform.openai.com. Required if OpenAI is your preferred provider."
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={saving}
+                className="btn-primary rounded-lg px-5 py-2.5 text-sm font-semibold text-white disabled:opacity-50"
+              >
+                {saving ? "Saving…" : "Save settings"}
+              </button>
+            </form>
+          )}
+
+          {/* ── Prompt Templates tab ─────────────────────────────────────── */}
+          {activeTab === "templates" && (
+            isPro ? (
+              <div className="space-y-4 rounded-xl border border-cf-violet/14 bg-cf-panel p-5">
+                <div>
+                  <p className="text-sm font-semibold text-zinc-100">Prompt templates</p>
+                  <p className="mt-1 text-xs text-zinc-500">
+                    Save named prompt templates and pick one per generation from the generate form. Use{" "}
+                    <code className="rounded bg-cf-panel-alt px-1 py-0.5 font-mono text-zinc-300">{"{source}"}</code>{" "}
+                    where the extracted content should be injected.
+                  </p>
+                </div>
+
+                <TemplateManager templates={templates} onTemplatesChange={setTemplates} />
+
+                {templates.length === 0 && (
+                  <div className="space-y-4 border-t border-cf-violet/10 pt-2">
+                    <p className="text-xs text-zinc-500">Or use the one-off custom prompt below (legacy):</p>
+                    {customPrompt.trim() && (
+                      <OutputModeToggle value={freeFormOutput} onChange={setFreeFormOutput} />
+                    )}
+                    <textarea
+                      value={customPrompt}
+                      onChange={(e) => setCustomPrompt(e.target.value)}
+                      rows={10}
+                      placeholder={PROMPT_PLACEHOLDER}
+                      spellCheck={false}
+                      className="w-full resize-y rounded-lg border border-cf-violet/25 bg-cf-panel-alt px-3 py-2.5 font-mono text-xs text-zinc-100 placeholder-zinc-600 outline-none focus:border-cf-violet/60 focus:ring-1 focus:ring-cf-violet/20"
+                    />
+                    {customPrompt.trim() && !customPrompt.includes("{source}") && (
+                      <p className="text-xs text-amber-400">
+                        Your prompt doesn&apos;t include <code className="font-mono">{"{source}"}</code> — the source content will be appended automatically.
+                      </p>
+                    )}
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="rounded-xl border border-cf-violet/14 bg-cf-panel p-5">
+                <div className="flex items-start gap-4">
+                  <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-cf-violet/10 text-cf-violet">
+                    <svg className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={1.75} viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
+                    </svg>
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-semibold text-zinc-100">Prompt templates</p>
+                    <p className="mt-1 text-xs text-zinc-500">
+                      Save named prompt templates and pick one per generation. Available on the Pro plan.
+                    </p>
+                    <a
+                      href="/dashboard/billing"
+                      className="mt-3 inline-flex items-center gap-1.5 rounded-lg bg-cf-violet px-4 py-2 text-xs font-semibold text-white transition hover:bg-cf-violet/80"
+                    >
+                      Upgrade to Pro
+                    </a>
+                  </div>
+                </div>
+              </div>
+            )
+          )}
+
+          {/* ── Brand Kit tab ────────────────────────────────────────────── */}
+          {activeTab === "brand-kit" && (
+            isPro ? (
+              <div className="space-y-4 rounded-xl border border-cf-violet/14 bg-cf-panel p-5">
+                <div>
+                  <p className="text-sm font-semibold text-zinc-100">Brand Kit</p>
+                  <p className="mt-1 text-xs text-zinc-500">
+                    Set once, applied to every generation when you enable it. Defines your brand identity — voice, audience, and CTA injected into the AI prompt automatically.
+                  </p>
+                </div>
+
+                <div className="space-y-3">
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                    <div>
+                      <label className="mb-1.5 block text-xs font-medium text-zinc-300">Brand name</label>
+                      <input
+                        type="text"
+                        value={brandKit.brand_name ?? ""}
+                        onChange={(e) => setBrandKit((b) => ({ ...b, brand_name: e.target.value }))}
+                        maxLength={80}
+                        placeholder="e.g. ContentFlow"
+                        className="w-full rounded-lg border border-cf-violet/25 bg-cf-panel-alt px-3 py-2 text-sm text-zinc-100 placeholder-zinc-600 outline-none focus:border-cf-violet/60"
+                      />
+                    </div>
+                    <div>
+                      <label className="mb-1.5 block text-xs font-medium text-zinc-300">Niche / Industry</label>
+                      <input
+                        type="text"
+                        value={brandKit.niche ?? ""}
+                        onChange={(e) => setBrandKit((b) => ({ ...b, niche: e.target.value }))}
+                        maxLength={100}
+                        placeholder="e.g. AI productivity, content marketing"
+                        className="w-full rounded-lg border border-cf-violet/25 bg-cf-panel-alt px-3 py-2 text-sm text-zinc-100 placeholder-zinc-600 outline-none focus:border-cf-violet/60"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="mb-1.5 block text-xs font-medium text-zinc-300">Brand voice</label>
+                    <textarea
+                      value={brandKit.brand_voice ?? ""}
+                      onChange={(e) => setBrandKit((b) => ({ ...b, brand_voice: e.target.value }))}
+                      maxLength={300}
+                      rows={2}
+                      placeholder="e.g. Professional but approachable, data-driven, motivating for creators"
+                      className="w-full resize-none rounded-lg border border-cf-violet/25 bg-cf-panel-alt px-3 py-2.5 text-sm text-zinc-100 placeholder-zinc-600 outline-none focus:border-cf-violet/60"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="mb-1.5 block text-xs font-medium text-zinc-300">Target audience</label>
+                    <textarea
+                      value={brandKit.target_audience ?? ""}
+                      onChange={(e) => setBrandKit((b) => ({ ...b, target_audience: e.target.value }))}
+                      maxLength={200}
+                      rows={2}
+                      placeholder="e.g. Solopreneurs, content creators, marketers"
+                      className="w-full resize-none rounded-lg border border-cf-violet/25 bg-cf-panel-alt px-3 py-2.5 text-sm text-zinc-100 placeholder-zinc-600 outline-none focus:border-cf-violet/60"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="mb-1.5 block text-xs font-medium text-zinc-300">Preferred CTA</label>
+                    <input
+                      type="text"
+                      value={brandKit.preferred_cta ?? ""}
+                      onChange={(e) => setBrandKit((b) => ({ ...b, preferred_cta: e.target.value }))}
+                      maxLength={150}
+                      placeholder="e.g. Try ContentFlow free →"
+                      className="w-full rounded-lg border border-cf-violet/25 bg-cf-panel-alt px-3 py-2 text-sm text-zinc-100 placeholder-zinc-600 outline-none focus:border-cf-violet/60"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="mb-1.5 block text-xs font-medium text-zinc-300">Default hashtags</label>
+                    <input
+                      type="text"
+                      value={brandKit.default_hashtags ?? ""}
+                      onChange={(e) => setBrandKit((b) => ({ ...b, default_hashtags: e.target.value }))}
+                      maxLength={300}
+                      placeholder="#contentcreation #aitools #productivity"
+                      className="w-full rounded-lg border border-cf-violet/25 bg-cf-panel-alt px-3 py-2 text-sm text-zinc-100 placeholder-zinc-600 outline-none focus:border-cf-violet/60"
+                    />
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  disabled={savingBrandKit}
+                  onClick={handleSaveBrandKit}
+                  className="btn-primary rounded-lg px-4 py-2 text-xs font-semibold text-white disabled:opacity-50"
+                >
+                  {savingBrandKit ? "Saving…" : "Save Brand Kit"}
+                </button>
+              </div>
+            ) : (
+              <div className="rounded-xl border border-cf-violet/14 bg-cf-panel p-5">
+                <div className="flex items-start gap-4">
+                  <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-cf-violet/10 text-cf-violet">
+                    <svg className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={1.75} viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
+                    </svg>
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-semibold text-zinc-100">Brand Kit</p>
+                    <p className="mt-1 text-xs text-zinc-500">
+                      Set your brand voice, audience, and CTA once — applied to every generation automatically. Available on the Pro plan.
+                    </p>
+                    <a
+                      href="/dashboard/billing"
+                      className="mt-3 inline-flex items-center gap-1.5 rounded-lg bg-cf-violet px-4 py-2 text-xs font-semibold text-white transition hover:bg-cf-violet/80"
+                    >
+                      Upgrade to Pro
+                    </a>
+                  </div>
+                </div>
+              </div>
+            )
+          )}
+
         </div>
-      </form>
+      </div>
     </div>
   );
 }
