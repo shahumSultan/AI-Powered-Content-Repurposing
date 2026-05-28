@@ -9,13 +9,16 @@ async function sha256hex(text: string): Promise<string> {
 }
 
 function getClientIp(req: NextRequest): string {
-  // Trust the rightmost non-private IP in x-forwarded-for (Vercel/Railway inject this)
+  // x-real-ip is set by Vercel/Railway's edge proxy — not injectable by the client
+  const realIp = req.headers.get("x-real-ip");
+  if (realIp) return realIp;
+  // Fallback: take the LAST entry in x-forwarded-for (appended by our proxy, not the client)
   const forwarded = req.headers.get("x-forwarded-for");
   if (forwarded) {
     const ips = forwarded.split(",").map((s) => s.trim());
-    return ips[0] ?? "unknown";
+    return ips[ips.length - 1] ?? "unknown";
   }
-  return req.headers.get("x-real-ip") ?? "unknown";
+  return "unknown";
 }
 
 export async function POST(req: NextRequest) {

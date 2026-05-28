@@ -174,6 +174,13 @@ class SaveSettingsRequest(BaseModel):
     custom_prompt: str | None = None
     free_form_output: bool = False
 
+    @field_validator("custom_prompt")
+    @classmethod
+    def limit_custom_prompt(cls, v: str | None) -> str | None:
+        if v and len(v) > 5000:
+            raise ValueError("Custom prompt must be 5000 characters or fewer")
+        return v
+
 
 @router.get("/settings")
 async def get_settings(
@@ -451,7 +458,15 @@ async def prepare_generation(
     db: AsyncSession = Depends(get_db),
 ):
     """Atomically consume one generation quota slot and return settings + plan."""
-    plan = await _get_or_create_plan(current_user, db)
+    # SELECT FOR UPDATE prevents concurrent requests from double-spending quota
+    result = await db.execute(
+        select(UserPlan).where(UserPlan.user_id == current_user.id).with_for_update()
+    )
+    plan = result.scalar_one_or_none()
+    if not plan:
+        plan = UserPlan(user_id=current_user.id)
+        db.add(plan)
+        await db.flush()
 
     now = datetime.now(timezone.utc)
     if (now - plan.period_start.replace(tzinfo=timezone.utc)).days >= 30:
