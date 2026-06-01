@@ -1,16 +1,17 @@
+import asyncio
 import hashlib
 import logging
 import re
 import secrets
 from datetime import datetime, timedelta, timezone
 
-import httpx
-from fastapi import APIRouter, Depends, HTTPException, Request
+import resend
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request
 from pydantic import BaseModel, EmailStr
 from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from core.config import FRONTEND_URL, FROM_EMAIL, RESEND_API_KEY
+from core.config import FRONTEND_URL, FROM_EMAIL, RESEND_API_KEY, RESEND_TEMPLATE_ID
 from core.database import get_db
 from core.deps import get_current_user
 from core.security import create_token, hash_password, verify_password
@@ -129,34 +130,43 @@ async def update_me(
     return _user_dict(current_user)
 
 
-async def _send_reset_email(to_email: str, reset_url: str) -> None:
+async def _send_reset_email(to_email: str, reset_url: str, full_name: str | None = None) -> None:
     if not RESEND_API_KEY:
         logger.info("Password reset link (dev mode, no RESEND_API_KEY): %s", reset_url)
         return
     try:
-        async with httpx.AsyncClient() as client:
-            await client.post(
-                "https://api.resend.com/emails",
-                headers={"Authorization": f"Bearer {RESEND_API_KEY}"},
-                json={
-                    "from": FROM_EMAIL,
-                    "to": [to_email],
-                    "subject": "Reset your ContentCube password",
-                    "html": (
-                        f"<p>Hi,</p>"
-                        f"<p>Click the link below to reset your password. This link expires in 1 hour.</p>"
-                        f'<p><a href="{reset_url}">{reset_url}</a></p>'
-                        f"<p>If you didn't request this, you can ignore this email.</p>"
-                    ),
+        resend.api_key = RESEND_API_KEY
+        payload: dict = {
+            "from": FROM_EMAIL,
+            "to": [to_email],
+            "subject": "Reset your ContentCube password",
+        }
+        if RESEND_TEMPLATE_ID:
+            first_name = (full_name or "").split()[0] if full_name else "there"
+            payload["template"] = {
+                "id": RESEND_TEMPLATE_ID,
+                "variables": {
+                    "first_name": first_name,
+                    "reset_password_url": reset_url,
                 },
+            }
+        else:
+            payload["html"] = (
+                f"<p>Hi,</p>"
+                f"<p>Click the link below to reset your password. This link expires in 1 hour.</p>"
+                f'<p><a href="{reset_url}">{reset_url}</a></p>'
+                f"<p>If you didn't request this, you can ignore this email.</p>"
             )
+        # resend SDK is sync — run in thread pool to avoid blocking the event loop
+        email = await asyncio.to_thread(resend.Emails.send, payload)
+        logger.info("Password reset email sent to %s (Resend id: %s)", to_email, email.get("id"))
     except Exception:
         logger.exception("Failed to send password reset email to %s", to_email)
 
 
 @router.post("/forgot-password")
 @limiter.limit("3/minute")
-async def forgot_password(request: Request, body: ForgotPasswordRequest, db: AsyncSession = Depends(get_db)):
+async def forgot_password(request: Request, body: ForgotPasswordRequest, background_tasks: BackgroundTasks, db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(User).where(User.email == body.email))
     user = result.scalar_one_or_none()
 
@@ -182,7 +192,7 @@ async def forgot_password(request: Request, body: ForgotPasswordRequest, db: Asy
     await db.commit()
 
     reset_url = f"{FRONTEND_URL}/auth/reset-password?token={raw_token}"
-    await _send_reset_email(user.email, reset_url)
+    background_tasks.add_task(_send_reset_email, user.email, reset_url, user.full_name)
 
     return {"ok": True}
 

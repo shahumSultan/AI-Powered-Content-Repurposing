@@ -30,3 +30,4 @@ API_KEY_ENCRYPTION_KEY: str = os.getenv("API_KEY_ENCRYPTION_KEY", "")
 
 RESEND_API_KEY: str = os.getenv("RESEND_API_KEY", "")
 FROM_EMAIL: str = os.getenv("FROM_EMAIL", "noreply@contentcube.app")
+RESEND_TEMPLATE_ID: str = os.getenv("RESEND_TEMPLATE_ID", "")
