@@ -23,6 +23,7 @@ export interface ShortsIdea {
   what_to_say: string;
   timestamp_start: number | null;
   timestamp_end: number | null;
+  word_count?: number | null;
 }
 
 export interface XThread {

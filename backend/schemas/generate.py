@@ -42,6 +42,7 @@ class ShortsIdea(BaseModel):
     what_to_say: str
     timestamp_start: float | None = None
     timestamp_end: float | None = None
+    word_count: int | None = None
 
 
 class XThread(BaseModel):

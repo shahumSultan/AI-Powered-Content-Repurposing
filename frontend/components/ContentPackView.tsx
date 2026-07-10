@@ -191,6 +191,11 @@ function ShortsCard({
     if (!editing) setDraft(idea.what_to_say);
   }, [idea.what_to_say, editing]);
 
+  // 75–150 words ≈ 30–60s spoken at ~150 wpm
+  const wordCount = (editing ? draft : idea.what_to_say).trim().split(/\s+/).filter(Boolean).length;
+  const estSeconds = Math.round((wordCount / 150) * 60);
+  const inRange = wordCount >= 75 && wordCount <= 150;
+
   function handleBlur() {
     setEditing(false);
     if (draft !== idea.what_to_say) onEditWhatToSay(draft);
@@ -208,6 +213,18 @@ function ShortsCard({
             {idea.timestamp_start != null && idea.timestamp_end != null && (
               <span className={`rounded px-1.5 py-0.5 font-mono text-xs ${accent.badge}`}>
                 {formatTime(idea.timestamp_start)} → {formatTime(idea.timestamp_end)}
+              </span>
+            )}
+            {wordCount > 0 && (
+              <span
+                className={`rounded px-1.5 py-0.5 font-mono text-xs ${
+                  inRange
+                    ? "bg-emerald-900/50 text-emerald-400"
+                    : "bg-amber-900/50 text-amber-400"
+                }`}
+                title={inRange ? "Script fits a 30–60s Short" : "Aim for 75–150 words (~30–60s spoken)"}
+              >
+                ~{estSeconds}s · {wordCount} words
               </span>
             )}
           </div>
