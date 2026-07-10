@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta, timezone
 import bcrypt
-from jose import jwt, JWTError
+from jose import jwt
 from core.config import JWT_SECRET, JWT_ALGORITHM, JWT_EXPIRE_HOURS
 
 
