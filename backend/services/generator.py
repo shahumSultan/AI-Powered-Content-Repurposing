@@ -489,8 +489,9 @@ def generate_content_pack(
         pack.ig_captions    = _pad(pack.ig_captions,    5, stub.ig_captions)
         pack.shorts_ideas   = _pad(pack.shorts_ideas,   3, stub.shorts_ideas)
         pack.x_threads      = _pad(pack.x_threads,      1, stub.x_threads)
-        if pack.meta_caption is None:
-            pack.meta_caption = stub.meta_caption
+        # meta_caption is deliberately NOT stub-padded: older custom prompt
+        # templates produce the pre-meta_caption schema, and surfacing stub
+        # text as real ad copy would be worse than showing none.
 
         return pack
 
