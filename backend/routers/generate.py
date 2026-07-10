@@ -251,7 +251,7 @@ async def generate_from_audio(
 # ---------------------------------------------------------------------------
 
 class SingleItemRequest(BaseModel):
-    item_type: Literal["hook", "linkedin", "ig_caption", "shorts_idea", "x_thread"]
+    item_type: Literal["hook", "linkedin", "ig_caption", "shorts_idea", "x_thread", "meta_caption"]
     context: str
 
 

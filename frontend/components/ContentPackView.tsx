@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import type { ContentPack, ShortsIdea, XThread } from "@/lib/api";
+import type { ContentPack, MetaCaption, ShortsIdea, XThread } from "@/lib/api";
 
-type SectionKey = "hooks" | "linkedin" | "ig" | "shorts" | "x";
+type SectionKey = "hooks" | "linkedin" | "ig" | "meta" | "shorts" | "x";
 
 const SECTION_META: Record<
   SectionKey,
@@ -16,11 +16,12 @@ const SECTION_META: Record<
   hooks:   { label: "Hooks",     icon: "🪝", accent: { tab: "bg-cf-cyan",    border: "border-cf-cyan/40",    badge: "bg-cf-cyan/10 text-cf-cyan",    number: "text-cf-cyan"    } },
   linkedin:{ label: "LinkedIn",  icon: "in", accent: { tab: "bg-cf-violet",   border: "border-cf-violet/40",  badge: "bg-cf-violet/10 text-cf-violet", number: "text-cf-violet"  } },
   ig:      { label: "Instagram", icon: "IG", accent: { tab: "bg-cf-pink",     border: "border-cf-pink/40",    badge: "bg-cf-pink/10 text-cf-pink",     number: "text-cf-pink"    } },
+  meta:    { label: "Meta",      icon: "◐",  accent: { tab: "bg-blue-600",     border: "border-blue-800/40",   badge: "bg-blue-900/50 text-blue-400",   number: "text-blue-500"  } },
   shorts:  { label: "Shorts",    icon: "▶",  accent: { tab: "bg-red-600",      border: "border-red-800/40",    badge: "bg-red-900/50 text-red-400",     number: "text-red-500"    } },
   x:       { label: "X Thread",  icon: "𝕏",  accent: { tab: "bg-zinc-700",     border: "border-zinc-600/40",   badge: "bg-zinc-800/60 text-zinc-300",   number: "text-zinc-400"   } },
 };
 
-const SECTION_ORDER: SectionKey[] = ["hooks", "linkedin", "ig", "shorts", "x"];
+const SECTION_ORDER: SectionKey[] = ["hooks", "linkedin", "ig", "meta", "shorts", "x"];
 
 function formatTime(seconds: number): string {
   const m = Math.floor(seconds / 60);
@@ -45,6 +46,11 @@ function packToCsv(pack: ContentPack): string {
       rows.push(`x_thread,${ti + 1}.${i + 1},${csvCell(tweet)},,`)
     )
   );
+  if (pack.meta_caption) {
+    rows.push(`meta_primary_text,1,${csvCell(pack.meta_caption.primary_text)},,`);
+    rows.push(`meta_headline,1,${csvCell(pack.meta_caption.headline)},,`);
+    rows.push(`meta_description,1,${csvCell(pack.meta_caption.description)},,`);
+  }
   return rows.join("\n");
 }
 
@@ -374,6 +380,148 @@ function XThreadSection({
   );
 }
 
+const META_FIELDS: {
+  key: keyof MetaCaption;
+  label: string;
+  limit: number;
+  hint: string;
+  rows: number;
+}[] = [
+  { key: "primary_text", label: "Primary Text", limit: 125, hint: "Front-load the key message in the first 80 chars", rows: 3 },
+  { key: "headline",     label: "Headline",     limit: 27,  hint: "Short, benefit-driven",                            rows: 1 },
+  { key: "description",  label: "Description",  limit: 30,  hint: "Reinforce the CTA or value prop",                  rows: 1 },
+];
+
+function MetaFieldCard({
+  label,
+  limit,
+  hint,
+  rows,
+  text,
+  onEdit,
+}: {
+  label: string;
+  limit: number;
+  hint: string;
+  rows: number;
+  text: string;
+  onEdit: (text: string) => void;
+}) {
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState(text);
+  const { accent } = SECTION_META.meta;
+  const current = editing ? draft : text;
+  const overLimit = current.length > limit;
+
+  useEffect(() => {
+    if (!editing) setDraft(text);
+  }, [text, editing]);
+
+  function handleBlur() {
+    setEditing(false);
+    if (draft !== text) onEdit(draft);
+  }
+
+  return (
+    <div className={`rounded-lg border ${accent.border} bg-cf-panel p-4`}>
+      <div className="flex items-start gap-3">
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 flex-wrap">
+            <p className={`font-mono text-xs font-semibold uppercase tracking-wide ${accent.number}`}>{label}</p>
+            <span
+              className={`rounded px-1.5 py-0.5 font-mono text-xs ${
+                overLimit ? "bg-amber-900/50 text-amber-400" : "bg-emerald-900/50 text-emerald-400"
+              }`}
+              title={overLimit ? `Keep ${label.toLowerCase()} at or under ${limit} characters` : hint}
+            >
+              {current.length}/{limit}
+            </span>
+          </div>
+          {editing ? (
+            <textarea
+              autoFocus
+              value={draft}
+              onChange={(e) => setDraft(e.target.value)}
+              onBlur={handleBlur}
+              rows={rows}
+              className="mt-1.5 w-full resize-none rounded bg-cf-panel-alt px-2 py-1 text-sm leading-relaxed text-zinc-300 outline-none focus:ring-1 focus:ring-cf-violet/40"
+            />
+          ) : (
+            <p
+              className="mt-1.5 text-sm leading-relaxed text-zinc-300 whitespace-pre-wrap cursor-text"
+              onClick={() => { setDraft(text); setEditing(true); }}
+              title="Click to edit"
+            >
+              {text || <span className="text-zinc-600 italic">empty</span>}
+            </p>
+          )}
+        </div>
+        <CopyButton text={current} />
+      </div>
+    </div>
+  );
+}
+
+function MetaCaptionSection({
+  caption,
+  allowRegenerate,
+  regenLoading,
+  onRegenerate,
+  onEditField,
+}: {
+  caption: MetaCaption | null | undefined;
+  allowRegenerate: boolean;
+  regenLoading: boolean;
+  onRegenerate: () => void;
+  onEditField: (field: keyof MetaCaption, text: string) => void;
+}) {
+  if (!caption) {
+    return (
+      <div className="flex flex-col items-center justify-center py-12 text-center">
+        <p className="text-sm text-zinc-500">No Meta caption generated.</p>
+      </div>
+    );
+  }
+
+  const fullCaption = `${caption.primary_text}\n\n${caption.headline}\n${caption.description}`;
+
+  return (
+    <div className="space-y-2">
+      <div className="flex items-center justify-end gap-2 pb-1">
+        <CopyButton text={fullCaption} />
+        {allowRegenerate && (
+          <button
+            onClick={onRegenerate}
+            disabled={regenLoading}
+            className="flex items-center gap-1.5 rounded-lg border border-blue-800/40 bg-cf-panel-alt px-3 py-1.5 text-xs font-medium text-zinc-400 transition hover:text-zinc-200 disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            <svg
+              className={`h-3 w-3 ${regenLoading ? "animate-spin" : ""}`}
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+            Regenerate caption
+          </button>
+        )}
+      </div>
+      {META_FIELDS.map((f) => (
+        <MetaFieldCard
+          key={f.key}
+          label={f.label}
+          limit={f.limit}
+          hint={f.hint}
+          rows={f.rows}
+          text={caption[f.key]}
+          onEdit={(text) => onEditField(f.key, text)}
+        />
+      ))}
+    </div>
+  );
+}
+
 function EmptyState() {
   return (
     <div className="flex flex-col items-center justify-center py-12 text-center">
@@ -416,10 +564,16 @@ export default function ContentPackView({ pack, csv, json, allowRegenerate = fal
     x:        (editedPack.x_threads ?? []).filter((t) => t.tweets.length > 0),
   };
 
+  const hasMetaCaption = Boolean(
+    editedPack.meta_caption &&
+    (editedPack.meta_caption.primary_text || editedPack.meta_caption.headline || editedPack.meta_caption.description)
+  );
+
   const tabCount: Record<SectionKey, number> = {
     hooks:    visibleItems.hooks.length,
     linkedin: visibleItems.linkedin.length,
     ig:       visibleItems.ig.length,
+    meta:     hasMetaCaption ? 1 : 0,
     shorts:   visibleItems.shorts.length,
     x:        visibleItems.x.length > 0 ? visibleItems.x[0].tweets.length : 0,
   };
@@ -456,6 +610,46 @@ export default function ContentPackView({ pack, csv, json, allowRegenerate = fal
     }));
   }
 
+  function updateMetaField(field: keyof MetaCaption, text: string) {
+    setEditedPack((prev) =>
+      prev.meta_caption
+        ? { ...prev, meta_caption: { ...prev.meta_caption, [field]: text } }
+        : prev
+    );
+  }
+
+  async function regenerateMetaCaption() {
+    const mc = editedPack.meta_caption;
+    if (!mc) return;
+    setRegeneratingKey("meta-0");
+    try {
+      const res = await fetch("/api/generate/item", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          item_type: "meta_caption",
+          context: `${mc.primary_text}\n${mc.headline}\n${mc.description}`,
+        }),
+      });
+      if (!res.ok) return;
+      const data = await res.json();
+      if (data.item?.primary_text != null) {
+        setEditedPack((prev) => ({
+          ...prev,
+          meta_caption: {
+            primary_text: String(data.item.primary_text ?? ""),
+            headline: String(data.item.headline ?? ""),
+            description: String(data.item.description ?? ""),
+          },
+        }));
+      }
+    } catch {
+      // silent fail — original caption remains
+    } finally {
+      setRegeneratingKey(null);
+    }
+  }
+
   async function regenerateItem(sectionKey: SectionKey, originalIdx: number, context: string) {
     const key = `${sectionKey}-${originalIdx}`;
     setRegeneratingKey(key);
@@ -463,6 +657,7 @@ export default function ContentPackView({ pack, csv, json, allowRegenerate = fal
       hooks: "hook",
       linkedin: "linkedin",
       ig: "ig_caption",
+      meta: "meta_caption",
       shorts: "shorts_idea",
       x: "x_thread",
     };
@@ -574,6 +769,14 @@ export default function ContentPackView({ pack, csv, json, allowRegenerate = fal
               />
             ))
           )
+        ) : active === "meta" ? (
+          <MetaCaptionSection
+            caption={editedPack.meta_caption}
+            allowRegenerate={allowRegenerate}
+            regenLoading={regeneratingKey === "meta-0"}
+            onRegenerate={regenerateMetaCaption}
+            onEditField={updateMetaField}
+          />
         ) : active === "x" ? (
           <XThreadSection
             threads={editedPack.x_threads ?? []}

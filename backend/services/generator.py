@@ -20,6 +20,7 @@ from schemas.generate import (
     Hook,
     IGCaption,
     LinkedInPost,
+    MetaCaption,
     ShortsIdea,
     XThread,
 )
@@ -89,7 +90,8 @@ Generate exactly this JSON structure:
     {{"title": "...", "what_to_say": "...", "timestamp_start": null, "timestamp_end": null}},
     ...
   ],
-  "x_threads": [{{"tweets": ["tweet 1", "tweet 2", ...]}}]
+  "x_threads": [{{"tweets": ["tweet 1", "tweet 2", ...]}}],
+  "meta_caption": {{"primary_text": "...", "headline": "...", "description": "..."}}
 }}
 
 Rules:
@@ -98,6 +100,7 @@ Rules:
 - ig_captions: exactly 5 items, 30-60 words each, include 3 relevant hashtags
 - shorts_ideas: exactly 3 items; title <=60 chars, what_to_say MUST be 75-150 words — a complete script the creator speaks on camera, lasting 30-60 seconds at a natural pace
 - x_threads: exactly 1 item; 3-5 tweets each ≤280 chars, conversational tone, last tweet ends with a CTA
+- meta_caption: exactly 1 object for a Meta (Facebook/Instagram) ad-style caption. primary_text: max 125 chars, front-load the key message in the first 80 chars, conversational or question-led, one CTA at the end. headline: max 27 chars, benefit-driven, urgency or curiosity. description: max 30 chars, short reinforcement of the CTA or value prop. NO hashtags in any meta_caption field.
 """
 
 
@@ -167,12 +170,22 @@ def _pack_from_dict(data: dict, chunks: list[Chunk]) -> ContentPack:
         for x in x_threads_raw
     ]
 
+    meta_raw = data.get("meta_caption")
+    meta_caption = None
+    if isinstance(meta_raw, dict):
+        meta_caption = MetaCaption(
+            primary_text=str(meta_raw.get("primary_text", "")),
+            headline=str(meta_raw.get("headline", "")),
+            description=str(meta_raw.get("description", "")),
+        )
+
     return ContentPack(
         hooks=[Hook(text=h["text"]) for h in data.get("hooks", [])[:5]],
         linkedin_posts=[LinkedInPost(text=p["text"]) for p in data.get("linkedin_posts", [])[:2]],
         ig_captions=[IGCaption(text=c["text"]) for c in data.get("ig_captions", [])[:5]],
         shorts_ideas=shorts_ideas,
         x_threads=x_threads,
+        meta_caption=meta_caption,
     )
 
 
@@ -205,6 +218,11 @@ def _stub_pack(chunks: list[Chunk]) -> ContentPack:
             for i in range(3)
         ],
         x_threads=[XThread(tweets=[f"[STUB X TWEET {i+1}] {_excerpt(pool[0], 10)}" for i in range(3)])],
+        meta_caption=MetaCaption(
+            primary_text=f"[STUB META] {_excerpt(pool[0], 12)}",
+            headline="[STUB] Headline",
+            description="[STUB] Description",
+        ),
     )
 
 
@@ -222,14 +240,16 @@ Generate exactly this JSON structure:
     {"title": "...", "what_to_say": "...", "timestamp_start": null, "timestamp_end": null},
     ...
   ],
-  "x_threads": [{"tweets": ["tweet 1", "tweet 2", ...]}]
+  "x_threads": [{"tweets": ["tweet 1", "tweet 2", ...]}],
+  "meta_caption": {"primary_text": "...", "headline": "...", "description": "..."}
 }
 Rules:
 - hooks: exactly 5 items, max 140 chars each, attention-grabbing opening lines
 - linkedin_posts: exactly 2 items, 90-140 words each, professional tone, end with a CTA
 - ig_captions: exactly 5 items, 30-60 words each, include 3 relevant hashtags
 - shorts_ideas: exactly 3 items; title ≤60 chars, what_to_say MUST be 75-150 words — a complete script the creator speaks on camera, lasting 30-60 seconds at a natural pace
-- x_threads: exactly 1 item; 3-5 tweets each ≤280 chars, conversational tone, last tweet ends with a CTA"""
+- x_threads: exactly 1 item; 3-5 tweets each ≤280 chars, conversational tone, last tweet ends with a CTA
+- meta_caption: exactly 1 object for a Meta (Facebook/Instagram) ad-style caption; primary_text ≤125 chars with the key message in the first 80 and one CTA; headline ≤27 chars, benefit-driven; description ≤30 chars reinforcing the CTA; NO hashtags"""
 
 
 def _build_user_message(
@@ -360,6 +380,12 @@ _SINGLE_ITEM_PROMPTS: dict[str, str] = {
         "Conversational tone. Last tweet ends with a CTA. "
         'Output raw JSON only: {"tweets": ["tweet 1", "tweet 2", ...]}'
     ),
+    "meta_caption": (
+        "Write exactly 1 new Meta (Facebook/Instagram) ad-style caption inspired by this content. "
+        'Output raw JSON only: {"primary_text": "...", "headline": "...", "description": "..."} '
+        "where primary_text is ≤125 chars with the key message front-loaded in the first 80 chars and one CTA at the end, "
+        "headline is ≤27 chars and benefit-driven, description is ≤30 chars reinforcing the CTA. NO hashtags."
+    ),
 }
 
 _SINGLE_ITEM_SYSTEM = (
@@ -463,6 +489,8 @@ def generate_content_pack(
         pack.ig_captions    = _pad(pack.ig_captions,    5, stub.ig_captions)
         pack.shorts_ideas   = _pad(pack.shorts_ideas,   3, stub.shorts_ideas)
         pack.x_threads      = _pad(pack.x_threads,      1, stub.x_threads)
+        if pack.meta_caption is None:
+            pack.meta_caption = stub.meta_caption
 
         return pack
 

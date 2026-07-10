@@ -30,12 +30,19 @@ export interface XThread {
   tweets: string[];
 }
 
+export interface MetaCaption {
+  primary_text: string;
+  headline: string;
+  description: string;
+}
+
 export interface ContentPack {
   hooks: { text: string }[];
   linkedin_posts: { text: string }[];
   ig_captions: { text: string }[];
   shorts_ideas: ShortsIdea[];
   x_threads: XThread[];
+  meta_caption?: MetaCaption | null;
 }
 
 export interface GenerateResponse {
