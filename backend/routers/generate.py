@@ -4,7 +4,6 @@ import json
 import logging
 from typing import Literal
 from urllib.parse import urlparse
-import httpx
 import trafilatura
 from fastapi import APIRouter, Depends, File, Header, HTTPException, UploadFile
 from pydantic import BaseModel

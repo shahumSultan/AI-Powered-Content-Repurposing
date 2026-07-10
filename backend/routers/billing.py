@@ -1,7 +1,7 @@
 import logging
 
 import stripe
-from fastapi import APIRouter, Depends, Header, HTTPException, Request, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from core.limiter import limiter
 from pydantic import BaseModel
 from sqlalchemy import select
