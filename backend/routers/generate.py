@@ -119,11 +119,12 @@ def _build_response(
     free_form: bool = False,
     brand_kit_context: str | None = None,
 ) -> GenerateResponse:
-    ranked = rank(chunks)
     try:
         if free_form and custom_prompt:
+            # Free-form prompts (e.g. verbatim clip extraction) need the full
+            # source in original order — ranking would reorder and dedup it.
             raw = generate_free_form(
-                ranked,
+                chunks,
                 custom_prompt=custom_prompt,
                 groq_api_key=groq_key,
                 openai_api_key=openai_key,
@@ -137,6 +138,7 @@ def _build_response(
                 export_csv="",
                 raw_output=raw,
             )
+        ranked = rank(chunks)
         pack = generate_content_pack(
             ranked,
             custom_prompt=custom_prompt,

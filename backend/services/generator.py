@@ -301,9 +301,37 @@ def _call_openai(client: OpenAI, source: str, custom_prompt: str | None = None, 
 
 _FREE_FORM_SYSTEM_PROMPT = (
     "You are a helpful content assistant. "
-    "Follow the user's instructions exactly. "
-    "Output only the content requested — no extra commentary, no JSON, no code fences."
+    "Follow the user's instructions exactly, including any required output format, "
+    "exact required sentences, and final checklists. "
+    "When the instructions ask you to extract or quote from the source material, "
+    "copy the exact wording — never paraphrase, summarize, or invent dialogue."
 )
+
+# Free-form prompts (e.g. verbatim clip extraction) need the whole transcript
+# in original order, not the ranked highlights the pack pipeline uses.
+_FREE_FORM_MAX_PROMPT_WORDS = 8_000
+
+
+def _format_ts(seconds: float) -> str:
+    total = int(seconds)
+    hours, rem = divmod(total, 3600)
+    minutes, secs = divmod(rem, 60)
+    return f"{hours}:{minutes:02d}:{secs:02d}" if hours else f"{minutes}:{secs:02d}"
+
+
+def _build_free_form_source(chunks: list[Chunk]) -> str:
+    """Join chunks in original document order, prefixing each with its timestamp."""
+    parts = []
+    for c in chunks:
+        if c.timestamp_start is not None:
+            parts.append(f"[{_format_ts(c.timestamp_start)}] {c.text}")
+        else:
+            parts.append(c.text)
+    source = "\n\n".join(parts)
+    words = source.split()
+    if len(words) > _FREE_FORM_MAX_PROMPT_WORDS:
+        source = " ".join(words[:_FREE_FORM_MAX_PROMPT_WORDS])
+    return source
 
 
 def generate_free_form(
@@ -327,11 +355,7 @@ def generate_free_form(
         llm_client = env_client
         use_openai = False
 
-    selected = chunks[:_TOP_CHUNKS]
-    source = "\n\n".join(c.text for c in selected)
-    words = source.split()
-    if len(words) > _MAX_PROMPT_WORDS:
-        source = " ".join(words[:_MAX_PROMPT_WORDS])
+    source = _build_free_form_source(chunks)
 
     prefix = (brand_kit_context + "\n\n") if brand_kit_context else ""
     if "{source}" in custom_prompt:
@@ -347,7 +371,9 @@ def generate_free_form(
             {"role": "system", "content": _FREE_FORM_SYSTEM_PROMPT},
             {"role": "user", "content": user_message},
         ],
-        max_tokens=2048,
+        # verbatim clip extraction (3 clips + phrases + captions + checklist)
+        # regularly overflows 2048
+        max_tokens=4096,
         temperature=0.7,
     )
     return response.choices[0].message.content or ""
