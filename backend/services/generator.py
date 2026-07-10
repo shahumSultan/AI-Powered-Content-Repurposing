@@ -100,7 +100,7 @@ Rules:
 - ig_captions: exactly 5 items, 30-60 words each, include 3 relevant hashtags
 - shorts_ideas: exactly 3 items; title <=60 chars, what_to_say MUST be 75-150 words — a complete script the creator speaks on camera, lasting 30-60 seconds at a natural pace
 - x_threads: exactly 1 item; 3-5 tweets each ≤280 chars, conversational tone, last tweet ends with a CTA
-- meta_caption: exactly 1 object for a Meta (Facebook/Instagram) ad-style caption. primary_text: max 125 chars, front-load the key message in the first 80 chars, conversational or question-led, one CTA at the end. headline: max 27 chars, benefit-driven, urgency or curiosity. description: max 30 chars, short reinforcement of the CTA or value prop. NO hashtags in any meta_caption field.
+- meta_caption: exactly 1 object for a Meta (Facebook/Instagram) ad-style caption. primary_text: max 125 chars, front-load the SPECIFIC topic or insight from the source material in the first 80 chars, conversational or question-led, one CTA at the end. headline: max 27 chars, benefit-driven, names the actual subject. description: max 30 chars, short reinforcement of the CTA or value prop. NO hashtags. NEVER use generic filler like "Boost growth now", "Grow Now", or "Learn more today" — every field must reflect what THIS content is actually about.
 """
 
 
@@ -249,7 +249,7 @@ Rules:
 - ig_captions: exactly 5 items, 30-60 words each, include 3 relevant hashtags
 - shorts_ideas: exactly 3 items; title ≤60 chars, what_to_say MUST be 75-150 words — a complete script the creator speaks on camera, lasting 30-60 seconds at a natural pace
 - x_threads: exactly 1 item; 3-5 tweets each ≤280 chars, conversational tone, last tweet ends with a CTA
-- meta_caption: exactly 1 object for a Meta (Facebook/Instagram) ad-style caption; primary_text ≤125 chars with the key message in the first 80 and one CTA; headline ≤27 chars, benefit-driven; description ≤30 chars reinforcing the CTA; NO hashtags"""
+- meta_caption: exactly 1 object for a Meta (Facebook/Instagram) ad-style caption; primary_text ≤125 chars front-loading the SPECIFIC topic from the source in the first 80 and one CTA; headline ≤27 chars, benefit-driven, names the actual subject; description ≤30 chars reinforcing the CTA; NO hashtags; NEVER generic filler like "Boost growth now" — every field must reflect what THIS content is about"""
 
 
 def _build_user_message(
@@ -276,7 +276,9 @@ def _call_groq(client: Groq, source: str, custom_prompt: str | None = None, bran
             {"role": "system", "content": _SYSTEM_PROMPT},
             {"role": "user", "content": _build_user_message(source, custom_prompt, brand_kit_context)},
         ],
-        max_tokens=2048,
+        # sized for the full pack: 3 shorts scripts at 75-150 words each plus
+        # meta_caption pushed the old 2048 ceiling, making late fields terse
+        max_tokens=4096,
         temperature=0.7,
     )
     return response.choices[0].message.content
@@ -289,7 +291,7 @@ def _call_openai(client: OpenAI, source: str, custom_prompt: str | None = None, 
             {"role": "system", "content": _SYSTEM_PROMPT},
             {"role": "user", "content": _build_user_message(source, custom_prompt, brand_kit_context)},
         ],
-        max_tokens=2048,
+        max_tokens=4096,
         temperature=0.7,
     )
     return response.choices[0].message.content
@@ -383,8 +385,9 @@ _SINGLE_ITEM_PROMPTS: dict[str, str] = {
     "meta_caption": (
         "Write exactly 1 new Meta (Facebook/Instagram) ad-style caption inspired by this content. "
         'Output raw JSON only: {"primary_text": "...", "headline": "...", "description": "..."} '
-        "where primary_text is ≤125 chars with the key message front-loaded in the first 80 chars and one CTA at the end, "
-        "headline is ≤27 chars and benefit-driven, description is ≤30 chars reinforcing the CTA. NO hashtags."
+        "where primary_text is ≤125 chars front-loading the SPECIFIC topic from the content in the first 80 chars with one CTA at the end, "
+        "headline is ≤27 chars, benefit-driven and names the actual subject, description is ≤30 chars reinforcing the CTA. "
+        'NO hashtags. NEVER generic filler like "Boost growth now" — every field must reflect what this content is actually about.'
     ),
 }
 
