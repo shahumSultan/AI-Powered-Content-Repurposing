@@ -96,7 +96,7 @@ Rules:
 - hooks: exactly 5 items, max 140 chars each, written as attention-grabbing opening lines
 - linkedin_posts: exactly 2 items, 90-140 words each, professional tone, end with a call-to-action
 - ig_captions: exactly 5 items, 30-60 words each, include 3 relevant hashtags
-- shorts_ideas: exactly 3 items; title <=60 chars, what_to_say is 2-3 punchy sentences for the creator to speak on camera
+- shorts_ideas: exactly 3 items; title <=60 chars, what_to_say MUST be 75-150 words — a complete script the creator speaks on camera, lasting 30-60 seconds at a natural pace
 - x_threads: exactly 1 item; 3-5 tweets each ≤280 chars, conversational tone, last tweet ends with a CTA
 """
 
@@ -114,22 +114,50 @@ def _extract_json(text: str) -> dict:
     return json.loads(text[start: end + 1])
 
 
+_SHORT_MAX_SECONDS = 60.0
+
+
+def _clip_window(start: float | None) -> tuple[float | None, float | None]:
+    """Turn a chunk start time into a tight Shorts clip window (max 60s)."""
+    if start is None:
+        return None, None
+    return start, start + _SHORT_MAX_SECONDS
+
+
+def _select_clip_chunks(chunks: list[Chunk], limit: int = 3) -> list[Chunk]:
+    """Pick up to *limit* timestamped chunks (in ranked order) whose start times
+    are at least 60s apart, so no two Shorts point at overlapping moments."""
+    selected: list[Chunk] = []
+    for c in chunks:
+        if len(selected) >= limit:
+            break
+        if c.timestamp_start is None:
+            continue
+        if all(
+            abs(c.timestamp_start - s.timestamp_start) >= _SHORT_MAX_SECONDS
+            for s in selected
+        ):
+            selected.append(c)
+    return selected
+
+
 def _pack_from_dict(data: dict, chunks: list[Chunk]) -> ContentPack:
-    timestamped = [c for c in chunks[:_TOP_CHUNKS] if c.timestamp_start is not None]
+    timestamped = _select_clip_chunks(chunks)
 
     shorts_raw: list[dict] = data.get("shorts_ideas", [])[:3]
     shorts_ideas: list[ShortsIdea] = []
     for i, s in enumerate(shorts_raw):
         ts_start = ts_end = None
         if i < len(timestamped):
-            ts_start = timestamped[i].timestamp_start
-            ts_end = timestamped[i].timestamp_end
+            ts_start, ts_end = _clip_window(timestamped[i].timestamp_start)
+        what_to_say = s.get("what_to_say", "")
         shorts_ideas.append(
             ShortsIdea(
                 title=s.get("title", ""),
-                what_to_say=s.get("what_to_say", ""),
+                what_to_say=what_to_say,
                 timestamp_start=ts_start,
                 timestamp_end=ts_end,
+                word_count=len(what_to_say.split()) or None,
             )
         )
 
@@ -170,8 +198,9 @@ def _stub_pack(chunks: list[Chunk]) -> ContentPack:
             ShortsIdea(
                 title=f"[STUB SHORTS {i+1}] {_excerpt(pool[i], 6)}",
                 what_to_say=pool[i].text[:200],
-                timestamp_start=pool[i].timestamp_start,
-                timestamp_end=pool[i].timestamp_end,
+                timestamp_start=_clip_window(pool[i].timestamp_start)[0],
+                timestamp_end=_clip_window(pool[i].timestamp_start)[1],
+                word_count=len(pool[i].text[:200].split()) or None,
             )
             for i in range(3)
         ],
@@ -199,7 +228,7 @@ Rules:
 - hooks: exactly 5 items, max 140 chars each, attention-grabbing opening lines
 - linkedin_posts: exactly 2 items, 90-140 words each, professional tone, end with a CTA
 - ig_captions: exactly 5 items, 30-60 words each, include 3 relevant hashtags
-- shorts_ideas: exactly 3 items; title ≤60 chars, what_to_say is 2-3 punchy sentences
+- shorts_ideas: exactly 3 items; title ≤60 chars, what_to_say MUST be 75-150 words — a complete script the creator speaks on camera, lasting 30-60 seconds at a natural pace
 - x_threads: exactly 1 item; 3-5 tweets each ≤280 chars, conversational tone, last tweet ends with a CTA"""
 
 
@@ -324,7 +353,7 @@ _SINGLE_ITEM_PROMPTS: dict[str, str] = {
     "shorts_idea": (
         "Write exactly 1 new YouTube Shorts idea inspired by this content. "
         'Output raw JSON only: {"title": "...", "what_to_say": "..."} '
-        "where title is ≤60 chars and what_to_say is 2-3 punchy sentences for the creator to say on camera."
+        "where title is ≤60 chars and what_to_say MUST be 75-150 words — a complete script the creator speaks on camera, lasting 30-60 seconds at a natural pace."
     ),
     "x_thread": (
         "Write exactly 1 new Twitter/X thread (3-5 tweets, each ≤280 chars) inspired by this content. "
