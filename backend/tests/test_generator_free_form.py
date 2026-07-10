@@ -7,8 +7,13 @@ from services.generator import (
 )
 
 
-def _chunk(text: str, start: float | None = None) -> Chunk:
-    return Chunk(text=text, word_count=len(text.split()), timestamp_start=start)
+def _chunk(text: str, start: float | None = None, end: float | None = None) -> Chunk:
+    return Chunk(
+        text=text,
+        word_count=len(text.split()),
+        timestamp_start=start,
+        timestamp_end=end,
+    )
 
 
 def test_format_ts_minutes_and_hours():
@@ -36,7 +41,12 @@ def test_source_includes_all_chunks_not_just_top_three():
         assert f"chunk number {i} content" in source
 
 
-def test_timestamps_prefixed_for_transcript_chunks():
+def test_timestamp_range_prefixed_for_transcript_chunks():
+    source = _build_free_form_source([_chunk("he said something great", 725.0, 810.0)])
+    assert source.startswith("[12:05 - 13:30] he said something great")
+
+
+def test_start_only_timestamp_when_end_missing():
     source = _build_free_form_source([_chunk("he said something great", 725.0)])
     assert source.startswith("[12:05] he said something great")
 

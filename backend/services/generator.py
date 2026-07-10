@@ -320,10 +320,12 @@ def _format_ts(seconds: float) -> str:
 
 
 def _build_free_form_source(chunks: list[Chunk]) -> str:
-    """Join chunks in original document order, prefixing each with its timestamp."""
+    """Join chunks in original document order, prefixing each with its timestamp range."""
     parts = []
     for c in chunks:
-        if c.timestamp_start is not None:
+        if c.timestamp_start is not None and c.timestamp_end is not None:
+            parts.append(f"[{_format_ts(c.timestamp_start)} - {_format_ts(c.timestamp_end)}] {c.text}")
+        elif c.timestamp_start is not None:
             parts.append(f"[{_format_ts(c.timestamp_start)}] {c.text}")
         else:
             parts.append(c.text)
