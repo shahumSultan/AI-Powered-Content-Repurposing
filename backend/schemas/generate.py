@@ -49,12 +49,19 @@ class XThread(BaseModel):
     tweets: list[str]   # 3–5 tweets, each ≤280 chars
 
 
+class MetaCaption(BaseModel):
+    primary_text: str   # ≤125 chars, key message front-loaded in first 80
+    headline: str       # ≤27 chars, benefit-driven
+    description: str    # ≤30 chars, CTA or value-prop reinforcement
+
+
 class ContentPack(BaseModel):
     hooks: list[Hook]
     linkedin_posts: list[LinkedInPost]
     ig_captions: list[IGCaption]
     shorts_ideas: list[ShortsIdea]
     x_threads: list[XThread] = []
+    meta_caption: MetaCaption | None = None
 
 
 class GenerateResponse(BaseModel):

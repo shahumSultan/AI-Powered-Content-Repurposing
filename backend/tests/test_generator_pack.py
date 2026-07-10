@@ -74,6 +74,30 @@ def test_shorts_overlapping_starts_deduplicated():
     assert starts == [55.0, 300.0, None]
 
 
+def test_meta_caption_parsed():
+    data = _full_data()
+    data["meta_caption"] = {
+        "primary_text": "Tired of slow growth? Here's the fix. Watch now",
+        "headline": "Smarter strategies",
+        "description": "Listen on Spotify",
+    }
+    pack = _pack_from_dict(data, chunks=[])
+    assert pack.meta_caption is not None
+    assert pack.meta_caption.primary_text.startswith("Tired of slow growth?")
+    assert pack.meta_caption.headline == "Smarter strategies"
+    assert pack.meta_caption.description == "Listen on Spotify"
+
+
+def test_meta_caption_missing_or_malformed_is_none():
+    pack = _pack_from_dict(_full_data(), chunks=[])
+    assert pack.meta_caption is None
+
+    data = _full_data()
+    data["meta_caption"] = "not a dict"
+    pack = _pack_from_dict(data, chunks=[])
+    assert pack.meta_caption is None
+
+
 def test_shorts_word_count_computed():
     data = _full_data()
     data["shorts_ideas"][0]["what_to_say"] = "one two three four five"

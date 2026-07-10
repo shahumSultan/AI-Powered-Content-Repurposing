@@ -29,4 +29,9 @@ def to_csv(pack: ContentPack) -> str:
             item.timestamp_end if item.timestamp_end is not None else "",
         ])
 
+    if pack.meta_caption is not None:
+        writer.writerow(["meta_primary_text", 1, pack.meta_caption.primary_text, "", ""])
+        writer.writerow(["meta_headline", 1, pack.meta_caption.headline, "", ""])
+        writer.writerow(["meta_description", 1, pack.meta_caption.description, "", ""])
+
     return buf.getvalue()
