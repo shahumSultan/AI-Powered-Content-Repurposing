@@ -105,11 +105,6 @@ def _ingest_text(text: str) -> list[Chunk]:
     return chunk_text(text)
 
 
-def _empty_pack():
-    from schemas.generate import ContentPack
-    return ContentPack(hooks=[], linkedin_posts=[], ig_captions=[], shorts_ideas=[])
-
-
 def _build_response(
     chunks: list[Chunk],
     errors: list[str],
@@ -119,6 +114,7 @@ def _build_response(
     free_form: bool = False,
     brand_kit_context: str | None = None,
 ) -> GenerateResponse:
+    raw: str | None = None
     try:
         if free_form and custom_prompt:
             # Free-form prompts (e.g. verbatim clip extraction) need the full
@@ -130,18 +126,12 @@ def _build_response(
                 openai_api_key=openai_key,
                 brand_kit_context=brand_kit_context,
             )
-            pack = _empty_pack()
-            return GenerateResponse(
-                content_pack=pack,
-                errors=errors,
-                export_json={},
-                export_csv="",
-                raw_output=raw,
-            )
         ranked = rank(chunks)
         pack = generate_content_pack(
             ranked,
-            custom_prompt=custom_prompt,
+            # The custom prompt steers the free-form output only; feeding it to
+            # the pack too would distort the standard hooks/posts/captions.
+            custom_prompt=None if free_form else custom_prompt,
             groq_api_key=groq_key,
             openai_api_key=openai_key,
             brand_kit_context=brand_kit_context,
@@ -154,6 +144,7 @@ def _build_response(
         errors=errors,
         export_json=json.loads(pack.model_dump_json()),
         export_csv=csv_str,
+        raw_output=raw,
     )
 
 

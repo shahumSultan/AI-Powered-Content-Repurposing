@@ -129,6 +129,20 @@ export async function buildGenerateContext(
   return { ok: true, ctx: { isPro, backendHeaders, templates, brandKit } };
 }
 
+/**
+ * Shape a generation result for history storage. Free-form runs now also produce
+ * a standard pack, so both are persisted: the pack fields alongside the raw
+ * output under `__raw_output__`.
+ */
+export function packForHistory(data: {
+  export_json?: Record<string, unknown> | null;
+  raw_output?: string | null;
+}): object | null {
+  const pack = data.export_json ?? null;
+  if (!data.raw_output) return pack;
+  return { ...(pack ?? {}), __raw_output__: data.raw_output };
+}
+
 export function recordGeneration(
   token: string,
   payload: { urls: string[]; title: string; content_pack: object | null }

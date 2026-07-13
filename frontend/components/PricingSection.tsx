@@ -5,6 +5,7 @@ interface PricingTier {
   price: string;
   period: string;
   description: string;
+  inheritsFrom?: string;
   features: string[];
   cta: string;
   ctaHref: string;
@@ -16,12 +17,13 @@ const TIERS: PricingTier[] = [
     name: "Beginner",
     price: "$7",
     period: "/month",
-    description: "Everything you need to get started and publish consistently.",
+    description: "Everything you need to turn one video into a week of posts.",
     features: [
       "5 content packs per month",
-      "YouTube videos & articles",
-      "Hooks, LinkedIn, Instagram & Shorts",
-      "Download as CSV or JSON",
+      "YouTube, blog, pasted text & audio uploads",
+      "All 6 formats: hooks, LinkedIn, Instagram, Meta, X threads & Shorts",
+      "CSV & JSON export",
+      "Full generation history",
       "Community support",
     ],
     cta: "Get Beginner →",
@@ -32,13 +34,13 @@ const TIERS: PricingTier[] = [
     name: "Pro",
     price: "$14",
     period: "/month",
-    description: "For creators who publish consistently and can't afford to slow down.",
+    description: "For creators who publish constantly and want the output in their own voice.",
+    inheritsFrom: "Beginner",
     features: [
       "Unlimited content packs",
-      "Process multiple links at once",
-      "All formats: hooks, LinkedIn, Instagram & Shorts",
-      "Custom prompt template",
-      "Download as CSV or JSON",
+      "Custom prompt templates",
+      "Free-form output and the full content pack in a single run",
+      "Brand kit — your voice, audience, CTA & hashtags applied to every pack",
       "Priority support",
     ],
     cta: "Get Pro →",
@@ -47,7 +49,57 @@ const TIERS: PricingTier[] = [
   },
 ];
 
+interface ComparisonRow {
+  feature: string;
+  beginner: string | boolean;
+  pro: string | boolean;
+}
+
+const COMPARISON: ComparisonRow[] = [
+  { feature: "Content packs per month", beginner: "5", pro: "Unlimited" },
+  { feature: "Sources — YouTube, blog, text, audio", beginner: true, pro: true },
+  { feature: "All 6 content formats", beginner: true, pro: true },
+  { feature: "CSV & JSON export", beginner: true, pro: true },
+  { feature: "Generation history", beginner: true, pro: true },
+  { feature: "Custom prompt templates", beginner: false, pro: true },
+  { feature: "Free-form output alongside your content pack", beginner: false, pro: true },
+  { feature: "Brand kit (voice, audience, CTA, hashtags)", beginner: false, pro: true },
+  { feature: "Support", beginner: "Community", pro: "Priority" },
+];
+
 const DELAYS = ["0ms", "100ms", "200ms"];
+
+function CheckIcon({ className }: { className: string }) {
+  return (
+    <svg className={className} fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+      <path
+        fillRule="evenodd"
+        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+        clipRule="evenodd"
+      />
+    </svg>
+  );
+}
+
+function Cell({ value }: { value: string | boolean }) {
+  if (value === true) {
+    return (
+      <>
+        <CheckIcon className="mx-auto h-4 w-4 text-cf-cyan" />
+        <span className="sr-only">Included</span>
+      </>
+    );
+  }
+  if (value === false) {
+    return (
+      <>
+        <span aria-hidden="true" className="text-zinc-600">—</span>
+        <span className="sr-only">Not included</span>
+      </>
+    );
+  }
+  return <span className="text-sm text-zinc-300">{value}</span>;
+}
 
 export default function PricingSection() {
   return (
@@ -62,6 +114,9 @@ export default function PricingSection() {
             Simple, Honest Pricing
           </h2>
           <p className="mt-4 text-zinc-400">Pick your pace. Upgrade when you need more.</p>
+          <p className="mt-2 text-sm text-zinc-500">
+            Every account starts with 3 free generations — no card required.
+          </p>
         </AnimateOnScroll>
       </div>
 
@@ -94,20 +149,16 @@ export default function PricingSection() {
 
               <p className="mt-3 text-sm text-zinc-500">{tier.description}</p>
 
-              <ul className="mt-6 flex-1 space-y-3">
+              {tier.inheritsFrom && (
+                <p className="mt-6 text-sm font-semibold text-zinc-300">
+                  Everything in {tier.inheritsFrom}, plus:
+                </p>
+              )}
+
+              <ul className={`flex-1 space-y-3 ${tier.inheritsFrom ? "mt-3" : "mt-6"}`}>
                 {tier.features.map((feature) => (
                   <li key={feature} className="flex items-start gap-2.5 text-sm text-zinc-400">
-                    <svg
-                      className="mt-0.5 h-4 w-4 shrink-0 text-cf-cyan"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
+                    <CheckIcon className="mt-0.5 h-4 w-4 shrink-0 text-cf-cyan" />
                     {feature}
                   </li>
                 ))}
@@ -127,6 +178,46 @@ export default function PricingSection() {
           </AnimateOnScroll>
         ))}
       </div>
+
+      {/* Plan comparison */}
+      <AnimateOnScroll delay="200ms" className="mx-auto mt-20 max-w-3xl">
+        <h3 className="display-font mb-6 text-center text-xl font-bold text-zinc-100">
+          Compare plans
+        </h3>
+
+        <div className="overflow-x-auto rounded-2xl border border-cf-violet/14 bg-cf-panel/80">
+          <table className="w-full min-w-[34rem] border-collapse text-left">
+            <thead>
+              <tr className="border-b border-cf-violet/14">
+                <th scope="col" className="px-5 py-4 text-xs font-semibold uppercase tracking-wider text-zinc-500">
+                  Feature
+                </th>
+                <th scope="col" className="w-32 px-5 py-4 text-center text-xs font-semibold uppercase tracking-wider text-zinc-500">
+                  Beginner
+                </th>
+                <th scope="col" className="w-32 px-5 py-4 text-center text-xs font-semibold uppercase tracking-wider text-cf-violet">
+                  Pro
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {COMPARISON.map((row) => (
+                <tr key={row.feature} className="border-b border-cf-violet/8 last:border-b-0">
+                  <th scope="row" className="px-5 py-3.5 text-sm font-normal text-zinc-400">
+                    {row.feature}
+                  </th>
+                  <td className="px-5 py-3.5 text-center">
+                    <Cell value={row.beginner} />
+                  </td>
+                  <td className="px-5 py-3.5 text-center">
+                    <Cell value={row.pro} />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </AnimateOnScroll>
     </section>
   );
 }
