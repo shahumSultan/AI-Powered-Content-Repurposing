@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { AUTH_COOKIE } from "@/lib/auth";
 import { BACKEND_URL } from "@/lib/config";
-import { buildGenerateContext, recordGeneration } from "@/lib/generate-proxy";
+import { buildGenerateContext, packForHistory, recordGeneration } from "@/lib/generate-proxy";
 
 const MAX_BYTES = 25 * 1024 * 1024;
 
@@ -52,7 +52,7 @@ export async function POST(req: NextRequest) {
   recordGeneration(token, {
     urls: [],
     title: `Audio — ${file.name}`,
-    content_pack: data.raw_output ? { __raw_output__: data.raw_output } : data.export_json,
+    content_pack: packForHistory(data),
   });
 
   return NextResponse.json(data);

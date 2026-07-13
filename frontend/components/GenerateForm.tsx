@@ -295,14 +295,15 @@ export default function GenerateForm({ isPro = false }: { isPro?: boolean }) {
       </form>
 
       {result && (
-        result.raw_output
-          ? <FreeFormView text={result.raw_output} />
-          : <ContentPackView
-              pack={result.content_pack}
-              csv={result.export_csv}
-              json={result.export_json}
-              allowRegenerate
-            />
+        <div className="flex flex-col gap-6">
+          {result.raw_output && <FreeFormView text={result.raw_output} />}
+          <ContentPackView
+            pack={result.content_pack}
+            csv={result.export_csv}
+            json={result.export_json}
+            allowRegenerate
+          />
+        </div>
       )}
     </div>
   );

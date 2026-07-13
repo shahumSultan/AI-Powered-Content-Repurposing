@@ -25,6 +25,14 @@ export default async function HistoryDetailPage({ params }: { params: Promise<{ 
     weekday: "short", year: "numeric", month: "long", day: "numeric",
   });
 
+  // Free-form generations store the raw output alongside the pack. Records saved
+  // before hybrid generation hold only __raw_output__ and no pack fields, so a
+  // pack is only renderable once it actually carries content arrays.
+  const { __raw_output__: rawOutput, ...packFields } = record.content_pack ?? {};
+  const pack = Array.isArray((packFields as ContentPack).hooks)
+    ? (packFields as ContentPack)
+    : null;
+
   return (
     <div className="max-w-2xl">
       <div className="mb-6">
@@ -53,14 +61,17 @@ export default async function HistoryDetailPage({ params }: { params: Promise<{ 
         </div>
       </div>
 
-      {record.content_pack?.__raw_output__ ? (
-        <FreeFormView text={record.content_pack.__raw_output__} />
-      ) : record.content_pack ? (
-        <ContentPackView
-          pack={record.content_pack}
-          csv={null}
-          json={record.content_pack as unknown as Record<string, unknown>}
-        />
+      {rawOutput || pack ? (
+        <div className="flex flex-col gap-6">
+          {rawOutput && <FreeFormView text={rawOutput} />}
+          {pack && (
+            <ContentPackView
+              pack={pack}
+              csv={null}
+              json={pack as unknown as Record<string, unknown>}
+            />
+          )}
+        </div>
       ) : (
         <div className="rounded-xl border border-cf-violet/14 bg-cf-panel p-8 text-center">
           <p className="text-sm text-zinc-500">Content pack data was not saved for this generation.</p>
